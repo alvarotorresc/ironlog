@@ -7,6 +7,7 @@ import type {
   MaxWeightDataPoint,
   VolumeDataPoint,
   MuscleGroupVolume,
+  MuscleFatigueData,
   TimePeriod,
 } from '@/types';
 
@@ -139,4 +140,35 @@ export function useMuscleDistribution(period: TimePeriod): UseMuscleDistribution
   }, [load]);
 
   return { distribution, isLoading, reload: load };
+}
+
+interface UseMuscleFatigueReturn {
+  fatigueData: MuscleFatigueData[];
+  isLoading: boolean;
+  reload: () => Promise<void>;
+}
+
+export function useMuscleFatigue(): UseMuscleFatigueReturn {
+  const [fatigueData, setFatigueData] = useState<MuscleFatigueData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const db = await getDatabase();
+      const repo = new StatsRepository(db);
+      const result = await repo.getMuscleFatigueData();
+      setFatigueData(result);
+    } catch (error) {
+      console.error('Failed to load muscle fatigue data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { fatigueData, isLoading, reload: load };
 }
