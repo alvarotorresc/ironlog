@@ -572,4 +572,214 @@ export const PREDEFINED_EXERCISES: PredefinedExercise[] = [
     illustration: 'stretching',
     restSeconds: 0,
   },
+
+  // --- Additional exercises (v0.1.1) ---
+
+  // Chest (additional)
+  {
+    name: 'Cable Fly',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Smith Machine Bench Press',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: '',
+    restSeconds: 120,
+  },
+  {
+    name: 'Machine Chest Press',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Landmine Press',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: '',
+    restSeconds: 90,
+  },
+
+  // Back (additional)
+  {
+    name: 'Rack Pull',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: '',
+    restSeconds: 180,
+  },
+  {
+    name: 'Meadows Row',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Single Arm Cable Row',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Prone Row',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Reverse Grip Lat Pulldown',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Machine Row',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: '',
+    restSeconds: 90,
+  },
+
+  // Legs (additional)
+  {
+    name: 'Seated Leg Curl',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Sissy Squat',
+    type: 'calisthenics',
+    muscleGroup: 'legs',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Smith Machine Squat',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: '',
+    restSeconds: 120,
+  },
+  {
+    name: 'Glute Kickback Machine',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Step-ups',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Box Squat',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: '',
+    restSeconds: 120,
+  },
+
+  // Shoulders (additional)
+  {
+    name: 'Machine Shoulder Press',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: '',
+    restSeconds: 90,
+  },
+  {
+    name: 'Landmine Lateral Raise',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Barbell Shrug',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Behind Neck Press',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: '',
+    restSeconds: 120,
+  },
+
+  // Arms (additional)
+  {
+    name: 'Spider Curl',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Machine Preacher Curl',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Wrist Curl',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: '',
+    restSeconds: 30,
+  },
+  {
+    name: 'Reverse Curl',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: '',
+    restSeconds: 60,
+  },
+  {
+    name: 'Rope Pushdown',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: '',
+    restSeconds: 60,
+  },
+
+  // Full Body (additional)
+  {
+    name: 'Thruster',
+    type: 'weights',
+    muscleGroup: 'full_body',
+    illustration: '',
+    restSeconds: 120,
+  },
+  {
+    name: 'Power Clean',
+    type: 'weights',
+    muscleGroup: 'full_body',
+    illustration: '',
+    restSeconds: 150,
+  },
+  {
+    name: 'Snatch',
+    type: 'weights',
+    muscleGroup: 'full_body',
+    illustration: '',
+    restSeconds: 180,
+  },
 ];
