@@ -1,13 +1,49 @@
 import { useCallback, useState } from 'react';
-import { View, Text, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  Modal,
+  FlatList,
+  ActivityIndicator,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Play, Dumbbell, X, ListChecks } from 'lucide-react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import {
+  Play,
+  Dumbbell,
+  X,
+  ListChecks,
+  Calendar,
+  Flame,
+  TrendingUp,
+  BarChart3,
+  Trophy,
+} from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { RoutineRepository, type RoutineWithExercises } from '@/repositories/routine.repo';
 import { WorkoutRepository } from '@/repositories/workout.repo';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
+import { StatsCard } from '@/components/StatsCard';
+import { useDashboardStats } from '@/hooks/useStats';
+import type { ExercisePR } from '@/types';
+
+function formatVolume(volume: number): string {
+  if (volume >= 1000) {
+    return `${(volume / 1000).toFixed(1)}k kg`;
+  }
+  return `${volume} kg`;
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const day = date.getDate();
+  const month = date.toLocaleString('en-US', { month: 'short' });
+  return `${month} ${day}`;
+}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -15,6 +51,9 @@ export default function HomeScreen() {
   const [routines, setRoutines] = useState<RoutineWithExercises[]>([]);
   const [loadingRoutines, setLoadingRoutines] = useState(false);
   const [starting, setStarting] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { stats, isLoading: statsLoading, reload: reloadStats } = useDashboardStats();
 
   const loadRoutines = useCallback(async () => {
     setLoadingRoutines(true);
@@ -70,51 +109,174 @@ export default function HomeScreen() {
     }
   }, [router, starting]);
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await reloadStats();
+    setRefreshing(false);
+  }, [reloadStats]);
+
+  useFocusEffect(
+    useCallback(() => {
+      reloadStats();
+    }, [reloadStats]),
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }}>
-      <View style={{ padding: 20 }}>
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: '700',
-            color: colors.text.primary,
-            letterSpacing: -0.5,
-          }}
-        >
-          IronLog
-        </Text>
-      </View>
-
-      {/* Start Workout CTA */}
-      <View style={{ paddingHorizontal: 20, paddingTop: 16 }}>
-        <Pressable
-          onPress={handleStartPress}
-          style={({ pressed }) => ({
-            backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
-            borderRadius: 16,
-            paddingVertical: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-            gap: 12,
-            opacity: pressed ? 0.95 : 1,
-          })}
-          accessibilityRole="button"
-          accessibilityLabel="Start workout"
-        >
-          <Play size={24} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.brand.blue}
+            colors={[colors.brand.blue]}
+          />
+        }
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+        {/* Header */}
+        <View style={{ padding: 20 }}>
           <Text
             style={{
-              fontSize: 20,
+              fontSize: 28,
               fontWeight: '700',
-              color: '#FFFFFF',
-              letterSpacing: -0.3,
+              color: colors.text.primary,
+              letterSpacing: -0.5,
             }}
           >
-            Start Workout
+            IronLog
           </Text>
-        </Pressable>
-      </View>
+        </View>
+
+        {/* Stats Grid */}
+        {statsLoading && !stats ? (
+          <View style={{ paddingHorizontal: 20, paddingBottom: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="small" color={colors.brand.blue} />
+          </View>
+        ) : stats ? (
+          <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <StatsCard label="This Week" value={String(stats.workoutsThisWeek)} icon={Calendar} />
+              <StatsCard
+                label="Streak"
+                value={stats.currentStreak > 0 ? `${stats.currentStreak} \uD83D\uDD25` : '0'}
+                icon={Flame}
+                color={stats.currentStreak > 0 ? colors.semantic.warning : undefined}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
+              <StatsCard
+                label="Volume"
+                value={formatVolume(stats.volumeThisWeek)}
+                icon={TrendingUp}
+              />
+              <StatsCard
+                label="This Month"
+                value={String(stats.workoutsThisMonth)}
+                icon={BarChart3}
+              />
+            </View>
+          </View>
+        ) : null}
+
+        {/* Recent PRs */}
+        {stats ? (
+          <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                marginBottom: 12,
+              }}
+            >
+              <Trophy size={18} color={colors.chart.pr} strokeWidth={1.5} />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: colors.text.primary,
+                }}
+              >
+                Recent PRs
+              </Text>
+            </View>
+            {stats.recentPRs.length > 0 ? (
+              <View
+                style={{
+                  backgroundColor: colors.bg.secondary,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                }}
+              >
+                {stats.recentPRs.slice(0, 5).map((pr, index) => (
+                  <PRRow
+                    key={`${pr.exerciseId}-${pr.date}`}
+                    pr={pr}
+                    isLast={index === Math.min(stats.recentPRs.length, 5) - 1}
+                  />
+                ))}
+              </View>
+            ) : (
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.text.tertiary,
+                  fontStyle: 'italic',
+                }}
+              >
+                No recent PRs. Keep pushing!
+              </Text>
+            )}
+          </View>
+        ) : null}
+
+        {/* Start Workout CTA */}
+        <View style={{ paddingHorizontal: 20, paddingTop: 4 }}>
+          <Pressable
+            onPress={handleStartPress}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
+              borderRadius: 16,
+              paddingVertical: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+              gap: 12,
+              opacity: pressed ? 0.95 : 1,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel="Start workout"
+          >
+            <Play size={24} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: '700',
+                color: '#FFFFFF',
+                letterSpacing: -0.3,
+              }}
+            >
+              Start Workout
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Footer */}
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.text.tertiary,
+            textAlign: 'center',
+            marginTop: 24,
+          }}
+        >
+          Made with {'\uD83C\uDFCB\uFE0F'} by Alvaro Torres
+        </Text>
+      </ScrollView>
 
       {/* Routine Picker Modal */}
       <Modal
@@ -284,6 +446,59 @@ export default function HomeScreen() {
         </View>
       </Modal>
     </SafeAreaView>
+  );
+}
+
+interface PRRowProps {
+  pr: ExercisePR;
+  isLast: boolean;
+}
+
+function PRRow({ pr, isLast }: PRRowProps) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 14,
+        paddingVertical: 12,
+        borderBottomWidth: isLast ? 0 : 1,
+        borderBottomColor: colors.border,
+      }}
+      accessibilityLabel={`PR: ${pr.exerciseName}, ${pr.maxWeight} kg on ${formatDate(pr.date)}`}
+    >
+      <View style={{ flex: 1, marginRight: 12 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: '600',
+            color: colors.text.primary,
+          }}
+          numberOfLines={1}
+        >
+          {pr.exerciseName}
+        </Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: colors.text.tertiary,
+            marginTop: 2,
+          }}
+        >
+          {formatDate(pr.date)}
+        </Text>
+      </View>
+      <Text
+        style={{
+          fontSize: 15,
+          fontWeight: '700',
+          color: colors.chart.pr,
+        }}
+      >
+        {pr.maxWeight} kg
+      </Text>
+    </View>
   );
 }
 

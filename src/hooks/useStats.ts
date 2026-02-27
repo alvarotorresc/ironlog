@@ -24,11 +24,13 @@ interface UseExerciseStatsReturn {
 interface UseDashboardStatsReturn {
   stats: DashboardStats | null;
   isLoading: boolean;
+  reload: () => Promise<void>;
 }
 
 interface UseMuscleDistributionReturn {
   distribution: MuscleGroupVolume[];
   isLoading: boolean;
+  reload: () => Promise<void>;
 }
 
 export function useExerciseProgress(
@@ -111,7 +113,7 @@ export function useDashboardStats(): UseDashboardStatsReturn {
     load();
   }, [load]);
 
-  return { stats, isLoading };
+  return { stats, isLoading, reload: load };
 }
 
 export function useMuscleDistribution(period: TimePeriod): UseMuscleDistributionReturn {
@@ -136,5 +138,5 @@ export function useMuscleDistribution(period: TimePeriod): UseMuscleDistribution
     load();
   }, [load]);
 
-  return { distribution, isLoading };
+  return { distribution, isLoading, reload: load };
 }
