@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState as useLocalState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -6,8 +6,11 @@ import { Check, Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors } from '@/constants/theme';
 import { useWorkout, type WorkoutExerciseState } from '@/hooks/useWorkout';
+import { useRestTimer } from '@/hooks/useRestTimer';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { WorkoutSetRow } from '@/components/WorkoutSetRow';
+import { RestTimer } from '@/components/RestTimer';
+import type { WorkoutSet } from '@/types';
 
 function formatElapsedTime(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
@@ -29,8 +32,29 @@ export default function WorkoutScreen() {
     workoutId: string;
   }>();
   const router = useRouter();
+  const [lastExerciseName, setLastExerciseName] = useLocalState('');
 
   const workout = useWorkout(routineId ?? 'empty', workoutId ?? '0');
+  const restTimer = useRestTimer();
+
+  const handleAddSet = useCallback(
+    async (exerciseId: number): Promise<WorkoutSet | null> => {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const newSet = await workout.addSet(exerciseId);
+
+      if (newSet) {
+        // Find the exercise to get its restSeconds and name
+        const exerciseState = workout.exercises.find((e) => e.exercise.id === exerciseId);
+        if (exerciseState && exerciseState.exercise.restSeconds > 0) {
+          setLastExerciseName(exerciseState.exercise.name);
+          restTimer.start(exerciseState.exercise.restSeconds);
+        }
+      }
+
+      return newSet;
+    },
+    [workout, restTimer, setLastExerciseName],
+  );
 
   const handleFinish = useCallback(() => {
     const totalSets = workout.exercises.reduce((sum, e) => sum + e.sets.length, 0);
@@ -42,6 +66,7 @@ export default function WorkoutScreen() {
           text: 'Discard',
           style: 'destructive',
           onPress: async () => {
+            restTimer.reset();
             await workout.finishWorkout();
             router.back();
           },
@@ -58,13 +83,14 @@ export default function WorkoutScreen() {
         {
           text: 'Finish',
           onPress: async () => {
+            restTimer.reset();
             await workout.finishWorkout();
             router.back();
           },
         },
       ],
     );
-  }, [workout, router]);
+  }, [workout, router, restTimer]);
 
   if (workout.loading) {
     return (
@@ -75,6 +101,8 @@ export default function WorkoutScreen() {
       </SafeAreaView>
     );
   }
+
+  const isTimerVisible = restTimer.state !== 'idle';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
@@ -90,7 +118,7 @@ export default function WorkoutScreen() {
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 16,
-          paddingBottom: 120,
+          paddingBottom: isTimerVisible ? 140 : 120,
           gap: 16,
         }}
         showsVerticalScrollIndicator={false}
@@ -100,7 +128,7 @@ export default function WorkoutScreen() {
           <ExerciseSection
             key={exerciseState.exercise.id}
             exerciseState={exerciseState}
-            onAddSet={workout.addSet}
+            onAddSet={handleAddSet}
             onUpdateSet={workout.updateSet}
             onDeleteSet={workout.deleteSet}
           />
@@ -126,6 +154,17 @@ export default function WorkoutScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Rest Timer Banner */}
+      <RestTimer
+        state={restTimer.state}
+        remainingSeconds={restTimer.remainingSeconds}
+        totalSeconds={restTimer.totalSeconds}
+        exerciseName={lastExerciseName}
+        onSkip={restTimer.skip}
+        onAddTime={restTimer.addTime}
+        onDismiss={restTimer.reset}
+      />
     </SafeAreaView>
   );
 }
@@ -205,7 +244,7 @@ function WorkoutHeader({ routineName, elapsedSeconds, onFinish }: WorkoutHeaderP
 
 interface ExerciseSectionProps {
   exerciseState: WorkoutExerciseState;
-  onAddSet: (exerciseId: number) => Promise<unknown>;
+  onAddSet: (exerciseId: number) => Promise<WorkoutSet | null>;
   onUpdateSet: (
     setId: number,
     data: {
@@ -227,8 +266,7 @@ function ExerciseSection({
   const { exercise, sets } = exerciseState;
   const hasSets = sets.length > 0;
 
-  const handleAddSet = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleAddSet = useCallback(() => {
     onAddSet(exercise.id);
   }, [onAddSet, exercise.id]);
 
