@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Check, Plus } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { colors } from '@/constants/theme';
 import { useWorkout, type WorkoutExerciseState } from '@/hooks/useWorkout';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
@@ -226,7 +227,8 @@ function ExerciseSection({
   const { exercise, sets } = exerciseState;
   const hasSets = sets.length > 0;
 
-  const handleAddSet = useCallback(() => {
+  const handleAddSet = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onAddSet(exercise.id);
   }, [onAddSet, exercise.id]);
 
