@@ -45,7 +45,7 @@ export class RoutineRepository {
 
   async getAll(): Promise<Routine[]> {
     const rows = await this.db.getAllAsync<RoutineRow>(
-      'SELECT * FROM routines ORDER BY created_at DESC',
+      'SELECT * FROM routines ORDER BY created_at DESC, id DESC',
     );
 
     return rows.map((row) => ({

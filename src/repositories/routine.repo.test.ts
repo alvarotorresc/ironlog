@@ -175,4 +175,27 @@ describe('RoutineRepository', () => {
     expect(after!.exercises[0].exercise.name).toBe('Second');
     expect(after!.exercises[1].exercise.name).toBe('First');
   });
+
+  it('should reject empty routine name via CHECK constraint', async () => {
+    await expect(routineRepo.create('')).rejects.toThrow();
+  });
+
+  it('should reject addExercise with non-existent exercise id', async () => {
+    const routine = await routineRepo.create('Test');
+
+    await expect(routineRepo.addExercise(routine.id, 999, 1)).rejects.toThrow();
+  });
+
+  it('should return routines ordered by most recent first', async () => {
+    await routineRepo.create('First');
+    await routineRepo.create('Second');
+    await routineRepo.create('Third');
+
+    const routines = await routineRepo.getAll();
+
+    expect(routines).toHaveLength(3);
+    expect(routines[0].name).toBe('Third');
+    expect(routines[1].name).toBe('Second');
+    expect(routines[2].name).toBe('First');
+  });
 });

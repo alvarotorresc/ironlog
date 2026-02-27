@@ -10,8 +10,8 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,json,md,yml,yaml,css}\"",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests",
-    "test:watch": "jest --watch",
+    "test": "jest --passWithNoTests --no-cache",
+    "test:watch": "jest --watch --no-cache",
     "prepare": "lefthook install",
     "build:apk": "eas build --platform android --profile preview"
   },

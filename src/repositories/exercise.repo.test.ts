@@ -122,4 +122,68 @@ describe('ExerciseRepository', () => {
     expect(updated!.illustration).toBe('bench-press');
     expect(updated!.restSeconds).toBe(120);
   });
+
+  it('should update a single field without affecting others', async () => {
+    const created = await repo.create({
+      name: 'Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      illustration: 'press',
+      restSeconds: 90,
+    });
+
+    await repo.update(created.id, { name: 'Overhead Press' });
+
+    const updated = await repo.getById(created.id);
+    expect(updated!.name).toBe('Overhead Press');
+    expect(updated!.type).toBe('weights');
+    expect(updated!.muscleGroup).toBe('chest');
+    expect(updated!.illustration).toBe('press');
+    expect(updated!.restSeconds).toBe(90);
+  });
+
+  it('should no-op when update is called with empty data', async () => {
+    const created = await repo.create({
+      name: 'Squat',
+      type: 'weights',
+      muscleGroup: 'legs',
+    });
+
+    await repo.update(created.id, {});
+
+    const exercise = await repo.getById(created.id);
+    expect(exercise!.name).toBe('Squat');
+  });
+
+  it('should return exercises ordered by name ascending', async () => {
+    await repo.create({ name: 'Squat', type: 'weights', muscleGroup: 'legs' });
+    await repo.create({ name: 'Bench Press', type: 'weights', muscleGroup: 'chest' });
+    await repo.create({ name: 'Deadlift', type: 'weights', muscleGroup: 'back' });
+
+    const exercises = await repo.getAll();
+
+    expect(exercises[0].name).toBe('Bench Press');
+    expect(exercises[1].name).toBe('Deadlift');
+    expect(exercises[2].name).toBe('Squat');
+  });
+
+  it('should return empty array for muscle group with no exercises', async () => {
+    await repo.create({ name: 'Bench Press', type: 'weights', muscleGroup: 'chest' });
+
+    const result = await repo.getByMuscleGroup('legs');
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('should reject empty name via CHECK constraint', async () => {
+    await expect(
+      repo.create({ name: '', type: 'weights', muscleGroup: 'chest' }),
+    ).rejects.toThrow();
+  });
+
+  it('should reject negative restSeconds via CHECK constraint', async () => {
+    await expect(
+      repo.create({ name: 'Test', type: 'weights', muscleGroup: 'chest', restSeconds: -10 }),
+    ).rejects.toThrow();
+  });
 });

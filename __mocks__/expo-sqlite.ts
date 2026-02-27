@@ -14,14 +14,9 @@ class MockSQLiteDatabase {
   }
 
   async execAsync(sql: string): Promise<void> {
-    const statements = sql
-      .split(';')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-
-    for (const statement of statements) {
-      this.db.exec(statement);
-    }
+    // Use better-sqlite3's native multi-statement exec which handles
+    // semicolons inside strings/expressions correctly
+    this.db.exec(sql);
   }
 
   async runAsync(

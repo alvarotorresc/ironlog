@@ -270,4 +270,136 @@ describe('WorkoutRepository', () => {
     expect(sets[0].weight).toBe(75);
     expect(sets[0].reps).toBe(10);
   });
+
+  it('should update a single set field without affecting others', async () => {
+    const workout = await workoutRepo.start(routineId);
+    const set = await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 70,
+      reps: 12,
+    });
+
+    await workoutRepo.updateSet(set.id, { weight: 80 });
+
+    const sets = await workoutRepo.getSetsForWorkout(workout.id);
+    expect(sets[0].weight).toBe(80);
+    expect(sets[0].reps).toBe(12);
+  });
+
+  it('should no-op when updateSet is called with empty data', async () => {
+    const workout = await workoutRepo.start(routineId);
+    const set = await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 70,
+      reps: 12,
+    });
+
+    await workoutRepo.updateSet(set.id, {});
+
+    const sets = await workoutRepo.getSetsForWorkout(workout.id);
+    expect(sets[0].weight).toBe(70);
+    expect(sets[0].reps).toBe(12);
+  });
+
+  it('should get workout detail with empty exercises when no sets added', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    const detail = await workoutRepo.getDetail(workout.id);
+
+    expect(detail).not.toBeNull();
+    expect(detail!.exercises).toHaveLength(0);
+  });
+
+  it('should return null for getDetail of non-existent workout', async () => {
+    const detail = await workoutRepo.getDetail(999);
+
+    expect(detail).toBeNull();
+  });
+
+  it('should get history with limit and offset', async () => {
+    await workoutRepo.start(routineId);
+    await workoutRepo.start(routineId);
+    await workoutRepo.start(routineId);
+
+    const page1 = await workoutRepo.getHistory(2, 0);
+    const page2 = await workoutRepo.getHistory(2, 2);
+
+    expect(page1).toHaveLength(2);
+    expect(page2).toHaveLength(1);
+  });
+
+  it('should return null for getLastSetForExercise when no sets exist', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    const lastSet = await workoutRepo.getLastSetForExercise(workout.id, benchId);
+
+    expect(lastSet).toBeNull();
+  });
+
+  it('should reject negative weight via CHECK constraint', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    await expect(
+      workoutRepo.addSet({
+        workoutId: workout.id,
+        exerciseId: benchId,
+        order: 1,
+        weight: -10,
+        reps: 5,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('should reject negative reps via CHECK constraint', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    await expect(
+      workoutRepo.addSet({
+        workoutId: workout.id,
+        exerciseId: benchId,
+        order: 1,
+        weight: 50,
+        reps: -5,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('should return sets ordered by exercise and sort_order', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: squatId,
+      order: 1,
+      weight: 100,
+      reps: 8,
+    });
+    await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 70,
+      reps: 12,
+    });
+    await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 2,
+      weight: 80,
+      reps: 10,
+    });
+
+    const sets = await workoutRepo.getSetsForWorkout(workout.id);
+
+    // benchId < squatId, so bench sets come first, ordered by sort_order
+    expect(sets[0].exerciseId).toBe(benchId);
+    expect(sets[0].order).toBe(1);
+    expect(sets[1].exerciseId).toBe(benchId);
+    expect(sets[1].order).toBe(2);
+    expect(sets[2].exerciseId).toBe(squatId);
+  });
 });
