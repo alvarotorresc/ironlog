@@ -1,0 +1,279 @@
+import type { ExerciseType, MuscleGroup } from '@/types';
+
+interface PredefinedExercise {
+  name: string;
+  type: ExerciseType;
+  muscleGroup: MuscleGroup;
+  illustration: string;
+  restSeconds: number;
+}
+
+export const PREDEFINED_EXERCISES: PredefinedExercise[] = [
+  // Chest
+  {
+    name: 'Bench Press',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: 'bench-press',
+    restSeconds: 120,
+  },
+  {
+    name: 'Incline Bench Press',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: 'incline-bench-press',
+    restSeconds: 120,
+  },
+  {
+    name: 'Dumbbell Fly',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: 'dumbbell-fly',
+    restSeconds: 90,
+  },
+  {
+    name: 'Push-ups',
+    type: 'calisthenics',
+    muscleGroup: 'chest',
+    illustration: 'push-ups',
+    restSeconds: 60,
+  },
+  {
+    name: 'Cable Crossover',
+    type: 'weights',
+    muscleGroup: 'chest',
+    illustration: 'cable-crossover',
+    restSeconds: 60,
+  },
+
+  // Back
+  {
+    name: 'Deadlift',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: 'deadlift',
+    restSeconds: 180,
+  },
+  {
+    name: 'Barbell Row',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: 'barbell-row',
+    restSeconds: 120,
+  },
+  {
+    name: 'Lat Pulldown',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: 'lat-pulldown',
+    restSeconds: 90,
+  },
+  {
+    name: 'Pull-ups',
+    type: 'calisthenics',
+    muscleGroup: 'back',
+    illustration: 'pull-ups',
+    restSeconds: 90,
+  },
+  {
+    name: 'Seated Cable Row',
+    type: 'weights',
+    muscleGroup: 'back',
+    illustration: 'seated-cable-row',
+    restSeconds: 90,
+  },
+
+  // Legs
+  {
+    name: 'Squat',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'squat',
+    restSeconds: 180,
+  },
+  {
+    name: 'Leg Press',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'leg-press',
+    restSeconds: 120,
+  },
+  {
+    name: 'Romanian Deadlift',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'romanian-deadlift',
+    restSeconds: 120,
+  },
+  {
+    name: 'Leg Extension',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'leg-extension',
+    restSeconds: 60,
+  },
+  {
+    name: 'Leg Curl',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'leg-curl',
+    restSeconds: 60,
+  },
+  {
+    name: 'Calf Raise',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'calf-raise',
+    restSeconds: 60,
+  },
+  {
+    name: 'Lunges',
+    type: 'weights',
+    muscleGroup: 'legs',
+    illustration: 'lunges',
+    restSeconds: 90,
+  },
+
+  // Shoulders
+  {
+    name: 'Overhead Press',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: 'overhead-press',
+    restSeconds: 120,
+  },
+  {
+    name: 'Lateral Raise',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: 'lateral-raise',
+    restSeconds: 60,
+  },
+  {
+    name: 'Front Raise',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: 'front-raise',
+    restSeconds: 60,
+  },
+  {
+    name: 'Face Pull',
+    type: 'weights',
+    muscleGroup: 'shoulders',
+    illustration: 'face-pull',
+    restSeconds: 60,
+  },
+
+  // Arms
+  {
+    name: 'Barbell Curl',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: 'barbell-curl',
+    restSeconds: 60,
+  },
+  {
+    name: 'Hammer Curl',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: 'hammer-curl',
+    restSeconds: 60,
+  },
+  {
+    name: 'Tricep Pushdown',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: 'tricep-pushdown',
+    restSeconds: 60,
+  },
+  {
+    name: 'Skull Crusher',
+    type: 'weights',
+    muscleGroup: 'arms',
+    illustration: 'skull-crusher',
+    restSeconds: 90,
+  },
+  {
+    name: 'Dips',
+    type: 'calisthenics',
+    muscleGroup: 'arms',
+    illustration: 'dips',
+    restSeconds: 90,
+  },
+
+  // Core
+  {
+    name: 'Plank',
+    type: 'flexibility',
+    muscleGroup: 'core',
+    illustration: 'plank',
+    restSeconds: 30,
+  },
+  {
+    name: 'Hanging Leg Raise',
+    type: 'calisthenics',
+    muscleGroup: 'core',
+    illustration: 'hanging-leg-raise',
+    restSeconds: 60,
+  },
+  {
+    name: 'Ab Crunch',
+    type: 'calisthenics',
+    muscleGroup: 'core',
+    illustration: 'ab-crunch',
+    restSeconds: 30,
+  },
+  {
+    name: 'Russian Twist',
+    type: 'calisthenics',
+    muscleGroup: 'core',
+    illustration: 'russian-twist',
+    restSeconds: 30,
+  },
+
+  // Cardio
+  {
+    name: 'Running',
+    type: 'cardio',
+    muscleGroup: 'full_body',
+    illustration: 'running',
+    restSeconds: 0,
+  },
+  {
+    name: 'Cycling',
+    type: 'cardio',
+    muscleGroup: 'legs',
+    illustration: 'cycling',
+    restSeconds: 0,
+  },
+  {
+    name: 'Rowing Machine',
+    type: 'cardio',
+    muscleGroup: 'full_body',
+    illustration: 'rowing-machine',
+    restSeconds: 0,
+  },
+  {
+    name: 'Jump Rope',
+    type: 'hiit',
+    muscleGroup: 'full_body',
+    illustration: 'jump-rope',
+    restSeconds: 30,
+  },
+  {
+    name: 'Burpees',
+    type: 'hiit',
+    muscleGroup: 'full_body',
+    illustration: 'burpees',
+    restSeconds: 30,
+  },
+
+  // Flexibility
+  {
+    name: 'Stretching',
+    type: 'flexibility',
+    muscleGroup: 'full_body',
+    illustration: 'stretching',
+    restSeconds: 0,
+  },
+];
