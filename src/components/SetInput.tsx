@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { View, Text, TextInput } from 'react-native';
 import { colors } from '@/constants/theme';
 import type { ExerciseType, WorkoutSet } from '@/types';
@@ -120,6 +120,14 @@ function NumericField({
   wide = false,
 }: NumericFieldProps) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const handleChange = useCallback(
     (text: string) => {

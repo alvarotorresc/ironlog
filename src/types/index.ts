@@ -50,6 +50,11 @@ export interface WorkoutSet {
   distance: number | null;
 }
 
+export interface WorkoutHistoryItem extends Workout {
+  routineName: string | null;
+  exerciseCount: number;
+}
+
 export interface ExercisePR {
   exerciseId: number;
   exerciseName: string;

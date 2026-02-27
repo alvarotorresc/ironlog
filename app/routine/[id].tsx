@@ -34,9 +34,10 @@ export default function EditRoutineScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
+  const isValidId = !isNaN(routineId) && routineId > 0;
 
-  const [loadingRoutine, setLoadingRoutine] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+  const [loadingRoutine, setLoadingRoutine] = useState(isValidId);
+  const [notFound, setNotFound] = useState(!isValidId);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -57,6 +58,8 @@ export default function EditRoutineScreen() {
   const [originalRoutine, setOriginalRoutine] = useState<RoutineWithExercises | null>(null);
 
   useEffect(() => {
+    if (!isValidId) return;
+
     async function loadRoutine() {
       try {
         const db = await getDatabase();
@@ -78,7 +81,7 @@ export default function EditRoutineScreen() {
       }
     }
     loadRoutine();
-  }, [routineId, resetForm]);
+  }, [routineId, resetForm, isValidId]);
 
   const handleAddExercise = useCallback(
     (exercise: Exercise) => {
@@ -116,6 +119,7 @@ export default function EditRoutineScreen() {
       router.back();
     } catch (error) {
       console.error('Failed to update routine:', error);
+      Alert.alert('Error', 'Failed to save changes. Please try again.');
       setSaving(false);
     }
   }, [name, exercises, validate, router, routineId, originalRoutine]);
@@ -138,6 +142,7 @@ export default function EditRoutineScreen() {
               router.back();
             } catch (error) {
               console.error('Failed to delete routine:', error);
+              Alert.alert('Error', 'Failed to delete routine. Please try again.');
               setDeleting(false);
             }
           },
@@ -278,6 +283,7 @@ export default function EditRoutineScreen() {
             }}
             error={errors.name}
             returnKeyType="done"
+            maxLength={100}
           />
 
           {/* Exercises section */}

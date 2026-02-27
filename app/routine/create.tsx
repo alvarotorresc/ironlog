@@ -1,5 +1,13 @@
 import { useState, useCallback } from 'react';
-import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
@@ -52,6 +60,7 @@ export default function CreateRoutineScreen() {
       router.back();
     } catch (error) {
       console.error('Failed to create routine:', error);
+      Alert.alert('Error', 'Failed to save routine. Please try again.');
       setSaving(false);
     }
   }, [name, exercises, validate, router]);
@@ -122,6 +131,7 @@ export default function CreateRoutineScreen() {
             error={errors.name}
             autoFocus
             returnKeyType="done"
+            maxLength={100}
           />
 
           {/* Exercises section */}

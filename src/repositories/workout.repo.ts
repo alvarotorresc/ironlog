@@ -1,5 +1,5 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
-import type { Workout, WorkoutSet, Exercise } from '../types';
+import type { Workout, WorkoutSet, Exercise, WorkoutHistoryItem } from '../types';
 
 interface WorkoutRow {
   id: number;
@@ -17,6 +17,11 @@ interface WorkoutSetRow {
   reps: number | null;
   duration: number | null;
   distance: number | null;
+}
+
+interface WorkoutHistoryRow extends WorkoutRow {
+  routine_name: string | null;
+  exercise_count: number;
 }
 
 interface WorkoutSetJoinRow extends WorkoutSetRow {
@@ -180,6 +185,29 @@ export class WorkoutRepository {
     );
 
     return rows.map(rowToWorkout);
+  }
+
+  async getHistoryWithRoutineNames(
+    limit = 50,
+    offset = 0,
+  ): Promise<WorkoutHistoryItem[]> {
+    const rows = await this.db.getAllAsync<WorkoutHistoryRow>(
+      `SELECT w.*, r.name as routine_name,
+        (SELECT COUNT(DISTINCT ws.exercise_id) FROM workout_sets ws WHERE ws.workout_id = w.id) as exercise_count
+      FROM workouts w
+      LEFT JOIN routines r ON r.id = w.routine_id
+      WHERE w.finished_at IS NOT NULL
+      ORDER BY w.started_at DESC
+      LIMIT ? OFFSET ?`,
+      limit,
+      offset,
+    );
+
+    return rows.map((row) => ({
+      ...rowToWorkout(row),
+      routineName: row.routine_name,
+      exerciseCount: row.exercise_count,
+    }));
   }
 
   async getDetail(workoutId: number): Promise<WorkoutDetail | null> {
