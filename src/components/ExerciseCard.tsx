@@ -57,34 +57,36 @@ export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border,
-        opacity: pressed ? 0.7 : 1,
+        marginHorizontal: 20,
+        marginVertical: 4,
+        padding: 12,
+        backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 10,
       })}
       accessibilityRole="button"
       accessibilityLabel={`${exercise.name}, ${exercise.type}, ${formatMuscleGroup(exercise.muscleGroup)}`}
     >
-      <ExerciseIllustration illustrationKey={exercise.illustration} size={44} />
+      <ExerciseIllustration illustrationKey={exercise.illustration} size={40} />
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.text.primary,
-            marginBottom: 4,
-          }}
-          numberOfLines={1}
-        >
-          {exercise.name}
-        </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <TypeBadge type={exercise.type} />
-          <Text style={{ fontSize: 12, color: colors.text.tertiary }}>
-            {formatMuscleGroup(exercise.muscleGroup)}
+          <Text
+            style={{
+              fontSize: 15,
+              fontWeight: '600',
+              color: colors.text.primary,
+              flexShrink: 1,
+            }}
+            numberOfLines={1}
+          >
+            {exercise.name}
           </Text>
+          <TypeBadge type={exercise.type} />
         </View>
+        <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
+          {formatMuscleGroup(exercise.muscleGroup)}
+        </Text>
       </View>
       <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={1.5} />
     </Pressable>
