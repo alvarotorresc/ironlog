@@ -35,7 +35,8 @@ import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { StatsCard } from '@/components/StatsCard';
 import { MuscleDistribution } from '@/components/MuscleDistribution';
 import { PeriodSelector } from '@/components/PeriodSelector';
-import { useDashboardStats, useMuscleDistribution } from '@/hooks/useStats';
+import { useDashboardStats, useMuscleDistribution, useMuscleFatigue } from '@/hooks/useStats';
+import { MuscleFatigueMap } from '@/components/MuscleFatigueMap';
 import type { ExercisePR, TimePeriod } from '@/types';
 
 function formatVolume(volume: number): string {
@@ -68,6 +69,7 @@ export default function HomeScreen() {
     isLoading: distributionLoading,
     reload: reloadDistribution,
   } = useMuscleDistribution(musclePeriod);
+  const { fatigueData, reload: reloadFatigue } = useMuscleFatigue();
 
   const loadRoutines = useCallback(async () => {
     setLoadingRoutines(true);
@@ -125,15 +127,16 @@ export default function HomeScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([reloadStats(), reloadDistribution()]);
+    await Promise.all([reloadStats(), reloadDistribution(), reloadFatigue()]);
     setRefreshing(false);
-  }, [reloadStats, reloadDistribution]);
+  }, [reloadStats, reloadDistribution, reloadFatigue]);
 
   useFocusEffect(
     useCallback(() => {
       reloadStats();
       reloadDistribution();
-    }, [reloadStats, reloadDistribution]),
+      reloadFatigue();
+    }, [reloadStats, reloadDistribution, reloadFatigue]),
   );
 
   return (
@@ -346,6 +349,25 @@ export default function HomeScreen() {
             <MuscleDistribution data={distribution} />
           )}
         </View>
+
+        {/* Muscle Fatigue */}
+        {fatigueData.length > 0 && (
+          <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <Target size={18} color={colors.semantic.warning} strokeWidth={1.5} />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: colors.text.primary,
+                }}
+              >
+                Muscle Fatigue
+              </Text>
+            </View>
+            <MuscleFatigueMap data={fatigueData} />
+          </View>
+        )}
 
         {/* Footer */}
         <Text
