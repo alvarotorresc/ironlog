@@ -1,4 +1,5 @@
-import { View, Text } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Text } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 
@@ -11,8 +12,26 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ label, value, icon: Icon, color, accentColor }: StatsCardProps) {
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [translateAnim] = useState(() => new Animated.Value(8));
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateAnim, {
+        toValue: 0,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, translateAnim]);
+
   return (
-    <View
+    <Animated.View
       style={{
         flex: 1,
         backgroundColor: colors.bg.secondary,
@@ -22,11 +41,13 @@ export function StatsCard({ label, value, icon: Icon, color, accentColor }: Stat
         padding: 14,
         borderLeftWidth: accentColor ? 3 : 1,
         borderLeftColor: accentColor ?? colors.border,
+        opacity: fadeAnim,
+        transform: [{ translateY: translateAnim }],
       }}
       accessibilityLabel={`${label}: ${value}`}
       accessibilityRole="text"
     >
-      <Icon size={20} color={colors.text.tertiary} strokeWidth={1.5} />
+      <Icon size={20} color={accentColor ?? colors.text.tertiary} strokeWidth={1.5} />
       <Text
         style={{
           fontSize: 24,
@@ -49,6 +70,6 @@ export function StatsCard({ label, value, icon: Icon, color, accentColor }: Stat
       >
         {label}
       </Text>
-    </View>
+    </Animated.View>
   );
 }
