@@ -1,16 +1,43 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  preset: 'jest-expo',
-  transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|nativewind|react-native-reanimated)',
+  projects: [
+    // Node tests (repositories, business logic)
+    {
+      displayName: 'node',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/src/repositories/**/*.test.ts', '<rootDir>/src/db/**/*.test.ts'],
+      transform: {
+        '^.+\\.tsx?$': [
+          'ts-jest',
+          {
+            tsconfig: 'tsconfig.json',
+            isolatedModules: true,
+          },
+        ],
+      },
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
+    // React Native tests (components, hooks)
+    {
+      displayName: 'rn',
+      preset: 'jest-expo',
+      testMatch: [
+        '<rootDir>/src/components/**/*.test.ts(x)?',
+        '<rootDir>/src/hooks/**/*.test.ts',
+        '<rootDir>/app/**/*.test.ts(x)?',
+      ],
+      transformIgnorePatterns: [
+        'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|nativewind|react-native-reanimated)',
+      ],
+      moduleNameMapper: {
+        '\\.svg$': '<rootDir>/__mocks__/svgMock.ts',
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
   ],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/', '/prototype/'],
-  moduleNameMapper: {
-    '\\.svg$': '<rootDir>/__mocks__/svgMock.ts',
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
 };
 
 export default config;

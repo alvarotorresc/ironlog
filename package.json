@@ -34,12 +34,20 @@
     "react-native-screens": "~4.23.0",
     "react-native-svg": "15.15.3"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "lefthook"
+    ]
+  },
   "devDependencies": {
     "@testing-library/react-native": "^13.3.3",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
+    "better-sqlite3": "^12.6.2",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
