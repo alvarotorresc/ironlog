@@ -21,6 +21,7 @@ import {
   TrendingUp,
   BarChart3,
   Trophy,
+  PieChart,
 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
@@ -28,8 +29,10 @@ import { RoutineRepository, type RoutineWithExercises } from '@/repositories/rou
 import { WorkoutRepository } from '@/repositories/workout.repo';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { StatsCard } from '@/components/StatsCard';
-import { useDashboardStats } from '@/hooks/useStats';
-import type { ExercisePR } from '@/types';
+import { MuscleDistribution } from '@/components/MuscleDistribution';
+import { PeriodSelector } from '@/components/PeriodSelector';
+import { useDashboardStats, useMuscleDistribution } from '@/hooks/useStats';
+import type { ExercisePR, TimePeriod } from '@/types';
 
 function formatVolume(volume: number): string {
   if (volume >= 1000) {
@@ -53,7 +56,14 @@ export default function HomeScreen() {
   const [starting, setStarting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [musclePeriod, setMusclePeriod] = useState<TimePeriod>('1m');
+
   const { stats, isLoading: statsLoading, reload: reloadStats } = useDashboardStats();
+  const {
+    distribution,
+    isLoading: distributionLoading,
+    reload: reloadDistribution,
+  } = useMuscleDistribution(musclePeriod);
 
   const loadRoutines = useCallback(async () => {
     setLoadingRoutines(true);
@@ -111,14 +121,15 @@ export default function HomeScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await reloadStats();
+    await Promise.all([reloadStats(), reloadDistribution()]);
     setRefreshing(false);
-  }, [reloadStats]);
+  }, [reloadStats, reloadDistribution]);
 
   useFocusEffect(
     useCallback(() => {
       reloadStats();
-    }, [reloadStats]),
+      reloadDistribution();
+    }, [reloadStats, reloadDistribution]),
   );
 
   return (
@@ -233,6 +244,41 @@ export default function HomeScreen() {
             )}
           </View>
         ) : null}
+
+        {/* Muscle Distribution */}
+        <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <PieChart size={18} color={colors.brand.blue} strokeWidth={1.5} />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: colors.text.primary,
+                }}
+              >
+                Muscle Distribution
+              </Text>
+            </View>
+          </View>
+          <View style={{ marginBottom: 12 }}>
+            <PeriodSelector value={musclePeriod} onChange={setMusclePeriod} />
+          </View>
+          {distributionLoading && distribution.length === 0 ? (
+            <View style={{ alignItems: 'center', paddingVertical: 20 }}>
+              <ActivityIndicator size="small" color={colors.brand.blue} />
+            </View>
+          ) : (
+            <MuscleDistribution data={distribution} />
+          )}
+        </View>
 
         {/* Start Workout CTA */}
         <View style={{ paddingHorizontal: 20, paddingTop: 4 }}>
