@@ -74,19 +74,28 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
         // Check if workout already has sets (in case of app restart)
         const workoutRepo = new WorkoutRepository(db);
         const detail = await workoutRepo.getDetail(wId);
-        if (detail && detail.exercises.length > 0) {
-          setExercises((prev) => {
-            const merged = [...prev];
-            for (const group of detail.exercises) {
-              const existingIndex = merged.findIndex((e) => e.exercise.id === group.exercise.id);
-              if (existingIndex >= 0) {
-                merged[existingIndex] = { ...merged[existingIndex], sets: group.sets };
-              } else {
-                merged.push(group);
+        if (detail) {
+          // Restore elapsed time from started_at
+          const startTime = new Date(detail.startedAt + 'Z').getTime();
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          if (elapsed > 0) {
+            setElapsedSeconds(elapsed);
+          }
+
+          if (detail.exercises.length > 0) {
+            setExercises((prev) => {
+              const merged = [...prev];
+              for (const group of detail.exercises) {
+                const existingIndex = merged.findIndex((e) => e.exercise.id === group.exercise.id);
+                if (existingIndex >= 0) {
+                  merged[existingIndex] = { ...merged[existingIndex], sets: group.sets };
+                } else {
+                  merged.push(group);
+                }
               }
-            }
-            return merged;
-          });
+              return merged;
+            });
+          }
         }
       } catch (error) {
         console.error('Failed to initialize workout:', error);
