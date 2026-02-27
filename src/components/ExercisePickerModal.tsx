@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, Modal, FlatList, ActivityIndicator } from 'react-native';
-import { X, Check } from 'lucide-react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, TextInput } from 'react-native';
+import { X, Check, Search } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
@@ -29,9 +29,11 @@ export function ExercisePickerModal({
 }: ExercisePickerModalProps) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!visible) return;
+    setSearchQuery('');
 
     async function load() {
       try {
@@ -48,6 +50,14 @@ export function ExercisePickerModal({
     }
     load();
   }, [visible]);
+
+  const filteredExercises = useMemo(() => {
+    if (!searchQuery.trim()) return exercises;
+    const q = searchQuery.toLowerCase();
+    return exercises.filter(
+      (e) => e.name.toLowerCase().includes(q) || e.muscleGroup.toLowerCase().includes(q),
+    );
+  }, [exercises, searchQuery]);
 
   const handleSelect = useCallback(
     (exercise: Exercise) => {
@@ -95,8 +105,6 @@ export function ExercisePickerModal({
               justifyContent: 'space-between',
               paddingHorizontal: 20,
               paddingVertical: 12,
-              borderBottomWidth: 1,
-              borderBottomColor: colors.border,
             }}
           >
             <Text
@@ -126,6 +134,41 @@ export function ExercisePickerModal({
             </Pressable>
           </View>
 
+          {/* Search bar */}
+          <View
+            style={{
+              marginHorizontal: 20,
+              marginBottom: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: colors.bg.tertiary,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: colors.border,
+              paddingHorizontal: 12,
+              height: 40,
+              gap: 8,
+            }}
+          >
+            <Search size={16} color={colors.text.tertiary} strokeWidth={1.5} />
+            <TextInput
+              placeholder="Search exercises..."
+              placeholderTextColor={colors.text.tertiary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={{
+                flex: 1,
+                fontSize: 14,
+                color: colors.text.primary,
+                padding: 0,
+              }}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={{ height: 1, backgroundColor: colors.border }} />
+
           {/* Exercise list */}
           {loading ? (
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
@@ -133,8 +176,9 @@ export function ExercisePickerModal({
             </View>
           ) : (
             <FlatList
-              data={exercises}
+              data={filteredExercises}
               keyExtractor={(item) => String(item.id)}
+              keyboardShouldPersistTaps="handled"
               renderItem={({ item }) => {
                 const isSelected = selectedExerciseIds.includes(item.id);
                 return (
@@ -143,37 +187,37 @@ export function ExercisePickerModal({
                     style={({ pressed }) => ({
                       flexDirection: 'row',
                       alignItems: 'center',
-                      gap: 12,
-                      paddingVertical: 12,
+                      gap: 10,
+                      paddingVertical: 10,
                       paddingHorizontal: 20,
-                      borderBottomWidth: 1,
-                      borderBottomColor: colors.border,
                       backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
                     })}
                     accessibilityRole="button"
                     accessibilityLabel={`${isSelected ? 'Already added: ' : 'Add '}${item.name}`}
                   >
-                    <ExerciseIllustration illustrationKey={item.illustration} size={40} />
+                    <ExerciseIllustration illustrationKey={item.illustration} size={34} />
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontWeight: '500',
-                          color: isSelected ? colors.text.tertiary : colors.text.primary,
-                        }}
-                        numberOfLines={1}
-                      >
-                        {item.name}
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: colors.text.tertiary,
-                          marginTop: 2,
-                        }}
-                      >
-                        {formatMuscleGroup(item.muscleGroup)}
-                      </Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Text
+                          style={{
+                            fontSize: 15,
+                            fontWeight: '500',
+                            color: isSelected ? colors.text.tertiary : colors.text.primary,
+                            flexShrink: 1,
+                          }}
+                          numberOfLines={1}
+                        >
+                          {item.name}
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: colors.text.tertiary,
+                          }}
+                        >
+                          {formatMuscleGroup(item.muscleGroup)}
+                        </Text>
+                      </View>
                     </View>
                     {isSelected && <Check size={18} color={colors.brand.blue} strokeWidth={2} />}
                   </Pressable>
@@ -181,6 +225,9 @@ export function ExercisePickerModal({
               }}
               contentContainerStyle={{ paddingBottom: 34 }}
               showsVerticalScrollIndicator={false}
+              ItemSeparatorComponent={() => (
+                <View style={{ height: 1, backgroundColor: colors.border, marginLeft: 64 }} />
+              )}
             />
           )}
         </View>
