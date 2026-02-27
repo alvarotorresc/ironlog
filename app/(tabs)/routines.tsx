@@ -6,6 +6,7 @@ import { Plus, ListChecks } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { RoutineRepository, type RoutineWithExercises } from '@/repositories/routine.repo';
+import { WorkoutRepository } from '@/repositories/workout.repo';
 import { RoutineCard } from '@/components/RoutineCard';
 import { EmptyState } from '@/components/ui';
 import type { Routine } from '@/types';
@@ -42,8 +43,15 @@ export default function RoutinesScreen() {
   );
 
   const handleStartPress = useCallback(
-    (routine: Routine) => {
-      router.push(`/workout/${routine.id}`);
+    async (routine: Routine) => {
+      try {
+        const db = await getDatabase();
+        const workoutRepo = new WorkoutRepository(db);
+        const workout = await workoutRepo.start(routine.id);
+        router.push(`/workout/${routine.id}?workoutId=${workout.id}`);
+      } catch (error) {
+        console.error('Failed to start workout:', error);
+      }
     },
     [router],
   );
