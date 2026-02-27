@@ -8,6 +8,8 @@ import type {
   ExerciseStats,
   TimePeriod,
   MuscleGroup,
+  FatigueLevel,
+  MuscleFatigueData,
 } from '../types';
 
 interface PRRow {
@@ -77,6 +79,24 @@ function periodToDays(period: TimePeriod): number | null {
 
 /** Volume types: only weights and calisthenics contribute to volume. */
 const VOLUME_TYPES = "('weights', 'calisthenics')";
+
+const ALL_MUSCLE_GROUPS: MuscleGroup[] = [
+  'chest',
+  'back',
+  'legs',
+  'shoulders',
+  'arms',
+  'core',
+  'full_body',
+];
+
+export function getFatigueLevel(daysSince: number | null): FatigueLevel {
+  if (daysSince === null) return 'rested';
+  if (daysSince <= 1) return 'weakened';
+  if (daysSince <= 2) return 'recovering';
+  if (daysSince <= 5) return 'recovered';
+  return 'rested';
+}
 
 export class StatsRepository {
   constructor(private db: SQLiteDatabase) {}
@@ -384,6 +404,48 @@ export class StatsRepository {
       muscleGroup: row.muscle_group as MuscleGroup,
       totalVolume: row.total_volume,
     }));
+  }
+
+  // ── Muscle fatigue ───────────────────────────────────────────────────
+
+  async getMuscleFatigueData(): Promise<MuscleFatigueData[]> {
+    interface FatigueRow {
+      muscle_group: string;
+      last_workout: string | null;
+    }
+
+    const rows = await this.db.getAllAsync<FatigueRow>(
+      `SELECT
+         e.muscle_group,
+         MAX(date(w.started_at)) as last_workout
+       FROM workout_sets ws
+       JOIN workouts w ON w.id = ws.workout_id
+       JOIN exercises e ON e.id = ws.exercise_id
+       WHERE w.finished_at IS NOT NULL
+       GROUP BY e.muscle_group`,
+    );
+
+    const rowMap = new Map(rows.map((r) => [r.muscle_group, r.last_workout]));
+
+    const todayRow = await this.db.getFirstAsync<{ today: string }>("SELECT date('now') as today");
+    const today = todayRow!.today;
+
+    return ALL_MUSCLE_GROUPS.map((group) => {
+      const lastWorkout = rowMap.get(group) ?? null;
+      let daysSince: number | null = null;
+
+      if (lastWorkout) {
+        const lastDate = new Date(lastWorkout);
+        const todayDate = new Date(today);
+        daysSince = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
+      }
+
+      return {
+        muscleGroup: group,
+        level: getFatigueLevel(daysSince),
+        daysSince,
+      };
+    });
   }
 
   // ── Private helpers ───────────────────────────────────────────────────

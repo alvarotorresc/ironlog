@@ -106,3 +106,11 @@ export interface WeightDataPoint {
   date: string;
   weight: number;
 }
+
+export type FatigueLevel = 'weakened' | 'recovering' | 'recovered' | 'rested';
+
+export interface MuscleFatigueData {
+  muscleGroup: MuscleGroup;
+  level: FatigueLevel;
+  daysSince: number | null;
+}

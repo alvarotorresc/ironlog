@@ -1,6 +1,6 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { createTestDatabase } from '../db/test-helpers';
-import { StatsRepository } from './stats.repo';
+import { StatsRepository, getFatigueLevel } from './stats.repo';
 import { ExerciseRepository } from './exercise.repo';
 import { RoutineRepository } from './routine.repo';
 
@@ -565,5 +565,90 @@ describe('StatsRepository', () => {
 
     // Should be 2 (today + yesterday), not 3
     expect(streak).toBe(2);
+  });
+
+  // ── getFatigueLevel (pure function) ──────────────────────────────────
+
+  it('should return weakened for 0 days since last workout', () => {
+    expect(getFatigueLevel(0)).toBe('weakened');
+  });
+
+  it('should return weakened for 1 day since last workout', () => {
+    expect(getFatigueLevel(1)).toBe('weakened');
+  });
+
+  it('should return recovering for 2 days since last workout', () => {
+    expect(getFatigueLevel(2)).toBe('recovering');
+  });
+
+  it('should return recovered for 3 days since last workout', () => {
+    expect(getFatigueLevel(3)).toBe('recovered');
+  });
+
+  it('should return recovered for 5 days since last workout', () => {
+    expect(getFatigueLevel(5)).toBe('recovered');
+  });
+
+  it('should return rested for 6+ days since last workout', () => {
+    expect(getFatigueLevel(6)).toBe('rested');
+    expect(getFatigueLevel(30)).toBe('rested');
+  });
+
+  it('should return rested for null (never worked)', () => {
+    expect(getFatigueLevel(null)).toBe('rested');
+  });
+
+  // ── getMuscleFatigueData ─────────────────────────────────────────────
+
+  it('should return all muscle groups with rested status when no workouts', async () => {
+    const data = await statsRepo.getMuscleFatigueData();
+
+    expect(data).toHaveLength(7);
+    expect(data.every((d) => d.level === 'rested')).toBe(true);
+    expect(data.every((d) => d.daysSince === null)).toBe(true);
+  });
+
+  it('should return weakened for recently worked muscle group', async () => {
+    const wId = await insertWorkout(db, routineId, daysAgo(0), daysAgo(0, 11));
+    await insertSet(db, wId, benchId, 1, 80, 10);
+
+    const data = await statsRepo.getMuscleFatigueData();
+
+    const chest = data.find((d) => d.muscleGroup === 'chest');
+    expect(chest).toBeDefined();
+    expect(chest!.level).toBe('weakened');
+    // daysSince can be 0 or -1 depending on UTC vs local timezone
+    expect(chest!.daysSince).toBeLessThanOrEqual(1);
+  });
+
+  it('should return correct fatigue levels for different muscle groups', async () => {
+    // Chest: worked today (weakened)
+    const w1Id = await insertWorkout(db, routineId, daysAgo(0), daysAgo(0, 11));
+    await insertSet(db, w1Id, benchId, 1, 80, 10);
+
+    // Legs: worked 4 days ago (recovered, even with timezone offset)
+    const w2Id = await insertWorkout(db, routineId, daysAgo(4), daysAgo(4, 11));
+    await insertSet(db, w2Id, squatId, 1, 100, 8);
+
+    const data = await statsRepo.getMuscleFatigueData();
+
+    const chest = data.find((d) => d.muscleGroup === 'chest');
+    const legs = data.find((d) => d.muscleGroup === 'legs');
+    const back = data.find((d) => d.muscleGroup === 'back');
+
+    expect(chest!.level).toBe('weakened');
+    expect(legs!.level).toBe('recovered');
+    expect(back!.level).toBe('rested');
+  });
+
+  it('should not count unfinished workouts in fatigue data', async () => {
+    const wUnfinished = await insertUnfinishedWorkout(db, routineId, daysAgo(0));
+    await insertSet(db, wUnfinished, benchId, 1, 80, 10);
+
+    const data = await statsRepo.getMuscleFatigueData();
+
+    const chest = data.find((d) => d.muscleGroup === 'chest');
+    expect(chest!.level).toBe('rested');
+    expect(chest!.daysSince).toBeNull();
   });
 });
