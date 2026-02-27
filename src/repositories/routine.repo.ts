@@ -129,6 +129,66 @@ export class RoutineRepository {
     }
   }
 
+  async getAllWithExercises(): Promise<RoutineWithExercises[]> {
+    const routineRows = await this.db.getAllAsync<RoutineRow>(
+      'SELECT * FROM routines ORDER BY created_at DESC, id DESC',
+    );
+
+    if (routineRows.length === 0) return [];
+
+    const allExerciseRows = await this.db.getAllAsync<RoutineExerciseJoinRow & { r_id: number }>(
+      `SELECT
+        re.id as re_id,
+        re.routine_id,
+        re.exercise_id,
+        re.sort_order,
+        r.id as r_id,
+        e.id as e_id,
+        e.name as e_name,
+        e.type as e_type,
+        e.muscle_group as e_muscle_group,
+        e.illustration as e_illustration,
+        e.rest_seconds as e_rest_seconds,
+        e.created_at as e_created_at
+      FROM routine_exercises re
+      JOIN exercises e ON e.id = re.exercise_id
+      JOIN routines r ON r.id = re.routine_id
+      ORDER BY re.routine_id, re.sort_order ASC`,
+    );
+
+    const exercisesByRoutine = new Map<number, RoutineWithExercises['exercises']>();
+    for (const row of allExerciseRows) {
+      const list = exercisesByRoutine.get(row.routine_id) ?? [];
+      list.push({
+        id: row.re_id,
+        routineId: row.routine_id,
+        exerciseId: row.exercise_id,
+        order: row.sort_order,
+        exercise: {
+          id: row.e_id,
+          name: row.e_name,
+          type: row.e_type as Exercise['type'],
+          muscleGroup: row.e_muscle_group as Exercise['muscleGroup'],
+          illustration: row.e_illustration,
+          restSeconds: row.e_rest_seconds,
+          createdAt: row.e_created_at,
+        },
+      });
+      exercisesByRoutine.set(row.routine_id, list);
+    }
+
+    return routineRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      createdAt: row.created_at,
+      exercises: exercisesByRoutine.get(row.id) ?? [],
+    }));
+  }
+
+  async updateName(id: number, name: string): Promise<void> {
+    await this.db.runAsync('UPDATE routines SET name = ? WHERE id = ?', name, id);
+  }
+
   async delete(id: number): Promise<void> {
     await this.db.runAsync('DELETE FROM routines WHERE id = ?', id);
   }
