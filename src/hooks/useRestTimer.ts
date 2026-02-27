@@ -95,10 +95,14 @@ export function useRestTimer(defaultSeconds: number = 90): UseRestTimerReturn {
     setTotalSeconds(0);
   }, [clearTimer]);
 
-  const addTime = useCallback((seconds: number) => {
-    setRemainingSeconds((prev) => prev + seconds);
-    setTotalSeconds((prev) => prev + seconds);
-  }, []);
+  const addTime = useCallback(
+    (seconds: number) => {
+      if (state !== 'running') return;
+      setRemainingSeconds((prev) => prev + seconds);
+      setTotalSeconds((prev) => prev + seconds);
+    },
+    [state],
+  );
 
   return {
     state,
