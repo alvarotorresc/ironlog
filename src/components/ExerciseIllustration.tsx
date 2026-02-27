@@ -98,6 +98,7 @@ export function ExerciseIllustration({ illustrationKey, size = 48 }: ExerciseIll
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 8,
+        overflow: 'hidden',
       }}
     >
       {SvgComponent ? (
