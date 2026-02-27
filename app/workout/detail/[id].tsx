@@ -1,8 +1,16 @@
 import { useCallback, useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+  TextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Calendar, Timer, Dumbbell } from 'lucide-react-native';
+import { ArrowLeft, Calendar, Timer, Dumbbell, Pencil, Trash2, Check } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import {
@@ -84,38 +92,137 @@ function formatSetValues(set: WorkoutSet, exerciseType: ExerciseType): string {
   }
 }
 
+type EditedSets = Record<number, { weight?: string; reps?: string; duration?: string }>;
+
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editedSets, setEditedSets] = useState<EditedSets>({});
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    async function loadWorkout() {
-      const workoutId = Number(id);
-      if (isNaN(workoutId)) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const db = await getDatabase();
-        const repo = new WorkoutRepository(db);
-        const data = await repo.getDetail(workoutId);
-        setWorkout(data);
-      } catch (error) {
-        console.error('Failed to load workout detail:', error);
-      } finally {
-        setLoading(false);
-      }
+  const loadWorkout = useCallback(async () => {
+    const workoutId = Number(id);
+    if (isNaN(workoutId)) {
+      setLoading(false);
+      return;
     }
 
-    loadWorkout();
+    try {
+      const db = await getDatabase();
+      const repo = new WorkoutRepository(db);
+      const data = await repo.getDetail(workoutId);
+      setWorkout(data);
+    } catch (error) {
+      console.error('Failed to load workout detail:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    loadWorkout();
+  }, [loadWorkout]);
 
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
+
+  const handleDelete = useCallback(() => {
+    if (!workout) return;
+
+    Alert.alert('Delete Workout', 'Are you sure? This action cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const db = await getDatabase();
+            const repo = new WorkoutRepository(db);
+            await repo.delete(workout.id);
+            router.back();
+          } catch (error) {
+            console.error('Failed to delete workout:', error);
+          }
+        },
+      },
+    ]);
+  }, [workout, router]);
+
+  const handleToggleEdit = useCallback(() => {
+    if (editing) {
+      setEditing(false);
+      setEditedSets({});
+    } else {
+      setEditing(true);
+      const initial: EditedSets = {};
+      if (workout) {
+        for (const group of workout.exercises) {
+          for (const set of group.sets) {
+            initial[set.id] = {
+              weight: set.weight != null ? String(set.weight) : '',
+              reps: set.reps != null ? String(set.reps) : '',
+              duration: set.duration != null ? String(set.duration) : '',
+            };
+          }
+        }
+      }
+      setEditedSets(initial);
+    }
+  }, [editing, workout]);
+
+  const handleSave = useCallback(async () => {
+    if (!workout || saving) return;
+    setSaving(true);
+
+    try {
+      const db = await getDatabase();
+      const repo = new WorkoutRepository(db);
+
+      for (const group of workout.exercises) {
+        for (const set of group.sets) {
+          const edited = editedSets[set.id];
+          if (!edited) continue;
+
+          const newWeight = edited.weight ? parseFloat(edited.weight) : null;
+          const newReps = edited.reps ? parseInt(edited.reps, 10) : null;
+          const newDuration = edited.duration ? parseInt(edited.duration, 10) : null;
+
+          const hasChanges =
+            newWeight !== set.weight || newReps !== set.reps || newDuration !== set.duration;
+
+          if (hasChanges) {
+            await repo.updateSet(set.id, {
+              weight: newWeight,
+              reps: newReps,
+              duration: newDuration,
+            });
+          }
+        }
+      }
+
+      setEditing(false);
+      setEditedSets({});
+      await loadWorkout();
+    } catch (error) {
+      console.error('Failed to save workout changes:', error);
+    } finally {
+      setSaving(false);
+    }
+  }, [workout, editedSets, saving, loadWorkout]);
+
+  const updateEditedSet = useCallback(
+    (setId: number, field: 'weight' | 'reps' | 'duration', value: string) => {
+      setEditedSets((prev) => ({
+        ...prev,
+        [setId]: { ...prev[setId], [field]: value },
+      }));
+    },
+    [],
+  );
 
   if (loading) {
     return (
@@ -163,7 +270,14 @@ export default function WorkoutDetailScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
-      <DetailHeader onBack={handleBack} />
+      <DetailHeader
+        onBack={handleBack}
+        editing={editing}
+        onToggleEdit={handleToggleEdit}
+        onDelete={handleDelete}
+        onSave={handleSave}
+        saving={saving}
+      />
 
       <ScrollView
         contentContainerStyle={{
@@ -242,7 +356,13 @@ export default function WorkoutDetailScreen() {
         {/* Exercise sections */}
         <View style={{ gap: 12 }}>
           {workout.exercises.map((group) => (
-            <ExerciseDetailCard key={group.exercise.id} group={group} />
+            <ExerciseDetailCard
+              key={group.exercise.id}
+              group={group}
+              editing={editing}
+              editedSets={editedSets}
+              onUpdateSet={updateEditedSet}
+            />
           ))}
         </View>
 
@@ -260,9 +380,21 @@ export default function WorkoutDetailScreen() {
 
 interface DetailHeaderProps {
   onBack: () => void;
+  editing?: boolean;
+  onToggleEdit?: () => void;
+  onDelete?: () => void;
+  onSave?: () => void;
+  saving?: boolean;
 }
 
-function DetailHeader({ onBack }: DetailHeaderProps) {
+function DetailHeader({
+  onBack,
+  editing,
+  onToggleEdit,
+  onDelete,
+  onSave,
+  saving,
+}: DetailHeaderProps) {
   return (
     <View
       style={{
@@ -297,19 +429,88 @@ function DetailHeader({ onBack }: DetailHeaderProps) {
           fontWeight: '700',
           color: colors.text.primary,
           letterSpacing: -0.3,
+          flex: 1,
         }}
       >
         Workout Detail
       </Text>
+
+      {/* Action buttons */}
+      {onToggleEdit && onDelete && (
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {editing && onSave ? (
+            <Pressable
+              onPress={onSave}
+              disabled={saving}
+              style={({ pressed }) => ({
+                height: 36,
+                paddingHorizontal: 14,
+                borderRadius: 8,
+                backgroundColor: colors.brand.blue,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed || saving ? 0.7 : 1,
+              })}
+              accessibilityRole="button"
+              accessibilityLabel="Save changes"
+            >
+              <Text style={{ fontSize: 14, fontWeight: '600', color: '#FFFFFF' }}>
+                {saving ? 'Saving...' : 'Save'}
+              </Text>
+            </Pressable>
+          ) : null}
+          <Pressable
+            onPress={onToggleEdit}
+            style={({ pressed }) => ({
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              backgroundColor: editing ? colors.brand.blue : colors.bg.tertiary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.7 : 1,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel={editing ? 'Cancel editing' : 'Edit workout'}
+          >
+            {editing ? (
+              <Check size={18} color="#FFFFFF" strokeWidth={2} />
+            ) : (
+              <Pencil size={18} color={colors.text.secondary} strokeWidth={1.5} />
+            )}
+          </Pressable>
+          {!editing && (
+            <Pressable
+              onPress={onDelete}
+              style={({ pressed }) => ({
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                backgroundColor: colors.bg.tertiary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              })}
+              accessibilityRole="button"
+              accessibilityLabel="Delete workout"
+            >
+              <Trash2 size={18} color={colors.semantic.error} strokeWidth={1.5} />
+            </Pressable>
+          )}
+        </View>
+      )}
     </View>
   );
 }
 
 interface ExerciseDetailCardProps {
   group: WorkoutExerciseGroup;
+  editing: boolean;
+  editedSets: EditedSets;
+  onUpdateSet: (setId: number, field: 'weight' | 'reps' | 'duration', value: string) => void;
 }
 
-function ExerciseDetailCard({ group }: ExerciseDetailCardProps) {
+function ExerciseDetailCard({ group, editing, editedSets, onUpdateSet }: ExerciseDetailCardProps) {
   const { exercise, sets } = group;
 
   return (
@@ -365,14 +566,25 @@ function ExerciseDetailCard({ group }: ExerciseDetailCardProps) {
             gap: 8,
           }}
         >
-          {sets.map((set, index) => (
-            <ReadOnlySetRow
-              key={set.id}
-              set={set}
-              setNumber={index + 1}
-              exerciseType={exercise.type}
-            />
-          ))}
+          {sets.map((set, index) =>
+            editing ? (
+              <EditableSetRow
+                key={set.id}
+                set={set}
+                setNumber={index + 1}
+                exerciseType={exercise.type}
+                editedValues={editedSets[set.id]}
+                onUpdate={(field, value) => onUpdateSet(set.id, field, value)}
+              />
+            ) : (
+              <ReadOnlySetRow
+                key={set.id}
+                set={set}
+                setNumber={index + 1}
+                exerciseType={exercise.type}
+              />
+            ),
+          )}
         </View>
       )}
     </View>
@@ -395,26 +607,7 @@ function ReadOnlySetRow({ set, setNumber, exerciseType }: ReadOnlySetRowProps) {
         paddingVertical: 4,
       }}
     >
-      <View
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: 6,
-          backgroundColor: colors.bg.tertiary,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 13,
-            fontWeight: '600',
-            color: colors.text.secondary,
-          }}
-        >
-          {setNumber}
-        </Text>
-      </View>
+      <SetNumberBadge number={setNumber} />
       <Text
         style={{
           fontSize: 15,
@@ -423,6 +616,136 @@ function ReadOnlySetRow({ set, setNumber, exerciseType }: ReadOnlySetRowProps) {
         }}
       >
         {formatSetValues(set, exerciseType)}
+      </Text>
+    </View>
+  );
+}
+
+interface EditableSetRowProps {
+  set: WorkoutSet;
+  setNumber: number;
+  exerciseType: ExerciseType;
+  editedValues?: { weight?: string; reps?: string; duration?: string };
+  onUpdate: (field: 'weight' | 'reps' | 'duration', value: string) => void;
+}
+
+function EditableSetRow({ setNumber, exerciseType, editedValues, onUpdate }: EditableSetRowProps) {
+  const showWeight = exerciseType === 'weights' || exerciseType === 'calisthenics';
+  const showReps =
+    exerciseType === 'weights' || exerciseType === 'calisthenics' || exerciseType === 'hiit';
+  const showDuration =
+    exerciseType === 'cardio' || exerciseType === 'hiit' || exerciseType === 'flexibility';
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingVertical: 4,
+      }}
+    >
+      <SetNumberBadge number={setNumber} />
+      {showWeight && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TextInput
+            value={editedValues?.weight ?? ''}
+            onChangeText={(v) => onUpdate('weight', v)}
+            keyboardType="decimal-pad"
+            style={{
+              width: 60,
+              height: 34,
+              borderRadius: 8,
+              backgroundColor: colors.bg.tertiary,
+              borderWidth: 1,
+              borderColor: colors.borderBright,
+              color: colors.text.primary,
+              fontSize: 14,
+              textAlign: 'center',
+              fontVariant: ['tabular-nums'],
+              padding: 0,
+            }}
+            placeholderTextColor={colors.text.tertiary}
+            placeholder="0"
+          />
+          <Text style={{ fontSize: 12, color: colors.text.secondary }}>kg</Text>
+        </View>
+      )}
+      {showReps && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          {showWeight && <Text style={{ fontSize: 14, color: colors.text.tertiary }}>x</Text>}
+          <TextInput
+            value={editedValues?.reps ?? ''}
+            onChangeText={(v) => onUpdate('reps', v)}
+            keyboardType="number-pad"
+            style={{
+              width: 50,
+              height: 34,
+              borderRadius: 8,
+              backgroundColor: colors.bg.tertiary,
+              borderWidth: 1,
+              borderColor: colors.borderBright,
+              color: colors.text.primary,
+              fontSize: 14,
+              textAlign: 'center',
+              fontVariant: ['tabular-nums'],
+              padding: 0,
+            }}
+            placeholderTextColor={colors.text.tertiary}
+            placeholder="0"
+          />
+          <Text style={{ fontSize: 12, color: colors.text.secondary }}>reps</Text>
+        </View>
+      )}
+      {showDuration && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <TextInput
+            value={editedValues?.duration ?? ''}
+            onChangeText={(v) => onUpdate('duration', v)}
+            keyboardType="number-pad"
+            style={{
+              width: 60,
+              height: 34,
+              borderRadius: 8,
+              backgroundColor: colors.bg.tertiary,
+              borderWidth: 1,
+              borderColor: colors.borderBright,
+              color: colors.text.primary,
+              fontSize: 14,
+              textAlign: 'center',
+              fontVariant: ['tabular-nums'],
+              padding: 0,
+            }}
+            placeholderTextColor={colors.text.tertiary}
+            placeholder="0"
+          />
+          <Text style={{ fontSize: 12, color: colors.text.secondary }}>sec</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function SetNumberBadge({ number }: { number: number }) {
+  return (
+    <View
+      style={{
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        backgroundColor: colors.bg.tertiary,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 13,
+          fontWeight: '600',
+          color: colors.text.secondary,
+        }}
+      >
+        {number}
       </Text>
     </View>
   );
