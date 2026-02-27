@@ -52,13 +52,6 @@ function formatDate(dateStr: string): string {
   return `${month} ${day}`;
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
 export default function HomeScreen() {
   const router = useRouter();
   const [showPicker, setShowPicker] = useState(false);
@@ -158,15 +151,7 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         {/* Header */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 }}>
-          <Text
-            style={{
-              fontSize: 15,
-              color: colors.text.secondary,
-            }}
-          >
-            {getGreeting()}
-          </Text>
+        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 }}>
           <Text
             style={{
               fontSize: 28,
@@ -429,76 +414,80 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {/* Start Empty Workout option */}
-          <Pressable
-            onPress={handleStartEmpty}
-            disabled={starting}
-            style={({ pressed }) => ({
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 12,
-              marginHorizontal: 20,
-              marginTop: 16,
-              marginBottom: 8,
-              padding: 16,
-              backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
-              borderWidth: 1,
-              borderColor: colors.border,
-              borderRadius: 12,
-              borderStyle: 'dashed',
-              opacity: starting ? 0.5 : 1,
-            })}
-            accessibilityRole="button"
-            accessibilityLabel="Start empty workout without a routine"
-          >
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                backgroundColor: colors.bg.tertiary,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Dumbbell size={20} color={colors.text.tertiary} strokeWidth={1.5} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '600',
-                  color: colors.text.primary,
-                }}
+          {/* Start Empty Workout option (only when routines exist) */}
+          {!loadingRoutines && routines.length > 0 && (
+            <>
+              <Pressable
+                onPress={handleStartEmpty}
+                disabled={starting}
+                style={({ pressed }) => ({
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  marginHorizontal: 20,
+                  marginTop: 16,
+                  marginBottom: 8,
+                  padding: 16,
+                  backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  borderRadius: 12,
+                  borderStyle: 'dashed',
+                  opacity: starting ? 0.5 : 1,
+                })}
+                accessibilityRole="button"
+                accessibilityLabel="Start empty workout without a routine"
               >
-                Empty Workout
-              </Text>
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: colors.text.secondary,
-                  marginTop: 2,
-                }}
-              >
-                Start without a routine, add exercises as you go
-              </Text>
-            </View>
-          </Pressable>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Dumbbell size={20} color={colors.text.tertiary} strokeWidth={1.5} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '600',
+                      color: colors.text.primary,
+                    }}
+                  >
+                    Empty Workout
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: colors.text.secondary,
+                      marginTop: 2,
+                    }}
+                  >
+                    Start without a routine, add exercises as you go
+                  </Text>
+                </View>
+              </Pressable>
 
-          {/* Divider */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: 20,
-              paddingVertical: 12,
-              gap: 12,
-            }}
-          >
-            <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-            <Text style={{ fontSize: 12, color: colors.text.tertiary }}>OR</Text>
-            <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-          </View>
+              {/* Divider */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                  paddingVertical: 12,
+                  gap: 12,
+                }}
+              >
+                <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+                <Text style={{ fontSize: 12, color: colors.text.tertiary }}>OR</Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
+              </View>
+            </>
+          )}
 
           {/* Routine List */}
           {loadingRoutines ? (
