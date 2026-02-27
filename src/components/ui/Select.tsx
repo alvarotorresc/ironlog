@@ -116,6 +116,15 @@ export function Select({ label, placeholder, options, value, onChange, error }: 
             <FlatList
               data={options}
               keyExtractor={(item) => item.value}
+              ItemSeparatorComponent={() => (
+                <View
+                  style={{
+                    height: 1,
+                    backgroundColor: colors.border,
+                    marginHorizontal: 20,
+                  }}
+                />
+              )}
               renderItem={({ item }) => (
                 <Pressable
                   onPress={() => {
@@ -127,8 +136,12 @@ export function Select({ label, placeholder, options, value, onChange, error }: 
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     paddingHorizontal: 20,
-                    paddingVertical: 14,
-                    backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
+                    paddingVertical: 16,
+                    backgroundColor: pressed
+                      ? colors.bg.tertiary
+                      : item.value === value
+                        ? colors.accent.blue10
+                        : 'transparent',
                   })}
                   accessibilityRole="button"
                   accessibilityState={{ selected: item.value === value }}
