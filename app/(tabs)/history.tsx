@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Clock, ChevronRight, Dumbbell, Timer } from 'lucide-react-native';
@@ -83,6 +83,26 @@ export default function HistoryScreen() {
     [router],
   );
 
+  const handleDeleteWorkout = useCallback((workoutId: number) => {
+    Alert.alert('Delete Workout', 'Are you sure? This action cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const db = await getDatabase();
+            const repo = new WorkoutRepository(db);
+            await repo.delete(workoutId);
+            setWorkouts((prev) => prev.filter((w) => w.id !== workoutId));
+          } catch (error) {
+            console.error('Failed to delete workout:', error);
+          }
+        },
+      },
+    ]);
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
       {/* Header */}
@@ -131,7 +151,11 @@ export default function HistoryScreen() {
           data={workouts}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
-            <HistoryItem workout={item} onPress={handleWorkoutPress} />
+            <HistoryItem
+              workout={item}
+              onPress={handleWorkoutPress}
+              onDelete={handleDeleteWorkout}
+            />
           )}
           contentContainerStyle={{
             paddingHorizontal: 20,
@@ -149,18 +173,22 @@ export default function HistoryScreen() {
 interface HistoryItemProps {
   workout: WorkoutHistoryItem;
   onPress: (workoutId: number) => void;
+  onDelete: (workoutId: number) => void;
 }
 
-function HistoryItem({ workout, onPress }: HistoryItemProps) {
+function HistoryItem({ workout, onPress, onDelete }: HistoryItemProps) {
   const routineLabel = workout.routineName ?? 'Free Workout';
   const dateLabel = formatRelativeDate(workout.startedAt);
   const timeLabel = formatTime(workout.startedAt);
-  const durationLabel =
-    workout.finishedAt ? formatDuration(workout.startedAt, workout.finishedAt) : '--';
+  const durationLabel = workout.finishedAt
+    ? formatDuration(workout.startedAt, workout.finishedAt)
+    : '--';
 
   return (
     <Pressable
       onPress={() => onPress(workout.id)}
+      onLongPress={() => onDelete(workout.id)}
+      delayLongPress={500}
       style={({ pressed }) => ({
         backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
         borderWidth: 1,
@@ -170,7 +198,7 @@ function HistoryItem({ workout, onPress }: HistoryItemProps) {
         opacity: pressed ? 0.85 : 1,
       })}
       accessibilityRole="button"
-      accessibilityLabel={`View ${routineLabel} workout from ${dateLabel}`}
+      accessibilityLabel={`View ${routineLabel} workout from ${dateLabel}. Long press to delete.`}
     >
       {/* Top row: routine name + chevron */}
       <View
