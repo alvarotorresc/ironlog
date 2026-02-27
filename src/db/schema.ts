@@ -58,6 +58,25 @@ const MIGRATIONS: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_exercises_muscle_group ON exercises(muscle_group);
     `,
   },
+  {
+    version: 2,
+    up: `
+      CREATE TABLE IF NOT EXISTS body_measurements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        weight REAL,
+        body_fat REAL CHECK(body_fat IS NULL OR (body_fat >= 0 AND body_fat <= 100)),
+        chest REAL CHECK(chest IS NULL OR chest >= 0),
+        waist REAL CHECK(waist IS NULL OR waist >= 0),
+        hips REAL CHECK(hips IS NULL OR hips >= 0),
+        biceps REAL CHECK(biceps IS NULL OR biceps >= 0),
+        thighs REAL CHECK(thighs IS NULL OR thighs >= 0),
+        notes TEXT,
+        measured_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_body_measurements_date ON body_measurements(measured_at);
+    `,
+  },
 ];
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
