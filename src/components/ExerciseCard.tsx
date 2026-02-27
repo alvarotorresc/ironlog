@@ -53,18 +53,23 @@ export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
   return (
     <Pressable
       onPress={() => onPress(exercise)}
-      style={({ pressed }) => ({
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        marginHorizontal: 20,
-        marginVertical: 4,
-        padding: 12,
-        backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 10,
-      })}
+      style={({ pressed }) => {
+        const typeColor = typeColors[exercise.type] ?? typeColors.weights;
+        return {
+          flexDirection: 'row' as const,
+          alignItems: 'center' as const,
+          gap: 12,
+          marginHorizontal: 20,
+          marginVertical: 4,
+          padding: 12,
+          backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
+          borderWidth: 1,
+          borderColor: colors.borderBright,
+          borderLeftWidth: 3,
+          borderLeftColor: typeColor.text,
+          borderRadius: 10,
+        };
+      }}
       accessibilityRole="button"
       accessibilityLabel={`${exercise.name}, ${exercise.type}, ${formatMuscleGroup(exercise.muscleGroup)}`}
     >
