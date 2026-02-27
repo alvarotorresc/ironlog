@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Bench -->
+  <rect x="30" y="78" width="60" height="6" rx="2"/>
+  <line x1="35" y1="84" x2="35" y2="100"/>
+  <line x1="85" y1="84" x2="85" y2="100"/>
+  <!-- Person lying on bench -->
+  <circle cx="60" cy="56" r="8"/>
+  <line x1="60" y1="64" x2="60" y2="78"/>
+  <!-- Arms pushing barbell up -->
+  <line x1="60" y1="68" x2="38" y2="42"/>
+  <line x1="60" y1="68" x2="82" y2="42"/>
+  <!-- Barbell -->
+  <line x1="28" y1="42" x2="92" y2="42"/>
+  <rect x="22" y="36" width="8" height="12" rx="2"/>
+  <rect x="90" y="36" width="8" height="12" rx="2"/>
+  <!-- Legs -->
+  <line x1="60" y1="78" x2="48" y2="96"/>
+  <line x1="48" y1="96" x2="45" y2="104"/>
+</svg>

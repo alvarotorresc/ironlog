@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Head -->
+  <circle cx="60" cy="22" r="8"/>
+  <!-- Barbell on shoulders -->
+  <line x1="28" y1="34" x2="92" y2="34"/>
+  <rect x="22" y="28" width="8" height="12" rx="2"/>
+  <rect x="90" y="28" width="8" height="12" rx="2"/>
+  <!-- Torso -->
+  <line x1="60" y1="30" x2="60" y2="60"/>
+  <!-- Arms holding bar -->
+  <line x1="60" y1="38" x2="44" y2="34"/>
+  <line x1="60" y1="38" x2="76" y2="34"/>
+  <!-- Legs in squat position -->
+  <line x1="60" y1="60" x2="44" y2="80"/>
+  <line x1="44" y1="80" x2="42" y2="100"/>
+  <line x1="60" y1="60" x2="76" y2="80"/>
+  <line x1="76" y1="80" x2="78" y2="100"/>
+</svg>

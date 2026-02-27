@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Ground -->
+  <line x1="16" y1="86" x2="104" y2="86"/>
+  <!-- Head -->
+  <circle cx="48" cy="38" r="8"/>
+  <!-- Torso angled back -->
+  <line x1="50" y1="46" x2="60" y2="72"/>
+  <!-- Arms twisted to one side with weight -->
+  <line x1="50" y1="54" x2="30" y2="58"/>
+  <line x1="50" y1="54" x2="36" y2="62"/>
+  <!-- Weight plate -->
+  <circle cx="28" cy="60" r="6"/>
+  <!-- Legs bent, feet on ground -->
+  <line x1="60" y1="72" x2="72" y2="64"/>
+  <line x1="72" y1="64" x2="78" y2="86"/>
+  <!-- Rotation arrow -->
+  <path d="M 32 48 A 16 16 0 0 0 28 66" stroke-dasharray="4 3"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Cable machine posts -->
+  <line x1="15" y1="20" x2="15" y2="100"/>
+  <line x1="105" y1="20" x2="105" y2="100"/>
+  <!-- Pulleys -->
+  <circle cx="15" cy="24" r="4"/>
+  <circle cx="105" cy="24" r="4"/>
+  <!-- Person standing center -->
+  <circle cx="60" cy="40" r="8"/>
+  <line x1="60" y1="48" x2="60" y2="80"/>
+  <!-- Cables to hands -->
+  <line x1="15" y1="24" x2="48" y2="62"/>
+  <line x1="105" y1="24" x2="72" y2="62"/>
+  <!-- Arms crossing -->
+  <line x1="60" y1="58" x2="48" y2="62"/>
+  <line x1="60" y1="58" x2="72" y2="62"/>
+  <!-- Legs -->
+  <line x1="60" y1="80" x2="48" y2="100"/>
+  <line x1="60" y1="80" x2="72" y2="100"/>
+</svg>

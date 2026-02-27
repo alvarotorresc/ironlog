@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Head -->
+  <circle cx="60" cy="22" r="8"/>
+  <!-- Torso -->
+  <line x1="60" y1="30" x2="60" y2="58"/>
+  <!-- Arms at sides holding rope -->
+  <line x1="60" y1="38" x2="40" y2="46"/>
+  <line x1="60" y1="38" x2="80" y2="46"/>
+  <!-- Jump rope arc over head -->
+  <path d="M 40 46 Q 40 10 60 8 Q 80 10 80 46"/>
+  <!-- Jump rope under feet -->
+  <path d="M 40 46 Q 40 100 60 100 Q 80 100 80 46"/>
+  <!-- Legs (slightly off ground) -->
+  <line x1="60" y1="58" x2="52" y2="82"/>
+  <line x1="52" y1="82" x2="50" y2="90"/>
+  <line x1="60" y1="58" x2="68" y2="82"/>
+  <line x1="68" y1="82" x2="70" y2="90"/>
+</svg>

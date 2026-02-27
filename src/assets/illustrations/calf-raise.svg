@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Head -->
+  <circle cx="60" cy="18" r="8"/>
+  <!-- Torso -->
+  <line x1="60" y1="26" x2="60" y2="58"/>
+  <!-- Arms by sides -->
+  <line x1="60" y1="36" x2="46" y2="54"/>
+  <line x1="60" y1="36" x2="74" y2="54"/>
+  <!-- Legs straight, on toes -->
+  <line x1="60" y1="58" x2="52" y2="82"/>
+  <line x1="52" y1="82" x2="50" y2="90"/>
+  <line x1="60" y1="58" x2="68" y2="82"/>
+  <line x1="68" y1="82" x2="70" y2="90"/>
+  <!-- Feet on edge/platform, on tiptoes -->
+  <rect x="36" y="90" width="48" height="4" rx="1"/>
+  <line x1="48" y1="94" x2="48" y2="100"/>
+  <line x1="72" y1="94" x2="72" y2="100"/>
+  <!-- Arrow showing upward movement -->
+  <line x1="96" y1="70" x2="96" y2="40"/>
+  <polyline points="90,48 96,40 102,48"/>
+</svg>

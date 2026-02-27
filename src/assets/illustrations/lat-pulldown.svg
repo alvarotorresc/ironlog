@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Machine frame top -->
+  <line x1="20" y1="16" x2="100" y2="16"/>
+  <line x1="60" y1="16" x2="60" y2="24"/>
+  <!-- Cable bar -->
+  <line x1="30" y1="24" x2="90" y2="24"/>
+  <!-- Head -->
+  <circle cx="60" cy="40" r="8"/>
+  <!-- Torso seated -->
+  <line x1="60" y1="48" x2="60" y2="78"/>
+  <!-- Arms pulling bar down -->
+  <line x1="60" y1="54" x2="34" y2="28"/>
+  <line x1="60" y1="54" x2="86" y2="28"/>
+  <!-- Seat -->
+  <rect x="45" y="78" width="30" height="4" rx="2"/>
+  <!-- Legs -->
+  <line x1="60" y1="82" x2="48" y2="100"/>
+  <line x1="60" y1="82" x2="72" y2="100"/>
+  <!-- Thigh pad -->
+  <line x1="42" y1="82" x2="78" y2="82"/>
+</svg>

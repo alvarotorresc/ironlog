@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Incline bench -->
+  <line x1="35" y1="90" x2="55" y2="60"/>
+  <line x1="55" y1="60" x2="75" y2="60"/>
+  <line x1="75" y1="60" x2="75" y2="90"/>
+  <line x1="35" y1="90" x2="35" y2="104"/>
+  <line x1="75" y1="90" x2="75" y2="104"/>
+  <!-- Person on incline -->
+  <circle cx="48" cy="48" r="8"/>
+  <line x1="48" y1="56" x2="58" y2="76"/>
+  <!-- Arms pushing barbell -->
+  <line x1="52" y1="62" x2="32" y2="34"/>
+  <line x1="52" y1="62" x2="72" y2="34"/>
+  <!-- Barbell -->
+  <line x1="22" y1="34" x2="82" y2="34"/>
+  <rect x="16" y="28" width="8" height="12" rx="2"/>
+  <rect x="80" y="28" width="8" height="12" rx="2"/>
+  <!-- Legs -->
+  <line x1="58" y1="76" x2="68" y2="96"/>
+  <line x1="68" y1="96" x2="70" y2="104"/>
+</svg>

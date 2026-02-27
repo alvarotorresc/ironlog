@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Head -->
+  <circle cx="28" cy="52" r="8"/>
+  <!-- Body in plank - straight line -->
+  <line x1="36" y1="56" x2="92" y2="62"/>
+  <!-- Arms (forearms on ground) -->
+  <line x1="32" y1="58" x2="30" y2="72"/>
+  <line x1="30" y1="72" x2="42" y2="76"/>
+  <!-- Ground -->
+  <line x1="18" y1="76" x2="108" y2="76"/>
+  <!-- Legs -->
+  <line x1="92" y1="62" x2="100" y2="72"/>
+  <line x1="100" y1="72" x2="102" y2="76"/>
+  <!-- Feet -->
+  <line x1="98" y1="76" x2="106" y2="76"/>
+</svg>

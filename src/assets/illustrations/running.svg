@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" stroke="#A3A3A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Head -->
+  <circle cx="56" cy="22" r="8"/>
+  <!-- Torso leaning forward -->
+  <line x1="58" y1="30" x2="62" y2="58"/>
+  <!-- Arms in running motion -->
+  <line x1="60" y1="40" x2="42" y2="34"/>
+  <line x1="60" y1="40" x2="78" y2="50"/>
+  <!-- Front leg extended -->
+  <line x1="62" y1="58" x2="40" y2="72"/>
+  <line x1="40" y1="72" x2="34" y2="96"/>
+  <line x1="30" y1="96" x2="40" y2="96"/>
+  <!-- Back leg pushing off -->
+  <line x1="62" y1="58" x2="80" y2="72"/>
+  <line x1="80" y1="72" x2="90" y2="88"/>
+  <line x1="86" y1="88" x2="96" y2="86"/>
+  <!-- Ground -->
+  <line x1="20" y1="98" x2="104" y2="98"/>
+</svg>
