@@ -72,6 +72,12 @@ export function useRoutineForm(
     setErrors((prev) => ({ ...prev, name: undefined }));
   }, []);
 
+  const resetForm = useCallback((newName: string, newExercises: RoutineExerciseItem[]) => {
+    setName(newName);
+    setExercises(newExercises);
+    setErrors({});
+  }, []);
+
   return {
     name,
     setName,
@@ -82,5 +88,6 @@ export function useRoutineForm(
     moveExercise,
     validate,
     clearNameError,
+    resetForm,
   };
 }
