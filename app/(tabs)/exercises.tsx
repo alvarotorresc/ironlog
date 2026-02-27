@@ -33,14 +33,17 @@ function FilterChip({
   return (
     <Pressable
       onPress={onPress}
-      style={{
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 999,
+      style={({ pressed }) => ({
+        height: 32,
+        paddingHorizontal: 14,
+        borderRadius: 16,
         backgroundColor: active ? colors.brand.blue : colors.bg.tertiary,
         borderWidth: 1,
         borderColor: active ? colors.brand.blue : colors.border,
-      }}
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        opacity: pressed ? 0.7 : 1,
+      })}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       accessibilityLabel={`Filter by ${label}`}
@@ -51,6 +54,7 @@ function FilterChip({
           fontWeight: active ? '600' : '400',
           color: active ? '#FFFFFF' : colors.text.secondary,
         }}
+        numberOfLines={1}
       >
         {label}
       </Text>
