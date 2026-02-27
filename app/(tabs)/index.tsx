@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -22,6 +23,7 @@ import {
   BarChart3,
   Trophy,
   PieChart,
+  Target,
 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
@@ -177,47 +179,65 @@ export default function HomeScreen() {
         </View>
 
         {/* Start Workout CTA */}
-        <View style={{ paddingHorizontal: 20, paddingVertical: 16 }}>
-          <Pressable
-            onPress={handleStartPress}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
+        <CTAButton onPress={handleStartPress} />
+
+        {/* Welcome state when no workouts yet */}
+        {stats && stats.totalWorkouts === 0 && !statsLoading ? (
+          <View
+            style={{
+              marginHorizontal: 20,
+              marginBottom: 20,
+              padding: 24,
+              backgroundColor: colors.bg.secondary,
+              borderWidth: 1,
+              borderColor: colors.border,
               borderRadius: 14,
-              paddingVertical: 16,
               alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'row',
-              gap: 10,
-              opacity: pressed ? 0.95 : 1,
-              shadowColor: colors.brand.blue,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 8,
-              elevation: 6,
-            })}
-            accessibilityRole="button"
-            accessibilityLabel="Start workout"
+            }}
           >
-            <Play size={20} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
-            <Text
+            <View
               style={{
-                fontSize: 18,
-                fontWeight: '700',
-                color: '#FFFFFF',
-                letterSpacing: -0.3,
+                width: 56,
+                height: 56,
+                borderRadius: 14,
+                backgroundColor: colors.accent.blue10,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 14,
               }}
             >
-              Start Workout
+              <Target size={28} color={colors.brand.blue} strokeWidth={1.5} />
+            </View>
+            <Text
+              style={{
+                fontSize: 17,
+                fontWeight: '700',
+                color: colors.text.primary,
+                marginBottom: 6,
+              }}
+            >
+              Ready to start?
             </Text>
-          </Pressable>
-        </View>
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.text.secondary,
+                textAlign: 'center',
+                lineHeight: 20,
+              }}
+            >
+              Hit Start Workout to log your first session. Your stats, PRs, and progress will show
+              up here.
+            </Text>
+          </View>
+        ) : null}
 
         {/* Stats Grid */}
         {statsLoading && !stats ? (
           <View style={{ paddingHorizontal: 20, paddingBottom: 20, alignItems: 'center' }}>
             <ActivityIndicator size="small" color={colors.brand.blue} />
           </View>
-        ) : stats ? (
+        ) : stats && stats.totalWorkouts > 0 ? (
           <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <StatsCard
@@ -252,7 +272,7 @@ export default function HomeScreen() {
         ) : null}
 
         {/* Recent PRs */}
-        {stats ? (
+        {stats && stats.totalWorkouts > 0 ? (
           <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
             <View
               style={{
@@ -580,6 +600,67 @@ interface RoutinePickerItemProps {
   routine: RoutineWithExercises;
   onSelect: (routineId: number) => void;
   disabled: boolean;
+}
+
+function CTAButton({ onPress }: { onPress: () => void }) {
+  const [scaleAnim] = useState(() => new Animated.Value(1));
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.97,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <View style={{ paddingHorizontal: 20, paddingVertical: 16 }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityLabel="Start workout"
+      >
+        <Animated.View
+          style={{
+            backgroundColor: colors.brand.blue,
+            borderRadius: 14,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            gap: 10,
+            shadowColor: colors.brand.blue,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+            transform: [{ scale: scaleAnim }],
+          }}
+        >
+          <Play size={20} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '700',
+              color: '#FFFFFF',
+              letterSpacing: -0.3,
+            }}
+          >
+            Start Workout
+          </Text>
+        </Animated.View>
+      </Pressable>
+    </View>
+  );
 }
 
 function RoutinePickerItem({ routine, onSelect, disabled }: RoutinePickerItemProps) {
