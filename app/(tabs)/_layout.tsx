@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Dumbbell, ListChecks, Clock } from 'lucide-react-native';
+import { Home, Dumbbell, ListChecks, Clock, Scale } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 
 export default function TabsLayout() {
@@ -46,6 +46,13 @@ export default function TabsLayout() {
         options={{
           title: 'History',
           tabBarIcon: ({ color, size }) => <Clock size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="body"
+        options={{
+          title: 'Body',
+          tabBarIcon: ({ color, size }) => <Scale size={size} color={color} />,
         }}
       />
     </Tabs>
