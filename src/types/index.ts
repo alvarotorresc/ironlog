@@ -1,13 +1,6 @@
 export type ExerciseType = 'weights' | 'cardio' | 'calisthenics' | 'hiit' | 'flexibility';
 
-export type MuscleGroup =
-  | 'chest'
-  | 'back'
-  | 'legs'
-  | 'shoulders'
-  | 'arms'
-  | 'core'
-  | 'full_body';
+export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'full_body';
 
 export interface Exercise {
   id: number;
@@ -95,3 +88,21 @@ export interface ExerciseStats {
 }
 
 export type TimePeriod = '1w' | '1m' | '3m' | '6m' | 'all';
+
+export interface BodyMeasurement {
+  id: number;
+  weight: number | null;
+  bodyFat: number | null;
+  chest: number | null;
+  waist: number | null;
+  hips: number | null;
+  biceps: number | null;
+  thighs: number | null;
+  notes: string | null;
+  measuredAt: string;
+}
+
+export interface WeightDataPoint {
+  date: string;
+  weight: number;
+}
