@@ -1,5 +1,13 @@
 import { useState, useCallback } from 'react';
-import { View, Text, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
@@ -76,6 +84,7 @@ export default function CreateExerciseScreen() {
       router.back();
     } catch (error) {
       console.error('Failed to create exercise:', error);
+      Alert.alert('Error', 'Could not save exercise. Please try again.');
       setSaving(false);
     }
   }, [name, type, muscleGroup, router]);

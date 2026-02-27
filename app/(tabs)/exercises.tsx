@@ -5,7 +5,6 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import { Plus, Dumbbell } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
-import { runMigrations } from '@/db/schema';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
 import { ExerciseCard } from '@/components/ExerciseCard';
 import { EmptyState } from '@/components/ui';
@@ -68,7 +67,6 @@ export default function ExercisesScreen() {
   const loadExercises = useCallback(async () => {
     try {
       const db = await getDatabase();
-      await runMigrations(db);
       const repo = new ExerciseRepository(db);
       const data =
         activeFilter === 'all' ? await repo.getAll() : await repo.getByMuscleGroup(activeFilter);
