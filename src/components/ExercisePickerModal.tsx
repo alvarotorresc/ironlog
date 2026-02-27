@@ -188,9 +188,13 @@ export function ExercisePickerModal({
                       flexDirection: 'row',
                       alignItems: 'center',
                       gap: 10,
-                      paddingVertical: 10,
+                      paddingVertical: 12,
                       paddingHorizontal: 20,
-                      backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
+                      backgroundColor: pressed
+                        ? colors.bg.tertiary
+                        : isSelected
+                          ? colors.accent.blue10
+                          : 'transparent',
                     })}
                     accessibilityRole="button"
                     accessibilityLabel={`${isSelected ? 'Already added: ' : 'Add '}${item.name}`}
