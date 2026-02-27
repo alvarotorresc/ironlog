@@ -1,0 +1,241 @@
+import { type SQLiteDatabase } from 'expo-sqlite';
+import type { Workout, WorkoutSet, Exercise } from '../types';
+
+interface WorkoutRow {
+  id: number;
+  routine_id: number | null;
+  started_at: string;
+  finished_at: string | null;
+}
+
+interface WorkoutSetRow {
+  id: number;
+  workout_id: number;
+  exercise_id: number;
+  sort_order: number;
+  weight: number | null;
+  reps: number | null;
+  duration: number | null;
+  distance: number | null;
+}
+
+interface WorkoutSetJoinRow extends WorkoutSetRow {
+  e_id: number;
+  e_name: string;
+  e_type: string;
+  e_muscle_group: string;
+  e_illustration: string | null;
+  e_rest_seconds: number;
+  e_created_at: string;
+}
+
+interface AddSetData {
+  workoutId: number;
+  exerciseId: number;
+  order: number;
+  weight?: number | null;
+  reps?: number | null;
+  duration?: number | null;
+  distance?: number | null;
+}
+
+interface UpdateSetData {
+  weight?: number | null;
+  reps?: number | null;
+  duration?: number | null;
+  distance?: number | null;
+}
+
+export interface WorkoutExerciseGroup {
+  exercise: Exercise;
+  sets: WorkoutSet[];
+}
+
+export interface WorkoutDetail extends Workout {
+  exercises: WorkoutExerciseGroup[];
+}
+
+function rowToWorkout(row: WorkoutRow): Workout {
+  return {
+    id: row.id,
+    routineId: row.routine_id,
+    startedAt: row.started_at,
+    finishedAt: row.finished_at,
+  };
+}
+
+function rowToSet(row: WorkoutSetRow): WorkoutSet {
+  return {
+    id: row.id,
+    workoutId: row.workout_id,
+    exerciseId: row.exercise_id,
+    order: row.sort_order,
+    weight: row.weight,
+    reps: row.reps,
+    duration: row.duration,
+    distance: row.distance,
+  };
+}
+
+export class WorkoutRepository {
+  constructor(private db: SQLiteDatabase) {}
+
+  async start(routineId?: number): Promise<Workout> {
+    const result = await this.db.runAsync(
+      'INSERT INTO workouts (routine_id) VALUES (?)',
+      routineId ?? null,
+    );
+
+    const row = await this.db.getFirstAsync<WorkoutRow>(
+      'SELECT * FROM workouts WHERE id = ?',
+      result.lastInsertRowId,
+    );
+
+    return rowToWorkout(row!);
+  }
+
+  async finish(workoutId: number): Promise<void> {
+    await this.db.runAsync(
+      "UPDATE workouts SET finished_at = datetime('now') WHERE id = ?",
+      workoutId,
+    );
+  }
+
+  async addSet(data: AddSetData): Promise<WorkoutSet> {
+    const result = await this.db.runAsync(
+      `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      data.workoutId,
+      data.exerciseId,
+      data.order,
+      data.weight ?? null,
+      data.reps ?? null,
+      data.duration ?? null,
+      data.distance ?? null,
+    );
+
+    const row = await this.db.getFirstAsync<WorkoutSetRow>(
+      'SELECT * FROM workout_sets WHERE id = ?',
+      result.lastInsertRowId,
+    );
+
+    return rowToSet(row!);
+  }
+
+  async updateSet(setId: number, data: UpdateSetData): Promise<void> {
+    const fields: string[] = [];
+    const values: (number | null)[] = [];
+
+    if (data.weight !== undefined) {
+      fields.push('weight = ?');
+      values.push(data.weight ?? null);
+    }
+    if (data.reps !== undefined) {
+      fields.push('reps = ?');
+      values.push(data.reps ?? null);
+    }
+    if (data.duration !== undefined) {
+      fields.push('duration = ?');
+      values.push(data.duration ?? null);
+    }
+    if (data.distance !== undefined) {
+      fields.push('distance = ?');
+      values.push(data.distance ?? null);
+    }
+
+    if (fields.length === 0) return;
+
+    values.push(setId);
+    await this.db.runAsync(`UPDATE workout_sets SET ${fields.join(', ')} WHERE id = ?`, ...values);
+  }
+
+  async getSetsForWorkout(workoutId: number): Promise<WorkoutSet[]> {
+    const rows = await this.db.getAllAsync<WorkoutSetRow>(
+      'SELECT * FROM workout_sets WHERE workout_id = ? ORDER BY exercise_id, sort_order',
+      workoutId,
+    );
+
+    return rows.map(rowToSet);
+  }
+
+  async getLastSetForExercise(workoutId: number, exerciseId: number): Promise<WorkoutSet | null> {
+    const row = await this.db.getFirstAsync<WorkoutSetRow>(
+      'SELECT * FROM workout_sets WHERE workout_id = ? AND exercise_id = ? ORDER BY sort_order DESC LIMIT 1',
+      workoutId,
+      exerciseId,
+    );
+
+    return row ? rowToSet(row) : null;
+  }
+
+  async deleteSet(setId: number): Promise<void> {
+    await this.db.runAsync('DELETE FROM workout_sets WHERE id = ?', setId);
+  }
+
+  async getHistory(limit = 50, offset = 0): Promise<Workout[]> {
+    const rows = await this.db.getAllAsync<WorkoutRow>(
+      'SELECT * FROM workouts ORDER BY started_at DESC LIMIT ? OFFSET ?',
+      limit,
+      offset,
+    );
+
+    return rows.map(rowToWorkout);
+  }
+
+  async getDetail(workoutId: number): Promise<WorkoutDetail | null> {
+    const workoutRow = await this.db.getFirstAsync<WorkoutRow>(
+      'SELECT * FROM workouts WHERE id = ?',
+      workoutId,
+    );
+
+    if (!workoutRow) return null;
+
+    const setRows = await this.db.getAllAsync<WorkoutSetJoinRow>(
+      `SELECT
+        ws.id, ws.workout_id, ws.exercise_id, ws.sort_order,
+        ws.weight, ws.reps, ws.duration, ws.distance,
+        e.id as e_id,
+        e.name as e_name,
+        e.type as e_type,
+        e.muscle_group as e_muscle_group,
+        e.illustration as e_illustration,
+        e.rest_seconds as e_rest_seconds,
+        e.created_at as e_created_at
+      FROM workout_sets ws
+      JOIN exercises e ON e.id = ws.exercise_id
+      WHERE ws.workout_id = ?
+      ORDER BY ws.exercise_id, ws.sort_order`,
+      workoutId,
+    );
+
+    const exerciseMap = new Map<number, WorkoutExerciseGroup>();
+
+    for (const row of setRows) {
+      if (!exerciseMap.has(row.exercise_id)) {
+        exerciseMap.set(row.exercise_id, {
+          exercise: {
+            id: row.e_id,
+            name: row.e_name,
+            type: row.e_type as Exercise['type'],
+            muscleGroup: row.e_muscle_group as Exercise['muscleGroup'],
+            illustration: row.e_illustration,
+            restSeconds: row.e_rest_seconds,
+            createdAt: row.e_created_at,
+          },
+          sets: [],
+        });
+      }
+
+      exerciseMap.get(row.exercise_id)!.sets.push(rowToSet(row));
+    }
+
+    return {
+      ...rowToWorkout(workoutRow),
+      exercises: Array.from(exerciseMap.values()),
+    };
+  }
+
+  async delete(workoutId: number): Promise<void> {
+    await this.db.runAsync('DELETE FROM workouts WHERE id = ?', workoutId);
+  }
+}
