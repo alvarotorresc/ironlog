@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   ScrollView,
   RefreshControl,
+  Platform,
+  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -360,7 +362,13 @@ export default function HomeScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowPicker(false)}
       >
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: colors.bg.primary,
+            paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ?? 32) : 0,
+          }}
+        >
           {/* Modal Header */}
           <View
             style={{
@@ -480,22 +488,44 @@ export default function HomeScreen() {
           ) : routines.length === 0 ? (
             <View
               style={{
+                paddingHorizontal: 24,
+                paddingTop: 24,
                 alignItems: 'center',
-                paddingHorizontal: 32,
-                paddingTop: 40,
               }}
             >
-              <ListChecks size={48} color={colors.text.tertiary} strokeWidth={1.5} />
+              <View
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 16,
+                  backgroundColor: colors.bg.tertiary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 16,
+                }}
+              >
+                <ListChecks size={32} color={colors.text.tertiary} strokeWidth={1.5} />
+              </View>
+              <Text
+                style={{
+                  color: colors.text.primary,
+                  fontSize: 16,
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  marginBottom: 6,
+                }}
+              >
+                No routines yet
+              </Text>
               <Text
                 style={{
                   color: colors.text.secondary,
-                  fontSize: 16,
+                  fontSize: 14,
                   textAlign: 'center',
-                  marginTop: 16,
-                  lineHeight: 24,
+                  lineHeight: 20,
                 }}
               >
-                No routines yet. Create one in the Routines tab first, or start an empty workout.
+                Create one in the Routines tab, or start an empty workout above.
               </Text>
             </View>
           ) : (
@@ -517,7 +547,7 @@ export default function HomeScreen() {
               )}
             />
           )}
-        </SafeAreaView>
+        </View>
       </Modal>
     </SafeAreaView>
   );
