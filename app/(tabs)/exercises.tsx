@@ -150,7 +150,7 @@ export default function ExercisesScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingVertical: 12,
+          paddingVertical: 16,
           gap: 8,
         }}
       >
