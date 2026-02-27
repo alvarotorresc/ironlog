@@ -368,6 +368,55 @@ describe('WorkoutRepository', () => {
     ).rejects.toThrow();
   });
 
+  describe('getLastSetFromPreviousWorkout', () => {
+    it('should return last set from a finished workout', async () => {
+      const workout = await workoutRepo.start(routineId);
+      await workoutRepo.addSet({
+        workoutId: workout.id,
+        exerciseId: benchId,
+        order: 1,
+        weight: 70,
+        reps: 12,
+      });
+      await workoutRepo.addSet({
+        workoutId: workout.id,
+        exerciseId: benchId,
+        order: 2,
+        weight: 80,
+        reps: 10,
+      });
+      await workoutRepo.finish(workout.id);
+
+      const lastSet = await workoutRepo.getLastSetFromPreviousWorkout(benchId);
+
+      expect(lastSet).not.toBeNull();
+      expect(lastSet!.weight).toBe(80);
+      expect(lastSet!.reps).toBe(10);
+    });
+
+    it('should ignore unfinished workouts', async () => {
+      const workout = await workoutRepo.start(routineId);
+      await workoutRepo.addSet({
+        workoutId: workout.id,
+        exerciseId: benchId,
+        order: 1,
+        weight: 100,
+        reps: 5,
+      });
+      // Do NOT finish this workout
+
+      const lastSet = await workoutRepo.getLastSetFromPreviousWorkout(benchId);
+
+      expect(lastSet).toBeNull();
+    });
+
+    it('should return null when no previous data exists', async () => {
+      const lastSet = await workoutRepo.getLastSetFromPreviousWorkout(benchId);
+
+      expect(lastSet).toBeNull();
+    });
+  });
+
   it('should return sets ordered by exercise and sort_order', async () => {
     const workout = await workoutRepo.start(routineId);
 

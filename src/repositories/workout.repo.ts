@@ -174,6 +174,18 @@ export class WorkoutRepository {
     return row ? rowToSet(row) : null;
   }
 
+  async getLastSetFromPreviousWorkout(exerciseId: number): Promise<WorkoutSet | null> {
+    const row = await this.db.getFirstAsync<WorkoutSetRow>(
+      `SELECT ws.* FROM workout_sets ws
+       JOIN workouts w ON w.id = ws.workout_id
+       WHERE ws.exercise_id = ? AND w.finished_at IS NOT NULL
+       ORDER BY w.finished_at DESC, ws.sort_order DESC LIMIT 1`,
+      exerciseId,
+    );
+
+    return row ? rowToSet(row) : null;
+  }
+
   async deleteSet(setId: number): Promise<void> {
     await this.db.runAsync('DELETE FROM workout_sets WHERE id = ?', setId);
   }

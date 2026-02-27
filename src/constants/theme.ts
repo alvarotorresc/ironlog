@@ -26,6 +26,10 @@ export const colors = {
     error: '#EF4444',
     info: '#3291FF',
   },
+  accent: {
+    blue10: 'rgba(50, 145, 255, 0.10)',
+    blue20: 'rgba(50, 145, 255, 0.20)',
+  },
   chart: {
     line: '#3291FF',
     area: 'rgba(50, 145, 255, 0.15)',

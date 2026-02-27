@@ -48,6 +48,13 @@ function formatDate(dateStr: string): string {
   return `${month} ${day}`;
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const [showPicker, setShowPicker] = useState(false);
@@ -147,17 +154,62 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         {/* Header */}
-        <View style={{ padding: 20 }}>
+        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 }}>
+          <Text
+            style={{
+              fontSize: 15,
+              color: colors.text.secondary,
+            }}
+          >
+            {getGreeting()}
+          </Text>
           <Text
             style={{
               fontSize: 28,
               fontWeight: '700',
               color: colors.text.primary,
               letterSpacing: -0.5,
+              marginTop: 2,
             }}
           >
             IronLog
           </Text>
+        </View>
+
+        {/* Start Workout CTA */}
+        <View style={{ paddingHorizontal: 20, paddingVertical: 16 }}>
+          <Pressable
+            onPress={handleStartPress}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
+              borderRadius: 14,
+              paddingVertical: 16,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'row',
+              gap: 10,
+              opacity: pressed ? 0.95 : 1,
+              shadowColor: colors.brand.blue,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 6,
+            })}
+            accessibilityRole="button"
+            accessibilityLabel="Start workout"
+          >
+            <Play size={20} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '700',
+                color: '#FFFFFF',
+                letterSpacing: -0.3,
+              }}
+            >
+              Start Workout
+            </Text>
+          </Pressable>
         </View>
 
         {/* Stats Grid */}
@@ -168,24 +220,32 @@ export default function HomeScreen() {
         ) : stats ? (
           <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
             <View style={{ flexDirection: 'row', gap: 12 }}>
-              <StatsCard label="This Week" value={String(stats.workoutsThisWeek)} icon={Calendar} />
+              <StatsCard
+                label="This Week"
+                value={String(stats.workoutsThisWeek)}
+                icon={Calendar}
+                accentColor={colors.brand.blue}
+              />
               <StatsCard
                 label="Streak"
                 value={stats.currentStreak > 0 ? `${stats.currentStreak} \uD83D\uDD25` : '0'}
                 icon={Flame}
                 color={stats.currentStreak > 0 ? colors.semantic.warning : undefined}
+                accentColor={colors.semantic.warning}
               />
             </View>
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
               <StatsCard
-                label="Volume"
+                label="Total Lifted"
                 value={formatVolume(stats.volumeThisWeek)}
                 icon={TrendingUp}
+                accentColor={colors.semantic.success}
               />
               <StatsCard
                 label="This Month"
                 value={String(stats.workoutsThisMonth)}
                 icon={BarChart3}
+                accentColor={colors.theme.slate}
               />
             </View>
           </View>
@@ -280,37 +340,6 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Start Workout CTA */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 4 }}>
-          <Pressable
-            onPress={handleStartPress}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
-              borderRadius: 16,
-              paddingVertical: 20,
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'row',
-              gap: 12,
-              opacity: pressed ? 0.95 : 1,
-            })}
-            accessibilityRole="button"
-            accessibilityLabel="Start workout"
-          >
-            <Play size={24} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: '700',
-                color: '#FFFFFF',
-                letterSpacing: -0.3,
-              }}
-            >
-              Start Workout
-            </Text>
-          </Pressable>
-        </View>
-
         {/* Footer */}
         <Text
           style={{
@@ -331,7 +360,7 @@ export default function HomeScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowPicker(false)}
       >
-        <View style={{ flex: 1, backgroundColor: colors.bg.primary }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
           {/* Modal Header */}
           <View
             style={{
@@ -451,10 +480,9 @@ export default function HomeScreen() {
           ) : routines.length === 0 ? (
             <View
               style={{
-                flex: 1,
                 alignItems: 'center',
-                justifyContent: 'center',
                 paddingHorizontal: 32,
+                paddingTop: 40,
               }}
             >
               <ListChecks size={48} color={colors.text.tertiary} strokeWidth={1.5} />
@@ -489,7 +517,7 @@ export default function HomeScreen() {
               )}
             />
           )}
-        </View>
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );

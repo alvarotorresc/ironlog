@@ -7,9 +7,10 @@ interface StatsCardProps {
   value: string;
   icon: LucideIcon;
   color?: string;
+  accentColor?: string;
 }
 
-export function StatsCard({ label, value, icon: Icon, color }: StatsCardProps) {
+export function StatsCard({ label, value, icon: Icon, color, accentColor }: StatsCardProps) {
   return (
     <View
       style={{
@@ -19,6 +20,8 @@ export function StatsCard({ label, value, icon: Icon, color }: StatsCardProps) {
         borderColor: colors.border,
         borderRadius: 12,
         padding: 14,
+        borderLeftWidth: accentColor ? 3 : 1,
+        borderLeftColor: accentColor ?? colors.border,
       }}
       accessibilityLabel={`${label}: ${value}`}
       accessibilityRole="text"

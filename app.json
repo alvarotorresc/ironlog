@@ -23,10 +23,14 @@
       },
       "package": "com.alvarotc.ironlog"
     },
-    "plugins": [
-      "expo-router",
-      "expo-sqlite"
-    ],
-    "scheme": "ironlog"
+    "plugins": ["expo-router", "expo-sqlite"],
+    "scheme": "ironlog",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5383e288-f8fa-44ba-8342-0ccc6d228be2"
+      }
+    },
+    "owner": "alvarotorrescarrasco"
   }
 }

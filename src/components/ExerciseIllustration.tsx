@@ -93,6 +93,7 @@ export function ExerciseIllustration({ illustrationKey, size = 48 }: ExerciseIll
       style={{
         width: size,
         height: size,
+        flexShrink: 0,
         backgroundColor: colors.bg.tertiary,
         alignItems: 'center',
         justifyContent: 'center',

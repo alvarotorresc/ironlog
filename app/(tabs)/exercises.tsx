@@ -38,8 +38,8 @@ function FilterChip({
         paddingHorizontal: 12,
         borderRadius: 999,
         backgroundColor: active ? colors.brand.blue : colors.bg.tertiary,
-        borderWidth: active ? 0 : 1,
-        borderColor: colors.border,
+        borderWidth: 1,
+        borderColor: active ? colors.brand.blue : colors.border,
       }}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}

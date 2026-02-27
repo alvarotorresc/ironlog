@@ -128,8 +128,11 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
         const db = await getDatabase();
         const workoutRepo = new WorkoutRepository(db);
 
-        // Get the last set for this exercise to copy values
-        const lastSet = await workoutRepo.getLastSetForExercise(workoutId, exerciseId);
+        // Get the last set for this exercise to copy values (fallback to previous workout)
+        let lastSet = await workoutRepo.getLastSetForExercise(workoutId, exerciseId);
+        if (!lastSet) {
+          lastSet = await workoutRepo.getLastSetFromPreviousWorkout(exerciseId);
+        }
 
         // Determine the next order
         const exerciseState = exercises.find((e) => e.exercise.id === exerciseId);
