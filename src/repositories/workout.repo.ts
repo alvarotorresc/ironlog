@@ -57,6 +57,7 @@ export interface WorkoutExerciseGroup {
 }
 
 export interface WorkoutDetail extends Workout {
+  routineName: string | null;
   exercises: WorkoutExerciseGroup[];
 }
 
@@ -187,10 +188,7 @@ export class WorkoutRepository {
     return rows.map(rowToWorkout);
   }
 
-  async getHistoryWithRoutineNames(
-    limit = 50,
-    offset = 0,
-  ): Promise<WorkoutHistoryItem[]> {
+  async getHistoryWithRoutineNames(limit = 50, offset = 0): Promise<WorkoutHistoryItem[]> {
     const rows = await this.db.getAllAsync<WorkoutHistoryRow>(
       `SELECT w.*, r.name as routine_name,
         (SELECT COUNT(DISTINCT ws.exercise_id) FROM workout_sets ws WHERE ws.workout_id = w.id) as exercise_count
@@ -211,8 +209,11 @@ export class WorkoutRepository {
   }
 
   async getDetail(workoutId: number): Promise<WorkoutDetail | null> {
-    const workoutRow = await this.db.getFirstAsync<WorkoutRow>(
-      'SELECT * FROM workouts WHERE id = ?',
+    const workoutRow = await this.db.getFirstAsync<WorkoutRow & { routine_name: string | null }>(
+      `SELECT w.*, r.name as routine_name
+      FROM workouts w
+      LEFT JOIN routines r ON r.id = w.routine_id
+      WHERE w.id = ?`,
       workoutId,
     );
 
@@ -259,6 +260,7 @@ export class WorkoutRepository {
 
     return {
       ...rowToWorkout(workoutRow),
+      routineName: workoutRow.routine_name,
       exercises: Array.from(exerciseMap.values()),
     };
   }
