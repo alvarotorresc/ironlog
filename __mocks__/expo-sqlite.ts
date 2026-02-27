@@ -43,6 +43,17 @@ class MockSQLiteDatabase {
     return rows as T[];
   }
 
+  async withTransactionAsync(callback: () => Promise<void>): Promise<void> {
+    this.db.exec('BEGIN');
+    try {
+      await callback();
+      this.db.exec('COMMIT');
+    } catch (error) {
+      this.db.exec('ROLLBACK');
+      throw error;
+    }
+  }
+
   close(): void {
     this.db.close();
   }

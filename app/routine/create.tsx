@@ -51,11 +51,10 @@ export default function CreateRoutineScreen() {
     try {
       const db = await getDatabase();
       const repo = new RoutineRepository(db);
-      const routine = await repo.create(name.trim());
-
-      for (let i = 0; i < exercises.length; i++) {
-        await repo.addExercise(routine.id, exercises[i].exerciseId, i + 1);
-      }
+      await repo.createWithExercises(
+        name.trim(),
+        exercises.map((e) => e.exerciseId),
+      );
 
       router.back();
     } catch (error) {

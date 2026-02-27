@@ -104,17 +104,11 @@ export default function EditRoutineScreen() {
         await repo.updateName(routineId, name.trim());
       }
 
-      // Remove all existing routine_exercises and re-add in new order
-      if (originalRoutine) {
-        for (const re of originalRoutine.exercises) {
-          await repo.removeExercise(re.id);
-        }
-      }
-
-      // Add exercises in current order
-      for (let i = 0; i < exercises.length; i++) {
-        await repo.addExercise(routineId, exercises[i].exerciseId, i + 1);
-      }
+      // Replace exercises atomically in a transaction
+      await repo.replaceExercises(
+        routineId,
+        exercises.map((e) => e.exerciseId),
+      );
 
       router.back();
     } catch (error) {

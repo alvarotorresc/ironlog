@@ -105,6 +105,50 @@ export class RoutineRepository {
     };
   }
 
+  async createWithExercises(name: string, exerciseIds: number[]): Promise<Routine> {
+    let routine: Routine | null = null;
+
+    await this.db.withTransactionAsync(async () => {
+      const result = await this.db.runAsync('INSERT INTO routines (name) VALUES (?)', name);
+      const row = await this.db.getFirstAsync<RoutineRow>(
+        'SELECT * FROM routines WHERE id = ?',
+        result.lastInsertRowId,
+      );
+
+      routine = {
+        id: row!.id,
+        name: row!.name,
+        createdAt: row!.created_at,
+      };
+
+      for (let i = 0; i < exerciseIds.length; i++) {
+        await this.db.runAsync(
+          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+          routine!.id,
+          exerciseIds[i],
+          i + 1,
+        );
+      }
+    });
+
+    return routine!;
+  }
+
+  async replaceExercises(routineId: number, exerciseIds: number[]): Promise<void> {
+    await this.db.withTransactionAsync(async () => {
+      await this.db.runAsync('DELETE FROM routine_exercises WHERE routine_id = ?', routineId);
+
+      for (let i = 0; i < exerciseIds.length; i++) {
+        await this.db.runAsync(
+          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+          routineId,
+          exerciseIds[i],
+          i + 1,
+        );
+      }
+    });
+  }
+
   async addExercise(routineId: number, exerciseId: number, order: number): Promise<void> {
     await this.db.runAsync(
       'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
