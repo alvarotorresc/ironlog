@@ -29,6 +29,7 @@ function TypeBadge({ type }: { type: string }) {
         paddingVertical: 2,
         paddingHorizontal: 8,
         borderRadius: 6,
+        flexShrink: 0,
       }}
     >
       <Text
@@ -37,6 +38,7 @@ function TypeBadge({ type }: { type: string }) {
           fontWeight: '600',
           color: c.text,
         }}
+        numberOfLines={1}
       >
         {t(`type.${type}` as TranslationKey)}
       </Text>

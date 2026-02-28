@@ -151,7 +151,9 @@ export function Select({ label, placeholder, options, value, onChange, error }: 
                       fontSize: 16,
                       color: item.value === value ? colors.brand.blue : colors.text.primary,
                       fontWeight: item.value === value ? '600' : '400',
+                      flex: 1,
                     }}
+                    numberOfLines={1}
                   >
                     {item.label}
                   </Text>

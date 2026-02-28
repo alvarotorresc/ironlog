@@ -197,13 +197,19 @@ export function ExercisePickerModal({
                   >
                     <ExerciseIllustration illustrationKey={item.illustration} size={34} />
                     <View style={{ flex: 1, minWidth: 0 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
                         <Text
                           style={{
                             fontSize: 15,
                             fontWeight: '500',
                             color: isSelected ? colors.text.tertiary : colors.text.primary,
-                            flexShrink: 1,
+                            flex: 1,
                           }}
                           numberOfLines={1}
                         >
@@ -213,7 +219,9 @@ export function ExercisePickerModal({
                           style={{
                             fontSize: 12,
                             color: colors.text.tertiary,
+                            flexShrink: 0,
                           }}
+                          numberOfLines={1}
                         >
                           {t(`muscle.${item.muscleGroup}` as TranslationKey)}
                         </Text>
