@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, TextInput } from 'react-native';
 import { X, Check, Search } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
 import { ExerciseIllustration } from './ExerciseIllustration';
@@ -14,19 +16,13 @@ interface ExercisePickerModalProps {
   selectedExerciseIds: number[];
 }
 
-function formatMuscleGroup(group: string): string {
-  return group
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
 export function ExercisePickerModal({
   visible,
   onClose,
   onSelect,
   selectedExerciseIds,
 }: ExercisePickerModalProps) {
+  const { t } = useTranslation();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -114,7 +110,7 @@ export function ExercisePickerModal({
                 color: colors.text.primary,
               }}
             >
-              Add Exercise
+              {t('exercisePicker.title')}
             </Text>
             <Pressable
               onPress={onClose}
@@ -128,7 +124,7 @@ export function ExercisePickerModal({
                 opacity: pressed ? 0.7 : 1,
               })}
               accessibilityRole="button"
-              accessibilityLabel="Close exercise picker"
+              accessibilityLabel={t('common.close')}
             >
               <X size={18} color={colors.text.secondary} strokeWidth={1.5} />
             </Pressable>
@@ -152,7 +148,7 @@ export function ExercisePickerModal({
           >
             <Search size={16} color={colors.text.tertiary} strokeWidth={1.5} />
             <TextInput
-              placeholder="Search exercises..."
+              placeholder={t('exercisePicker.search')}
               placeholderTextColor={colors.text.tertiary}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -219,7 +215,7 @@ export function ExercisePickerModal({
                             color: colors.text.tertiary,
                           }}
                         >
-                          {formatMuscleGroup(item.muscleGroup)}
+                          {t(`muscle.${item.muscleGroup}` as TranslationKey)}
                         </Text>
                       </View>
                     </View>

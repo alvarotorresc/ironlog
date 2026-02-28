@@ -1,6 +1,8 @@
 import { View, Text } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import type { FatigueLevel, MuscleFatigueData, MuscleGroup } from '@/types';
 
 const FATIGUE_COLORS: Record<FatigueLevel, string> = {
@@ -9,20 +11,6 @@ const FATIGUE_COLORS: Record<FatigueLevel, string> = {
   recovered: '#22C55E',
   rested: '#3A3A3A',
 };
-
-const FATIGUE_LABELS: Record<FatigueLevel, string> = {
-  weakened: 'Weakened',
-  recovering: 'Recovering',
-  recovered: 'Recovered',
-  rested: 'Rested',
-};
-
-function formatMuscleGroup(group: string): string {
-  return group
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
 
 // Simplified body silhouette paths for each muscle group (front view)
 const MUSCLE_PATHS: Record<MuscleGroup, string> = {
@@ -52,6 +40,7 @@ interface MuscleFatigueMapProps {
 }
 
 export function MuscleFatigueMap({ data }: MuscleFatigueMapProps) {
+  const { t } = useTranslation();
   const fatigueMap = new Map(data.map((d) => [d.muscleGroup, d]));
 
   const getColor = (group: MuscleGroup): string => {
@@ -117,7 +106,7 @@ export function MuscleFatigueMap({ data }: MuscleFatigueMapProps) {
               }}
             />
             <Text style={{ fontSize: 11, color: colors.text.secondary }}>
-              {formatMuscleGroup(item.muscleGroup)}
+              {t(`muscle.${item.muscleGroup}` as TranslationKey)}
             </Text>
           </View>
         ))}
@@ -148,7 +137,7 @@ export function MuscleFatigueMap({ data }: MuscleFatigueMapProps) {
                 }}
               />
               <Text style={{ fontSize: 10, color: colors.text.tertiary }}>
-                {FATIGUE_LABELS[level]}
+                {t(`fatigue.${level}` as TranslationKey)}
               </Text>
             </View>
           ))}

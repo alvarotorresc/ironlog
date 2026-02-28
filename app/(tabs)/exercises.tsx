@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
@@ -8,17 +8,19 @@ import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
 import { ExerciseCard } from '@/components/ExerciseCard';
 import { EmptyState } from '@/components/ui';
+import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import type { Exercise, MuscleGroup } from '@/types';
 
-const MUSCLE_GROUPS: Array<{ label: string; value: MuscleGroup | 'all' }> = [
-  { label: 'All', value: 'all' },
-  { label: 'Chest', value: 'chest' },
-  { label: 'Back', value: 'back' },
-  { label: 'Legs', value: 'legs' },
-  { label: 'Shoulders', value: 'shoulders' },
-  { label: 'Arms', value: 'arms' },
-  { label: 'Core', value: 'core' },
-  { label: 'Full Body', value: 'full_body' },
+const MUSCLE_GROUP_VALUES: Array<MuscleGroup | 'all'> = [
+  'all',
+  'chest',
+  'back',
+  'legs',
+  'shoulders',
+  'arms',
+  'core',
+  'full_body',
 ];
 
 function FilterChip({
@@ -64,9 +66,19 @@ function FilterChip({
 
 export default function ExercisesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<MuscleGroup | 'all'>('all');
+
+  const muscleGroups = useMemo(
+    () =>
+      MUSCLE_GROUP_VALUES.map((value) => ({
+        value,
+        label: value === 'all' ? t('exercises.filterAll') : t(`muscle.${value}` as TranslationKey),
+      })),
+    [t],
+  );
 
   const loadExercises = useCallback(async () => {
     try {
@@ -124,7 +136,7 @@ export default function ExercisesScreen() {
             letterSpacing: -0.5,
           }}
         >
-          Exercises
+          {t('exercises.title')}
         </Text>
         <Pressable
           onPress={handleCreatePress}
@@ -138,7 +150,7 @@ export default function ExercisesScreen() {
             opacity: pressed ? 0.7 : 1,
           })}
           accessibilityRole="button"
-          accessibilityLabel="Create new exercise"
+          accessibilityLabel={t('exercises.createNew')}
         >
           <Plus size={20} color="#FFFFFF" strokeWidth={2} />
         </Pressable>
@@ -154,7 +166,7 @@ export default function ExercisesScreen() {
           gap: 8,
         }}
       >
-        {MUSCLE_GROUPS.map((group) => (
+        {muscleGroups.map((group) => (
           <FilterChip
             key={group.value}
             label={group.label}
@@ -174,7 +186,9 @@ export default function ExercisesScreen() {
             color: colors.text.tertiary,
           }}
         >
-          {exercises.length} exercise{exercises.length !== 1 ? 's' : ''}
+          {exercises.length !== 1
+            ? t('exercises.countPlural', { count: exercises.length })
+            : t('exercises.count', { count: exercises.length })}
         </Text>
       )}
 
@@ -186,8 +200,8 @@ export default function ExercisesScreen() {
       ) : exercises.length === 0 ? (
         <EmptyState
           icon={Dumbbell}
-          message="No exercises yet. Create your first exercise to get started."
-          actionLabel="Create Exercise"
+          message={t('exercises.empty')}
+          actionLabel={t('exercises.createExercise')}
           onAction={handleCreatePress}
         />
       ) : (

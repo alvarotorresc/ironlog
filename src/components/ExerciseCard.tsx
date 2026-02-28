@@ -1,6 +1,8 @@
 import { View, Text, Pressable } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import { ExerciseIllustration } from './ExerciseIllustration';
 import type { Exercise } from '@/types';
 
@@ -18,6 +20,7 @@ const typeColors: Record<string, { bg: string; text: string }> = {
 };
 
 function TypeBadge({ type }: { type: string }) {
+  const { t } = useTranslation();
   const c = typeColors[type] ?? typeColors.weights;
   return (
     <View
@@ -33,23 +36,16 @@ function TypeBadge({ type }: { type: string }) {
           fontSize: 11,
           fontWeight: '600',
           color: c.text,
-          textTransform: 'capitalize',
         }}
       >
-        {type}
+        {t(`type.${type}` as TranslationKey)}
       </Text>
     </View>
   );
 }
 
-function formatMuscleGroup(group: string): string {
-  return group
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
 export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={() => onPress(exercise)}
@@ -71,7 +67,7 @@ export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
         };
       }}
       accessibilityRole="button"
-      accessibilityLabel={`${exercise.name}, ${exercise.type}, ${formatMuscleGroup(exercise.muscleGroup)}`}
+      accessibilityLabel={`${exercise.name}, ${t(`type.${exercise.type}` as TranslationKey)}, ${t(`muscle.${exercise.muscleGroup}` as TranslationKey)}`}
     >
       <ExerciseIllustration illustrationKey={exercise.illustration} size={40} />
       <View style={{ flex: 1, minWidth: 0 }}>
@@ -90,7 +86,7 @@ export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
           <TypeBadge type={exercise.type} />
         </View>
         <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
-          {formatMuscleGroup(exercise.muscleGroup)}
+          {t(`muscle.${exercise.muscleGroup}` as TranslationKey)}
         </Text>
       </View>
       <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={1.5} />
