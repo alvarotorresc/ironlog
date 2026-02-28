@@ -7,6 +7,7 @@ import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { WorkoutRepository } from '@/repositories/workout.repo';
 import { EmptyState } from '@/components/ui';
+import { useTranslation } from '@/i18n';
 import type { WorkoutHistoryItem } from '@/types';
 
 function formatRelativeDate(dateString: string): string {
@@ -54,6 +55,7 @@ function formatTime(dateString: string): string {
 
 export default function HistoryScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [workouts, setWorkouts] = useState<WorkoutHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -83,25 +85,28 @@ export default function HistoryScreen() {
     [router],
   );
 
-  const handleDeleteWorkout = useCallback((workoutId: number) => {
-    Alert.alert('Delete Workout', 'Are you sure? This action cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const db = await getDatabase();
-            const repo = new WorkoutRepository(db);
-            await repo.delete(workoutId);
-            setWorkouts((prev) => prev.filter((w) => w.id !== workoutId));
-          } catch (error) {
-            console.error('Failed to delete workout:', error);
-          }
+  const handleDeleteWorkout = useCallback(
+    (workoutId: number) => {
+      Alert.alert(t('history.deleteTitle'), t('history.deleteMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const db = await getDatabase();
+              const repo = new WorkoutRepository(db);
+              await repo.delete(workoutId);
+              setWorkouts((prev) => prev.filter((w) => w.id !== workoutId));
+            } catch (error) {
+              console.error('Failed to delete workout:', error);
+            }
+          },
         },
-      },
-    ]);
-  }, []);
+      ]);
+    },
+    [t],
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
@@ -121,7 +126,7 @@ export default function HistoryScreen() {
             letterSpacing: -0.5,
           }}
         >
-          History
+          {t('history.title')}
         </Text>
       </View>
 
@@ -145,7 +150,7 @@ export default function HistoryScreen() {
           <ActivityIndicator size="large" color={colors.brand.blue} />
         </View>
       ) : workouts.length === 0 ? (
-        <EmptyState icon={Clock} message="No workouts yet. Hit the gym!" />
+        <EmptyState icon={Clock} message={t('history.empty')} />
       ) : (
         <FlatList
           data={workouts}

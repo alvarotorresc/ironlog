@@ -9,10 +9,12 @@ import { RoutineRepository, type RoutineWithExercises } from '@/repositories/rou
 import { WorkoutRepository } from '@/repositories/workout.repo';
 import { RoutineCard } from '@/components/RoutineCard';
 import { EmptyState } from '@/components/ui';
+import { useTranslation } from '@/i18n';
 import type { Routine } from '@/types';
 
 export default function RoutinesScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [routines, setRoutines] = useState<RoutineWithExercises[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,7 +83,7 @@ export default function RoutinesScreen() {
             letterSpacing: -0.5,
           }}
         >
-          Routines
+          {t('routines.title')}
         </Text>
         <Pressable
           onPress={handleCreatePress}
@@ -95,7 +97,7 @@ export default function RoutinesScreen() {
             opacity: pressed ? 0.7 : 1,
           })}
           accessibilityRole="button"
-          accessibilityLabel="Create new routine"
+          accessibilityLabel={t('routines.createNew')}
         >
           <Plus size={20} color="#FFFFFF" strokeWidth={2} />
         </Pressable>
@@ -123,8 +125,8 @@ export default function RoutinesScreen() {
       ) : routines.length === 0 ? (
         <EmptyState
           icon={ListChecks}
-          message="No routines yet. Create your first routine to start tracking workouts."
-          actionLabel="Create Routine"
+          message={t('routines.empty')}
+          actionLabel={t('routines.createRoutine')}
           onAction={handleCreatePress}
         />
       ) : (
