@@ -1,6 +1,7 @@
 import { View, Text, LayoutChangeEvent } from 'react-native';
 import { useState } from 'react';
 import { colors } from '@/constants/theme';
+import { useTranslation, type TranslationKey } from '@/i18n';
 import type { MuscleGroupVolume, MuscleGroup } from '@/types';
 
 interface MuscleDistributionProps {
@@ -17,17 +18,10 @@ const MUSCLE_COLORS: Record<MuscleGroup, string> = {
   full_body: '#64748B',
 };
 
-const MUSCLE_LABELS: Record<MuscleGroup, string> = {
-  chest: 'Chest',
-  back: 'Back',
-  legs: 'Legs',
-  shoulders: 'Shoulders',
-  arms: 'Arms',
-  core: 'Core',
-  full_body: 'Full Body',
-};
-
-function computePercentages(data: MuscleGroupVolume[]): Array<{
+function computePercentages(
+  data: MuscleGroupVolume[],
+  translate: (key: TranslationKey) => string,
+): Array<{
   muscleGroup: MuscleGroup;
   label: string;
   percentage: number;
@@ -39,7 +33,7 @@ function computePercentages(data: MuscleGroupVolume[]): Array<{
   return data
     .map((item) => ({
       muscleGroup: item.muscleGroup,
-      label: MUSCLE_LABELS[item.muscleGroup],
+      label: translate(`muscle.${item.muscleGroup}` as TranslationKey),
       percentage: (item.totalVolume / totalVolume) * 100,
       color: MUSCLE_COLORS[item.muscleGroup],
     }))
@@ -47,8 +41,9 @@ function computePercentages(data: MuscleGroupVolume[]): Array<{
 }
 
 export function MuscleDistribution({ data }: MuscleDistributionProps) {
+  const { t } = useTranslation();
   const [barMaxWidth, setBarMaxWidth] = useState(0);
-  const entries = computePercentages(data);
+  const entries = computePercentages(data, t);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     setBarMaxWidth(event.nativeEvent.layout.width);
@@ -73,7 +68,7 @@ export function MuscleDistribution({ data }: MuscleDistributionProps) {
             fontStyle: 'italic',
           }}
         >
-          No workout data yet
+          {t('common.noData')}
         </Text>
       </View>
     );

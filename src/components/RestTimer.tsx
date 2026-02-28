@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { View, Text, Pressable, Animated, Easing } from 'react-native';
 import { SkipForward, Plus, Timer } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
 
 interface RestTimerProps {
   state: 'idle' | 'running' | 'finished';
@@ -28,6 +29,8 @@ export function RestTimer({
   onAddTime,
   onDismiss,
 }: RestTimerProps) {
+  const { t } = useTranslation();
+
   if (state === 'idle') return null;
 
   const isFinished = state === 'finished';
@@ -86,7 +89,7 @@ export function RestTimer({
                 color: isFinished ? colors.semantic.success : colors.text.primary,
               }}
             >
-              {isFinished ? 'GO!' : 'Rest Timer'}
+              {isFinished ? 'GO!' : t('restTimer.title')}
             </Text>
             {exerciseName && (
               <Text
@@ -139,7 +142,7 @@ export function RestTimer({
                   opacity: pressed ? 0.7 : 1,
                 })}
                 accessibilityRole="button"
-                accessibilityLabel="Add 15 seconds"
+                accessibilityLabel={t('restTimer.addTime')}
               >
                 <Plus size={12} color={colors.text.secondary} strokeWidth={2} />
                 <Text
@@ -169,7 +172,7 @@ export function RestTimer({
                   opacity: pressed ? 0.7 : 1,
                 })}
                 accessibilityRole="button"
-                accessibilityLabel="Skip rest timer"
+                accessibilityLabel={t('restTimer.skip')}
               >
                 <SkipForward size={14} color={colors.text.secondary} strokeWidth={2} />
                 <Text
@@ -179,7 +182,7 @@ export function RestTimer({
                     color: colors.text.secondary,
                   }}
                 >
-                  Skip
+                  {t('restTimer.skip')}
                 </Text>
               </Pressable>
             </>
