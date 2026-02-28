@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useRoutineForm, type RoutineExerciseItem } from './useRoutineForm';
 import type { Exercise } from '@/types';
 

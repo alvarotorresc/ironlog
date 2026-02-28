@@ -515,9 +515,10 @@ describe('StatsRepository', () => {
 
     expect(stats.totalWorkouts).toBe(2);
     expect(stats.currentStreak).toBeGreaterThanOrEqual(1);
-    expect(stats.recentPRs).toBeDefined();
-    expect(stats.recentPRs.length).toBeGreaterThanOrEqual(1);
-    expect(stats.volumeThisMonth).toBeGreaterThanOrEqual(1300);
+    expect(stats.currentStreak).toBeLessThanOrEqual(2);
+    expect(stats.recentPRs).toHaveLength(1);
+    expect(stats.recentPRs[0].exerciseName).toBe('Bench Press');
+    expect(stats.volumeThisMonth).toBe(1300);
   });
 
   // ── Edge cases ────────────────────────────────────────────────────────
