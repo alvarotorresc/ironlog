@@ -129,61 +129,71 @@ export function RestTimer({
               {/* +15s button */}
               <Pressable
                 onPress={() => onAddTime(15)}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 2,
-                  paddingVertical: 6,
-                  paddingHorizontal: 10,
-                  borderRadius: 6,
-                  backgroundColor: colors.bg.tertiary,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  opacity: pressed ? 0.7 : 1,
-                })}
                 accessibilityRole="button"
                 accessibilityLabel={t('restTimer.addTime')}
               >
-                <Plus size={12} color={colors.text.secondary} strokeWidth={2} />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    fontVariant: ['tabular-nums'],
-                    color: colors.text.secondary,
-                  }}
-                >
-                  15s
-                </Text>
+                {({ pressed }) => (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 2,
+                      paddingVertical: 6,
+                      paddingHorizontal: 10,
+                      borderRadius: 6,
+                      backgroundColor: colors.bg.tertiary,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      opacity: pressed ? 0.7 : 1,
+                    }}
+                  >
+                    <Plus size={12} color={colors.text.secondary} strokeWidth={2} />
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: '600',
+                        fontVariant: ['tabular-nums'],
+                        color: colors.text.secondary,
+                      }}
+                    >
+                      15s
+                    </Text>
+                  </View>
+                )}
               </Pressable>
 
               {/* Skip button */}
               <Pressable
                 onPress={onSkip}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 4,
-                  paddingVertical: 6,
-                  paddingHorizontal: 12,
-                  borderRadius: 6,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  opacity: pressed ? 0.7 : 1,
-                })}
                 accessibilityRole="button"
                 accessibilityLabel={t('restTimer.skip')}
               >
-                <SkipForward size={14} color={colors.text.secondary} strokeWidth={2} />
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontWeight: '600',
-                    color: colors.text.secondary,
-                  }}
-                >
-                  {t('restTimer.skip')}
-                </Text>
+                {({ pressed }) => (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                      paddingVertical: 6,
+                      paddingHorizontal: 12,
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      opacity: pressed ? 0.7 : 1,
+                    }}
+                  >
+                    <SkipForward size={14} color={colors.text.secondary} strokeWidth={2} />
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        fontWeight: '600',
+                        color: colors.text.secondary,
+                      }}
+                    >
+                      {t('restTimer.skip')}
+                    </Text>
+                  </View>
+                )}
               </Pressable>
             </>
           )}

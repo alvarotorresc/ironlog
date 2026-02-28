@@ -48,50 +48,55 @@ function TypeBadge({ type }: { type: string }) {
 
 export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
   const { t } = useTranslation();
+  const typeColor = typeColors[exercise.type] ?? typeColors.weights;
+
   return (
     <Pressable
       onPress={() => onPress(exercise)}
-      style={({ pressed }) => {
-        const typeColor = typeColors[exercise.type] ?? typeColors.weights;
-        return {
-          flexDirection: 'row' as const,
-          alignItems: 'center' as const,
-          gap: 12,
-          marginHorizontal: 20,
-          marginVertical: 4,
-          padding: 12,
-          backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
-          borderWidth: 1,
-          borderColor: colors.borderBright,
-          borderLeftWidth: 3,
-          borderLeftColor: typeColor.text,
-          borderRadius: 10,
-        };
-      }}
       accessibilityRole="button"
       accessibilityLabel={`${exercise.name}, ${t(`type.${exercise.type}` as TranslationKey)}, ${t(`muscle.${exercise.muscleGroup}` as TranslationKey)}`}
     >
-      <ExerciseIllustration illustrationKey={exercise.illustration} size={40} />
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text
-            style={{
-              fontSize: 15,
-              fontWeight: '600',
-              color: colors.text.primary,
-              flexShrink: 1,
-            }}
-            numberOfLines={1}
-          >
-            {exercise.name}
-          </Text>
-          <TypeBadge type={exercise.type} />
+      {({ pressed }) => (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            marginHorizontal: 20,
+            marginVertical: 4,
+            padding: 12,
+            backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
+            borderWidth: 1,
+            borderColor: colors.borderBright,
+            borderLeftWidth: 3,
+            borderLeftColor: typeColor.text,
+            borderRadius: 10,
+            opacity: pressed ? 0.9 : 1,
+          }}
+        >
+          <ExerciseIllustration illustrationKey={exercise.illustration} size={40} />
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: '600',
+                  color: colors.text.primary,
+                  flexShrink: 1,
+                }}
+                numberOfLines={1}
+              >
+                {exercise.name}
+              </Text>
+              <TypeBadge type={exercise.type} />
+            </View>
+            <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
+              {t(`muscle.${exercise.muscleGroup}` as TranslationKey)}
+            </Text>
+          </View>
+          <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={1.5} />
         </View>
-        <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
-          {t(`muscle.${exercise.muscleGroup}` as TranslationKey)}
-        </Text>
-      </View>
-      <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={1.5} />
+      )}
     </Pressable>
   );
 }

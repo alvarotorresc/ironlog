@@ -36,30 +36,37 @@ export function Select({ label, placeholder, options, value, onChange, error }: 
 
       <Pressable
         onPress={() => setVisible(true)}
-        style={({ pressed }) => ({
-          backgroundColor: colors.bg.tertiary,
-          borderWidth: 1,
-          borderColor: error ? colors.semantic.error : colors.border,
-          borderRadius: 8,
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          opacity: pressed ? 0.7 : 1,
-        })}
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${selectedOption?.label ?? placeholder ?? 'Select'}`}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            color: selectedOption ? colors.text.primary : colors.text.tertiary,
-          }}
-        >
-          {selectedOption?.label ?? placeholder ?? 'Select...'}
-        </Text>
-        <ChevronDown size={18} color={colors.text.tertiary} strokeWidth={1.5} />
+        {({ pressed }) => (
+          <View
+            style={{
+              backgroundColor: colors.bg.tertiary,
+              borderWidth: 1,
+              borderColor: error ? colors.semantic.error : colors.border,
+              borderRadius: 8,
+              paddingHorizontal: 14,
+              paddingVertical: 12,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              opacity: pressed ? 0.7 : 1,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                color: selectedOption ? colors.text.primary : colors.text.tertiary,
+                flex: 1,
+              }}
+              numberOfLines={1}
+            >
+              {selectedOption?.label ?? placeholder ?? 'Select...'}
+            </Text>
+            <ChevronDown size={18} color={colors.text.tertiary} strokeWidth={1.5} />
+          </View>
+        )}
       </Pressable>
 
       {error && <Text style={{ fontSize: 13, color: colors.semantic.error }}>{error}</Text>}
@@ -131,34 +138,39 @@ export function Select({ label, placeholder, options, value, onChange, error }: 
                     onChange(item.value);
                     setVisible(false);
                   }}
-                  style={({ pressed }) => ({
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingHorizontal: 20,
-                    paddingVertical: 16,
-                    backgroundColor: pressed
-                      ? colors.bg.tertiary
-                      : item.value === value
-                        ? colors.accent.blue10
-                        : 'transparent',
-                  })}
                   accessibilityRole="button"
                   accessibilityState={{ selected: item.value === value }}
                 >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: item.value === value ? colors.brand.blue : colors.text.primary,
-                      fontWeight: item.value === value ? '600' : '400',
-                      flex: 1,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {item.label}
-                  </Text>
-                  {item.value === value && (
-                    <Check size={20} color={colors.brand.blue} strokeWidth={2} />
+                  {({ pressed }) => (
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingHorizontal: 20,
+                        paddingVertical: 16,
+                        backgroundColor: pressed
+                          ? colors.bg.tertiary
+                          : item.value === value
+                            ? colors.accent.blue10
+                            : 'transparent',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: item.value === value ? colors.brand.blue : colors.text.primary,
+                          fontWeight: item.value === value ? '600' : '400',
+                          flex: 1,
+                        }}
+                        numberOfLines={1}
+                      >
+                        {item.label}
+                      </Text>
+                      {item.value === value && (
+                        <Check size={20} color={colors.brand.blue} strokeWidth={2} />
+                      )}
+                    </View>
                   )}
                 </Pressable>
               )}

@@ -83,28 +83,33 @@ export function RoutineCard({ routine, exercises, onPress, onStart }: RoutineCar
             e.stopPropagation();
             onStart(routine);
           }}
-          style={({ pressed }) => ({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 4,
-            paddingVertical: 8,
-            paddingHorizontal: 16,
-            borderRadius: 8,
-            backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
-          })}
           accessibilityRole="button"
           accessibilityLabel={`Start ${routine.name} workout`}
         >
-          <Play size={14} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: '700',
-              color: '#FFFFFF',
-            }}
-          >
-            Start
-          </Text>
+          {({ pressed }) => (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 4,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                borderRadius: 8,
+                backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
+              }}
+            >
+              <Play size={14} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '700',
+                  color: '#FFFFFF',
+                }}
+              >
+                Start
+              </Text>
+            </View>
+          )}
         </Pressable>
       </View>
 

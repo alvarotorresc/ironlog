@@ -1,4 +1,4 @@
-import { Pressable, Text, ActivityIndicator, type PressableProps } from 'react-native';
+import { View, Pressable, Text, ActivityIndicator, type PressableProps } from 'react-native';
 import { colors } from '@/constants/theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'danger';
@@ -41,7 +41,6 @@ export function Button({
   size = 'md',
   loading = false,
   disabled,
-  style,
   ...props
 }: ButtonProps) {
   const v = variantStyles[variant];
@@ -49,36 +48,35 @@ export function Button({
   const isDisabled = disabled || loading;
 
   return (
-    <Pressable
-      disabled={isDisabled}
-      style={({ pressed }) => [
-        {
-          height: s.height,
-          paddingHorizontal: s.paddingH,
-          backgroundColor: pressed ? v.pressedBg : v.bg,
-          borderRadius: 12,
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexDirection: 'row',
-          gap: 8,
-          opacity: isDisabled ? 0.5 : 1,
-        },
-        typeof style === 'function' ? style({ pressed }) : style,
-      ]}
-      {...props}
-    >
-      {loading ? (
-        <ActivityIndicator size="small" color={v.text} />
-      ) : (
-        <Text
+    <Pressable disabled={isDisabled} {...props}>
+      {({ pressed }) => (
+        <View
           style={{
-            color: v.text,
-            fontSize: s.fontSize,
-            fontWeight: '600',
+            height: s.height,
+            paddingHorizontal: s.paddingH,
+            backgroundColor: pressed ? v.pressedBg : v.bg,
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            gap: 8,
+            opacity: isDisabled ? 0.5 : 1,
           }}
         >
-          {title}
-        </Text>
+          {loading ? (
+            <ActivityIndicator size="small" color={v.text} />
+          ) : (
+            <Text
+              style={{
+                color: v.text,
+                fontSize: s.fontSize,
+                fontWeight: '600',
+              }}
+            >
+              {title}
+            </Text>
+          )}
+        </View>
       )}
     </Pressable>
   );

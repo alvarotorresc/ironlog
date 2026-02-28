@@ -214,28 +214,33 @@ function WorkoutHeader({ routineName, elapsedSeconds, onFinish }: WorkoutHeaderP
 
       <Pressable
         onPress={onFinish}
-        style={({ pressed }) => ({
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 6,
-          paddingVertical: 8,
-          paddingHorizontal: 16,
-          borderRadius: 8,
-          backgroundColor: pressed ? '#1DA34E' : colors.semantic.success,
-        })}
         accessibilityRole="button"
         accessibilityLabel={t('workout.finish')}
       >
-        <Check size={16} color="#FFFFFF" strokeWidth={2.5} />
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: '700',
-            color: '#FFFFFF',
-          }}
-        >
-          {t('workout.finishConfirm')}
-        </Text>
+        {({ pressed }) => (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              borderRadius: 8,
+              backgroundColor: pressed ? '#1DA34E' : colors.semantic.success,
+            }}
+          >
+            <Check size={16} color="#FFFFFF" strokeWidth={2.5} />
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '700',
+                color: '#FFFFFF',
+              }}
+            >
+              {t('workout.finishConfirm')}
+            </Text>
+          </View>
+        )}
       </Pressable>
     </View>
   );
@@ -341,33 +346,38 @@ function ExerciseSection({
       {/* Add Set button */}
       <Pressable
         onPress={handleAddSet}
-        style={({ pressed }) => ({
-          width: '100%',
-          height: 44,
-          marginTop: hasSets ? 12 : 8,
-          backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
-          borderWidth: 1,
-          borderStyle: 'dashed',
-          borderColor: colors.borderBright,
-          borderRadius: 8,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 4,
-        })}
         accessibilityRole="button"
         accessibilityLabel={`${t('workout.addSet')} - ${exercise.name}`}
       >
-        <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: '600',
-            color: colors.brand.blue,
-          }}
-        >
-          {t('workout.addSet')}
-        </Text>
+        {({ pressed }) => (
+          <View
+            style={{
+              width: '100%',
+              height: 44,
+              marginTop: hasSets ? 12 : 8,
+              backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
+              borderWidth: 1,
+              borderStyle: 'dashed',
+              borderColor: colors.borderBright,
+              borderRadius: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+            }}
+          >
+            <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: '600',
+                color: colors.brand.blue,
+              }}
+            >
+              {t('workout.addSet')}
+            </Text>
+          </View>
+        )}
       </Pressable>
     </View>
   );

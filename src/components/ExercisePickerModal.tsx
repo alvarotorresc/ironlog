@@ -114,19 +114,24 @@ export function ExercisePickerModal({
             </Text>
             <Pressable
               onPress={onClose}
-              style={({ pressed }) => ({
-                width: 32,
-                height: 32,
-                borderRadius: 8,
-                backgroundColor: colors.bg.tertiary,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
               accessibilityRole="button"
               accessibilityLabel={t('common.close')}
             >
-              <X size={18} color={colors.text.secondary} strokeWidth={1.5} />
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <X size={18} color={colors.text.secondary} strokeWidth={1.5} />
+                </View>
+              )}
             </Pressable>
           </View>
 
@@ -180,54 +185,61 @@ export function ExercisePickerModal({
                 return (
                   <Pressable
                     onPress={() => handleSelect(item)}
-                    style={({ pressed }) => ({
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 10,
-                      paddingVertical: 12,
-                      paddingHorizontal: 20,
-                      backgroundColor: pressed
-                        ? colors.bg.tertiary
-                        : isSelected
-                          ? colors.accent.blue10
-                          : 'transparent',
-                    })}
                     accessibilityRole="button"
                     accessibilityLabel={`${isSelected ? 'Already added: ' : 'Add '}${item.name}`}
                   >
-                    <ExerciseIllustration illustrationKey={item.illustration} size={34} />
-                    <View style={{ flex: 1, minWidth: 0 }}>
+                    {({ pressed }) => (
                       <View
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
-                          gap: 6,
+                          gap: 10,
+                          paddingVertical: 12,
+                          paddingHorizontal: 20,
+                          backgroundColor: pressed
+                            ? colors.bg.tertiary
+                            : isSelected
+                              ? colors.accent.blue10
+                              : 'transparent',
                         }}
                       >
-                        <Text
-                          style={{
-                            fontSize: 15,
-                            fontWeight: '500',
-                            color: isSelected ? colors.text.tertiary : colors.text.primary,
-                            flex: 1,
-                          }}
-                          numberOfLines={1}
-                        >
-                          {item.name}
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: colors.text.tertiary,
-                            flexShrink: 0,
-                          }}
-                          numberOfLines={1}
-                        >
-                          {t(`muscle.${item.muscleGroup}` as TranslationKey)}
-                        </Text>
+                        <ExerciseIllustration illustrationKey={item.illustration} size={34} />
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                          <View
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: 6,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 15,
+                                fontWeight: '500',
+                                color: isSelected ? colors.text.tertiary : colors.text.primary,
+                                flex: 1,
+                              }}
+                              numberOfLines={1}
+                            >
+                              {item.name}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: colors.text.tertiary,
+                                flexShrink: 0,
+                              }}
+                              numberOfLines={1}
+                            >
+                              {t(`muscle.${item.muscleGroup}` as TranslationKey)}
+                            </Text>
+                          </View>
+                        </View>
+                        {isSelected && (
+                          <Check size={18} color={colors.brand.blue} strokeWidth={2} />
+                        )}
                       </View>
-                    </View>
-                    {isSelected && <Check size={18} color={colors.brand.blue} strokeWidth={2} />}
+                    )}
                   </Pressable>
                 );
               }}
