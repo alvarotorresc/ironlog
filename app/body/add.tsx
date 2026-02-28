@@ -276,6 +276,7 @@ export default function AddMeasurementScreen() {
             onChangeText={(v) => updateField('notes', v)}
             multiline
             numberOfLines={3}
+            maxLength={500}
             style={{ minHeight: 80, textAlignVertical: 'top' }}
           />
         </ScrollView>

@@ -161,6 +161,7 @@ export default function CreateExerciseScreen() {
             error={errors.name}
             autoFocus
             returnKeyType="done"
+            maxLength={100}
           />
 
           <Select
