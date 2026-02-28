@@ -714,104 +714,109 @@ function RoutinePickerItem({ routine, onSelect, disabled }: RoutinePickerItemPro
     <Pressable
       onPress={() => onSelect(routine.id)}
       disabled={disabled}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        padding: 16,
-        opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
-      })}
       accessibilityRole="button"
       accessibilityLabel={`Start ${routine.name} workout`}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: exerciseCount > 0 ? 12 : 0,
-        }}
-      >
-        <View style={{ flex: 1, marginRight: 12 }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: '700',
-              color: colors.text.primary,
-              letterSpacing: -0.3,
-            }}
-            numberOfLines={1}
-          >
-            {routine.name}
-          </Text>
-          <Text
-            style={{
-              fontSize: 13,
-              color: colors.text.secondary,
-              marginTop: 2,
-            }}
-          >
-            {exerciseCount !== 1
-              ? t('home.exerciseCountPlural', { count: exerciseCount })
-              : t('home.exerciseCount', { count: exerciseCount })}
-          </Text>
-        </View>
+      {({ pressed }) => (
         <View
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            backgroundColor: colors.brand.blue,
-            alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
+            borderWidth: 1,
+            borderColor: colors.borderBright,
+            borderRadius: 12,
+            padding: 16,
+            opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
           }}
         >
-          <Play size={18} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
-        </View>
-      </View>
-
-      {/* Exercise preview */}
-      {exerciseCount > 0 && (
-        <View
-          style={{
-            paddingTop: 12,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-            gap: 6,
-          }}
-        >
-          {routine.exercises.slice(0, 4).map((re) => (
-            <View
-              key={re.id}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <ExerciseIllustration illustrationKey={re.exercise.illustration} size={24} />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: exerciseCount > 0 ? 12 : 0,
+            }}
+          >
+            <View style={{ flex: 1, marginRight: 12 }}>
               <Text
                 style={{
-                  fontSize: 14,
-                  color: colors.text.secondary,
+                  fontSize: 18,
+                  fontWeight: '700',
+                  color: colors.text.primary,
+                  letterSpacing: -0.3,
                 }}
                 numberOfLines={1}
               >
-                {re.exercise.name}
+                {routine.name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: colors.text.secondary,
+                  marginTop: 2,
+                }}
+              >
+                {exerciseCount !== 1
+                  ? t('home.exerciseCountPlural', { count: exerciseCount })
+                  : t('home.exerciseCount', { count: exerciseCount })}
               </Text>
             </View>
-          ))}
-          {exerciseCount > 4 && (
-            <Text
+            <View
               style={{
-                fontSize: 13,
-                color: colors.text.tertiary,
-                marginLeft: 32,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                backgroundColor: colors.brand.blue,
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              {t('home.moreExercises', { count: exerciseCount - 4 })}
-            </Text>
+              <Play size={18} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+            </View>
+          </View>
+
+          {/* Exercise preview */}
+          {exerciseCount > 0 && (
+            <View
+              style={{
+                paddingTop: 12,
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+                gap: 6,
+              }}
+            >
+              {routine.exercises.slice(0, 4).map((re) => (
+                <View
+                  key={re.id}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <ExerciseIllustration illustrationKey={re.exercise.illustration} size={24} />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: colors.text.secondary,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {re.exercise.name}
+                  </Text>
+                </View>
+              ))}
+              {exerciseCount > 4 && (
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: colors.text.tertiary,
+                    marginLeft: 32,
+                  }}
+                >
+                  {t('home.moreExercises', { count: exerciseCount - 4 })}
+                </Text>
+              )}
+            </View>
           )}
         </View>
       )}

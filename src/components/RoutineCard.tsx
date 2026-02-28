@@ -36,150 +36,155 @@ export function RoutineCard({ routine, exercises, onPress, onStart }: RoutineCar
   return (
     <Pressable
       onPress={() => onPress(routine)}
-      style={({ pressed }) => ({
-        backgroundColor: colors.bg.secondary,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        padding: 16,
-        opacity: pressed ? 0.85 : 1,
-      })}
       accessibilityRole="button"
       accessibilityLabel={`${routine.name}, ${exerciseCount} exercises`}
     >
-      {/* Header: name + start button */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 12,
-        }}
-      >
-        <View style={{ flex: 1, marginRight: 12 }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: '700',
-              color: colors.text.primary,
-              letterSpacing: -0.3,
-            }}
-            numberOfLines={1}
-          >
-            {routine.name}
-          </Text>
-          <Text
-            style={{
-              fontSize: 13,
-              color: colors.text.secondary,
-              marginTop: 2,
-            }}
-          >
-            {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}
-          </Text>
-        </View>
-        <Pressable
-          onPress={(e) => {
-            e.stopPropagation();
-            onStart(routine);
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={`Start ${routine.name} workout`}
-        >
-          {({ pressed }) => (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                paddingVertical: 8,
-                paddingHorizontal: 16,
-                borderRadius: 8,
-                backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
-              }}
-            >
-              <Play size={14} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: '700',
-                  color: '#FFFFFF',
-                }}
-              >
-                Start
-              </Text>
-            </View>
-          )}
-        </Pressable>
-      </View>
-
-      {/* Exercise list */}
-      {exerciseCount > 0 && (
+      {({ pressed }) => (
         <View
           style={{
-            paddingTop: 12,
-            borderTopWidth: 1,
-            borderTopColor: colors.border,
-            gap: 8,
+            backgroundColor: pressed ? colors.bg.elevated : colors.bg.tertiary,
+            borderWidth: 1,
+            borderColor: colors.borderBright,
+            borderRadius: 12,
+            padding: 16,
+            opacity: pressed ? 0.85 : 1,
           }}
         >
-          {exercises.slice(0, 5).map((ex) => (
-            <View
-              key={ex.exerciseId}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <ExerciseIllustration illustrationKey={ex.illustration} size={28} />
+          {/* Header: name + start button */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
+          >
+            <View style={{ flex: 1, marginRight: 12 }}>
               <Text
                 style={{
-                  fontSize: 14,
-                  color: colors.text.secondary,
+                  fontSize: 18,
+                  fontWeight: '700',
+                  color: colors.text.primary,
+                  letterSpacing: -0.3,
                 }}
                 numberOfLines={1}
               >
-                {ex.exerciseName}
+                {routine.name}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 13,
+                  color: colors.text.secondary,
+                  marginTop: 2,
+                }}
+              >
+                {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}
               </Text>
             </View>
-          ))}
-          {exerciseCount > 5 && (
-            <Text
+            <Pressable
+              onPress={(e) => {
+                e.stopPropagation();
+                onStart(routine);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={`Start ${routine.name} workout`}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? '#2B7FE0' : colors.brand.blue,
+                  }}
+                >
+                  <Play size={14} color="#FFFFFF" fill="#FFFFFF" strokeWidth={0} />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '700',
+                      color: '#FFFFFF',
+                    }}
+                  >
+                    Start
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
+
+          {/* Exercise list */}
+          {exerciseCount > 0 && (
+            <View
               style={{
-                fontSize: 13,
-                color: colors.text.tertiary,
-                marginLeft: 36,
+                paddingTop: 12,
+                borderTopWidth: 1,
+                borderTopColor: colors.border,
+                gap: 8,
               }}
             >
-              +{exerciseCount - 5} more
-            </Text>
+              {exercises.slice(0, 5).map((ex) => (
+                <View
+                  key={ex.exerciseId}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <ExerciseIllustration illustrationKey={ex.illustration} size={28} />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: colors.text.secondary,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {ex.exerciseName}
+                  </Text>
+                </View>
+              ))}
+              {exerciseCount > 5 && (
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: colors.text.tertiary,
+                    marginLeft: 36,
+                  }}
+                >
+                  +{exerciseCount - 5} more
+                </Text>
+              )}
+            </View>
           )}
+
+          {/* Footer: created date + chevron */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: 12,
+              paddingTop: 8,
+              borderTopWidth: 1,
+              borderTopColor: colors.border,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.text.tertiary,
+              }}
+            >
+              Created {formatDate(routine.createdAt)}
+            </Text>
+            <ChevronRight size={14} color={colors.text.tertiary} strokeWidth={1.5} />
+          </View>
         </View>
       )}
-
-      {/* Footer: created date + chevron */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: 12,
-          paddingTop: 8,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 12,
-            color: colors.text.tertiary,
-          }}
-        >
-          Created {formatDate(routine.createdAt)}
-        </Text>
-        <ChevronRight size={14} color={colors.text.tertiary} strokeWidth={1.5} />
-      </View>
     </Pressable>
   );
 }
