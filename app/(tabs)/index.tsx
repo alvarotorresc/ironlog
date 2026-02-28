@@ -28,6 +28,7 @@ import {
   Target,
 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { RoutineRepository, type RoutineWithExercises } from '@/repositories/routine.repo';
 import { WorkoutRepository } from '@/repositories/workout.repo';
@@ -55,6 +56,7 @@ function formatDate(dateStr: string): string {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [showPicker, setShowPicker] = useState(false);
   const [routines, setRoutines] = useState<RoutineWithExercises[]>([]);
   const [loadingRoutines, setLoadingRoutines] = useState(false);
@@ -164,7 +166,7 @@ export default function HomeScreen() {
               marginTop: 2,
             }}
           >
-            IronLog
+            {t('home.title')}
           </Text>
         </View>
 
@@ -206,7 +208,7 @@ export default function HomeScreen() {
                 marginBottom: 6,
               }}
             >
-              Ready to start?
+              {t('home.readyTitle')}
             </Text>
             <Text
               style={{
@@ -216,8 +218,7 @@ export default function HomeScreen() {
                 lineHeight: 20,
               }}
             >
-              Hit Start Workout to log your first session. Your stats, PRs, and progress will show
-              up here.
+              {t('home.readyMessage')}
             </Text>
           </View>
         ) : null}
@@ -231,13 +232,13 @@ export default function HomeScreen() {
           <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <StatsCard
-                label="This Week"
+                label={t('home.thisWeek')}
                 value={String(stats.workoutsThisWeek)}
                 icon={Calendar}
                 accentColor={colors.brand.blue}
               />
               <StatsCard
-                label="Streak"
+                label={t('home.streak')}
                 value={stats.currentStreak > 0 ? `${stats.currentStreak} \uD83D\uDD25` : '0'}
                 icon={Flame}
                 color={stats.currentStreak > 0 ? colors.semantic.warning : undefined}
@@ -246,13 +247,13 @@ export default function HomeScreen() {
             </View>
             <View style={{ flexDirection: 'row', gap: 12, marginTop: 12 }}>
               <StatsCard
-                label="Total Lifted"
+                label={t('home.totalLifted')}
                 value={formatVolume(stats.volumeThisWeek)}
                 icon={TrendingUp}
                 accentColor={colors.semantic.success}
               />
               <StatsCard
-                label="This Month"
+                label={t('home.thisMonth')}
                 value={String(stats.workoutsThisMonth)}
                 icon={BarChart3}
                 accentColor={colors.theme.slate}
@@ -280,7 +281,7 @@ export default function HomeScreen() {
                   color: colors.text.primary,
                 }}
               >
-                Recent PRs
+                {t('home.recentPRs')}
               </Text>
             </View>
             {stats.recentPRs.length > 0 ? (
@@ -309,7 +310,7 @@ export default function HomeScreen() {
                   fontStyle: 'italic',
                 }}
               >
-                No recent PRs. Keep pushing!
+                {t('home.noPRs')}
               </Text>
             )}
           </View>
@@ -334,7 +335,7 @@ export default function HomeScreen() {
                   color: colors.text.primary,
                 }}
               >
-                Muscle Distribution
+                {t('home.muscleDistribution')}
               </Text>
             </View>
           </View>
@@ -362,7 +363,7 @@ export default function HomeScreen() {
                   color: colors.text.primary,
                 }}
               >
-                Muscle Fatigue
+                {t('home.muscleFatigue')}
               </Text>
             </View>
             <MuscleFatigueMap data={fatigueData} />
@@ -416,7 +417,7 @@ export default function HomeScreen() {
                 letterSpacing: -0.3,
               }}
             >
-              Select Routine
+              {t('home.selectRoutine')}
             </Text>
             <Pressable
               onPress={() => setShowPicker(false)}
@@ -480,7 +481,7 @@ export default function HomeScreen() {
                       color: colors.text.primary,
                     }}
                   >
-                    Empty Workout
+                    {t('home.emptyWorkout')}
                   </Text>
                   <Text
                     style={{
@@ -489,7 +490,7 @@ export default function HomeScreen() {
                       marginTop: 2,
                     }}
                   >
-                    Start without a routine, add exercises as you go
+                    {t('home.emptyWorkoutDesc')}
                   </Text>
                 </View>
               </Pressable>
@@ -505,7 +506,7 @@ export default function HomeScreen() {
                 }}
               >
                 <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
-                <Text style={{ fontSize: 12, color: colors.text.tertiary }}>OR</Text>
+                <Text style={{ fontSize: 12, color: colors.text.tertiary }}>{t('common.or')}</Text>
                 <View style={{ flex: 1, height: 1, backgroundColor: colors.border }} />
               </View>
             </>
@@ -546,7 +547,7 @@ export default function HomeScreen() {
                   marginBottom: 6,
                 }}
               >
-                No routines yet
+                {t('home.noRoutines')}
               </Text>
               <Text
                 style={{
@@ -556,7 +557,7 @@ export default function HomeScreen() {
                   lineHeight: 20,
                 }}
               >
-                Create one in the Routines tab, or start an empty workout above.
+                {t('home.noRoutinesDesc')}
               </Text>
             </View>
           ) : (
@@ -644,6 +645,7 @@ interface RoutinePickerItemProps {
 }
 
 function CTAButton({ onPress }: { onPress: () => void }) {
+  const { t } = useTranslation();
   const [scaleAnim] = useState(() => new Animated.Value(1));
 
   const handlePressIn = () => {
@@ -696,7 +698,7 @@ function CTAButton({ onPress }: { onPress: () => void }) {
               letterSpacing: -0.3,
             }}
           >
-            Start Workout
+            {t('home.startWorkout')}
           </Text>
         </Animated.View>
       </Pressable>
@@ -705,6 +707,7 @@ function CTAButton({ onPress }: { onPress: () => void }) {
 }
 
 function RoutinePickerItem({ routine, onSelect, disabled }: RoutinePickerItemProps) {
+  const { t } = useTranslation();
   const exerciseCount = routine.exercises.length;
 
   return (
@@ -749,7 +752,9 @@ function RoutinePickerItem({ routine, onSelect, disabled }: RoutinePickerItemPro
               marginTop: 2,
             }}
           >
-            {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}
+            {exerciseCount !== 1
+              ? t('home.exerciseCountPlural', { count: exerciseCount })
+              : t('home.exerciseCount', { count: exerciseCount })}
           </Text>
         </View>
         <View
@@ -805,7 +810,7 @@ function RoutinePickerItem({ routine, onSelect, disabled }: RoutinePickerItemPro
                 marginLeft: 32,
               }}
             >
-              +{exerciseCount - 4} more
+              {t('home.moreExercises', { count: exerciseCount - 4 })}
             </Text>
           )}
         </View>
