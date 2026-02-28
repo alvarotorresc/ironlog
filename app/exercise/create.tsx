@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,25 +15,19 @@ import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
 import { Button, Input, Select } from '@/components/ui';
+import { useTranslation, type TranslationKey } from '@/i18n';
 import type { ExerciseType, MuscleGroup } from '@/types';
 
-const EXERCISE_TYPE_OPTIONS = [
-  { label: 'Weights', value: 'weights' },
-  { label: 'Calisthenics', value: 'calisthenics' },
-  { label: 'Cardio', value: 'cardio' },
-  { label: 'HIIT', value: 'hiit' },
-  { label: 'Flexibility', value: 'flexibility' },
-];
-
-const MUSCLE_GROUP_OPTIONS = [
-  { label: 'Chest', value: 'chest' },
-  { label: 'Back', value: 'back' },
-  { label: 'Legs', value: 'legs' },
-  { label: 'Shoulders', value: 'shoulders' },
-  { label: 'Arms', value: 'arms' },
-  { label: 'Core', value: 'core' },
-  { label: 'Full Body', value: 'full_body' },
-];
+const EXERCISE_TYPE_VALUES = ['weights', 'calisthenics', 'cardio', 'hiit', 'flexibility'] as const;
+const MUSCLE_GROUP_VALUES = [
+  'chest',
+  'back',
+  'legs',
+  'shoulders',
+  'arms',
+  'core',
+  'full_body',
+] as const;
 
 interface FormErrors {
   name?: string;
@@ -57,6 +51,17 @@ function validate(name: string, type: string, muscleGroup: string): FormErrors {
 
 export default function CreateExerciseScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const exerciseTypeOptions = useMemo(
+    () => EXERCISE_TYPE_VALUES.map((v) => ({ label: t(`type.${v}` as TranslationKey), value: v })),
+    [t],
+  );
+  const muscleGroupOptions = useMemo(
+    () => MUSCLE_GROUP_VALUES.map((v) => ({ label: t(`muscle.${v}` as TranslationKey), value: v })),
+    [t],
+  );
+
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [muscleGroup, setMuscleGroup] = useState('');
@@ -117,7 +122,7 @@ export default function CreateExerciseScreen() {
               opacity: pressed ? 0.7 : 1,
             })}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('common.back')}
           >
             <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
           </Pressable>
@@ -128,7 +133,7 @@ export default function CreateExerciseScreen() {
               color: colors.text.primary,
             }}
           >
-            New Exercise
+            {t('exercise.create.title')}
           </Text>
         </View>
 
@@ -144,8 +149,8 @@ export default function CreateExerciseScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <Input
-            label="Name"
-            placeholder="e.g. Bench Press"
+            label={t('exercise.create.name')}
+            placeholder={t('exercise.create.namePlaceholder')}
             value={name}
             onChangeText={(text) => {
               setName(text);
@@ -159,9 +164,9 @@ export default function CreateExerciseScreen() {
           />
 
           <Select
-            label="Type"
+            label={t('exercise.create.type')}
             placeholder="Select type..."
-            options={EXERCISE_TYPE_OPTIONS}
+            options={exerciseTypeOptions}
             value={type}
             onChange={(val) => {
               setType(val);
@@ -173,9 +178,9 @@ export default function CreateExerciseScreen() {
           />
 
           <Select
-            label="Muscle Group"
+            label={t('exercise.create.muscleGroup')}
             placeholder="Select muscle group..."
-            options={MUSCLE_GROUP_OPTIONS}
+            options={muscleGroupOptions}
             value={muscleGroup}
             onChange={(val) => {
               setMuscleGroup(val);
@@ -197,7 +202,7 @@ export default function CreateExerciseScreen() {
           }}
         >
           <Button
-            title="Save Exercise"
+            title={t('common.save')}
             onPress={handleSave}
             loading={saving}
             disabled={saving}

@@ -11,6 +11,7 @@ import { ProgressChart } from '@/components/ProgressChart';
 import { PeriodSelector } from '@/components/PeriodSelector';
 import { Card } from '@/components/ui';
 import { useExerciseStats, useExerciseProgress } from '@/hooks/useStats';
+import { useTranslation, type TranslationKey } from '@/i18n';
 import type { Exercise, TimePeriod } from '@/types';
 
 const typeColors: Record<string, { bg: string; text: string }> = {
@@ -20,13 +21,6 @@ const typeColors: Record<string, { bg: string; text: string }> = {
   hiit: { bg: 'rgba(244, 63, 94, 0.12)', text: colors.brand.red },
   flexibility: { bg: 'rgba(148, 163, 184, 0.12)', text: colors.theme.slateBright },
 };
-
-function formatMuscleGroup(group: string): string {
-  return group
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '-';
@@ -43,7 +37,9 @@ function formatVolume(volume: number): string {
 }
 
 function TypeBadge({ type }: { type: string }) {
+  const { t } = useTranslation();
   const c = typeColors[type] ?? typeColors.weights;
+  const key = `type.${type}` as TranslationKey;
   return (
     <View
       style={{
@@ -58,16 +54,17 @@ function TypeBadge({ type }: { type: string }) {
           fontSize: 12,
           fontWeight: '600',
           color: c.text,
-          textTransform: 'capitalize',
         }}
       >
-        {type}
+        {t(key)}
       </Text>
     </View>
   );
 }
 
 function MuscleGroupBadge({ group }: { group: string }) {
+  const { t } = useTranslation();
+  const key = `muscle.${group}` as TranslationKey;
   return (
     <View
       style={{
@@ -86,7 +83,7 @@ function MuscleGroupBadge({ group }: { group: string }) {
           color: colors.text.secondary,
         }}
       >
-        {formatMuscleGroup(group)}
+        {t(key)}
       </Text>
     </View>
   );
@@ -156,6 +153,7 @@ function SectionHeader({ title }: { title: string }) {
 export default function ExerciseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const exerciseId = parseInt(id ?? '0', 10);
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
@@ -234,7 +232,7 @@ export default function ExerciseDetailScreen() {
             opacity: pressed ? 0.7 : 1,
           })}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.back')}
         >
           <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
         </Pressable>
@@ -294,26 +292,30 @@ export default function ExerciseDetailScreen() {
           </View>
         ) : stats !== null ? (
           <View style={{ marginBottom: 24 }}>
-            <SectionHeader title="Stats" />
+            <SectionHeader title={t('exercise.stats')} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <StatCard
                 icon={Trophy}
                 value={stats.currentPR !== null ? `${stats.currentPR}kg` : '-'}
-                label="Current PR"
+                label={t('exercise.currentPR')}
                 color={stats.currentPR !== null ? colors.chart.pr : colors.text.tertiary}
               />
               <StatCard
                 icon={Calendar}
                 value={formatDate(stats.lastWorkoutDate)}
-                label="Last Workout"
+                label={t('exercise.lastWorkout')}
               />
             </View>
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-              <StatCard icon={Hash} value={String(stats.totalSessions)} label="Sessions" />
+              <StatCard
+                icon={Hash}
+                value={String(stats.totalSessions)}
+                label={t('exercise.totalSessions')}
+              />
               <StatCard
                 icon={TrendingUp}
                 value={stats.averageVolume > 0 ? formatVolume(stats.averageVolume) : '-'}
-                label="Avg Volume"
+                label={t('exercise.avgVolume')}
               />
             </View>
           </View>
@@ -322,7 +324,7 @@ export default function ExerciseDetailScreen() {
         {/* Progress charts section */}
         {hasWorkoutData ? (
           <View>
-            <SectionHeader title="Progress" />
+            <SectionHeader title={t('exercise.progress')} />
 
             {/* Period selector */}
             <View style={{ marginBottom: 16 }}>
@@ -345,7 +347,7 @@ export default function ExerciseDetailScreen() {
                       marginBottom: 8,
                     }}
                   >
-                    Max Weight (kg)
+                    {t('exercise.maxWeight')} ({t('common.kg')})
                   </Text>
                   <ProgressChart
                     data={maxWeightData.map((d) => ({
@@ -367,7 +369,7 @@ export default function ExerciseDetailScreen() {
                       marginBottom: 8,
                     }}
                   >
-                    Volume (kg)
+                    {t('exercise.volume')} ({t('common.kg')})
                   </Text>
                   <ProgressChart
                     data={volumeData.map((d) => ({
@@ -401,7 +403,7 @@ export default function ExerciseDetailScreen() {
                 paddingHorizontal: 16,
               }}
             >
-              No data yet. Complete a workout with this exercise to see progress.
+              {t('exercise.noProgress')}
             </Text>
           </Card>
         )}
