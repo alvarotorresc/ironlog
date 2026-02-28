@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Check } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
 import { Input } from '@/components/ui';
@@ -36,6 +37,7 @@ function parseOptionalNumber(value: string): number | null {
 
 export default function AddMeasurementScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<FormData>({
     weight: '',
@@ -59,19 +61,19 @@ export default function AddMeasurementScreen() {
 
     const weight = parseOptionalNumber(form.weight);
     if (form.weight.trim() && (weight === null || weight <= 0)) {
-      newErrors.weight = 'Enter a valid weight';
+      newErrors.weight = t('body.add.validWeight');
     }
 
     const bodyFat = parseOptionalNumber(form.bodyFat);
     if (form.bodyFat.trim() && (bodyFat === null || bodyFat < 0 || bodyFat > 100)) {
-      newErrors.bodyFat = 'Enter a value between 0-100';
+      newErrors.bodyFat = t('body.add.validBodyFat');
     }
 
     const numericFields: Array<keyof FormData> = ['chest', 'waist', 'hips', 'biceps', 'thighs'];
     for (const field of numericFields) {
       const val = parseOptionalNumber(form[field]);
       if (form[field].trim() && (val === null || val <= 0)) {
-        newErrors[field] = 'Enter a valid measurement';
+        newErrors[field] = t('body.add.validMeasurement');
       }
     }
 
@@ -80,12 +82,12 @@ export default function AddMeasurementScreen() {
       form.weight.trim() || form.bodyFat.trim() || numericFields.some((f) => form[f].trim());
 
     if (!hasAnyValue) {
-      newErrors.weight = 'Enter at least one measurement';
+      newErrors.weight = t('body.add.atLeastOne');
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [form]);
+  }, [form, t]);
 
   const handleSave = useCallback(async () => {
     if (!validate() || saving) return;
@@ -107,11 +109,11 @@ export default function AddMeasurementScreen() {
       router.back();
     } catch (error) {
       console.error('Failed to save measurement:', error);
-      Alert.alert('Error', 'Failed to save measurement');
+      Alert.alert(t('common.error'), t('body.add.saveError'));
     } finally {
       setSaving(false);
     }
-  }, [form, validate, saving, router]);
+  }, [form, validate, saving, router, t]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }}>
@@ -151,7 +153,7 @@ export default function AddMeasurementScreen() {
             letterSpacing: -0.3,
           }}
         >
-          Add Measurement
+          {t('body.add.title')}
         </Text>
         <Pressable
           onPress={handleSave}
@@ -183,8 +185,8 @@ export default function AddMeasurementScreen() {
         >
           {/* Weight — Primary */}
           <Input
-            label="Weight (kg)"
-            placeholder="e.g. 80.5"
+            label={t('body.add.weight')}
+            placeholder={t('body.add.weightPlaceholder')}
             keyboardType="decimal-pad"
             value={form.weight}
             onChangeText={(v) => updateField('weight', v)}
@@ -192,8 +194,8 @@ export default function AddMeasurementScreen() {
           />
 
           <Input
-            label="Body Fat (%)"
-            placeholder="e.g. 15"
+            label={t('body.add.bodyFat')}
+            placeholder={t('body.add.bodyFatPlaceholder')}
             keyboardType="decimal-pad"
             value={form.bodyFat}
             onChangeText={(v) => updateField('bodyFat', v)}
@@ -209,14 +211,14 @@ export default function AddMeasurementScreen() {
               marginTop: 8,
             }}
           >
-            Measurements (cm)
+            {t('body.add.measurements')}
           </Text>
 
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Input
-                label="Chest"
-                placeholder="cm"
+                label={t('body.chest')}
+                placeholder={t('common.cm')}
                 keyboardType="decimal-pad"
                 value={form.chest}
                 onChangeText={(v) => updateField('chest', v)}
@@ -225,8 +227,8 @@ export default function AddMeasurementScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Input
-                label="Waist"
-                placeholder="cm"
+                label={t('body.waist')}
+                placeholder={t('common.cm')}
                 keyboardType="decimal-pad"
                 value={form.waist}
                 onChangeText={(v) => updateField('waist', v)}
@@ -238,8 +240,8 @@ export default function AddMeasurementScreen() {
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Input
-                label="Hips"
-                placeholder="cm"
+                label={t('body.hips')}
+                placeholder={t('common.cm')}
                 keyboardType="decimal-pad"
                 value={form.hips}
                 onChangeText={(v) => updateField('hips', v)}
@@ -248,8 +250,8 @@ export default function AddMeasurementScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Input
-                label="Biceps"
-                placeholder="cm"
+                label={t('body.biceps')}
+                placeholder={t('common.cm')}
                 keyboardType="decimal-pad"
                 value={form.biceps}
                 onChangeText={(v) => updateField('biceps', v)}
@@ -259,8 +261,8 @@ export default function AddMeasurementScreen() {
           </View>
 
           <Input
-            label="Thighs"
-            placeholder="cm"
+            label={t('body.thighs')}
+            placeholder={t('common.cm')}
             keyboardType="decimal-pad"
             value={form.thighs}
             onChangeText={(v) => updateField('thighs', v)}
@@ -268,8 +270,8 @@ export default function AddMeasurementScreen() {
           />
 
           <Input
-            label="Notes"
-            placeholder="e.g. Morning, fasted"
+            label={t('body.add.notes')}
+            placeholder={t('body.add.notesPlaceholder')}
             value={form.notes}
             onChangeText={(v) => updateField('notes', v)}
             multiline

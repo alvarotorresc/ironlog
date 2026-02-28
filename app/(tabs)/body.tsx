@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Plus, Scale, TrendingDown, TrendingUp, Minus, Trash2 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
 import { useBodyMeasurements, useWeightProgress } from '@/hooks/useBodyMetrics';
@@ -27,13 +28,14 @@ function formatDate(dateStr: string): string {
 }
 
 function WeightTrend({ current, previous }: { current: number; previous: number | null }) {
+  const { t } = useTranslation();
   if (previous === null) return null;
   const diff = current - previous;
   if (Math.abs(diff) < 0.1) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <Minus size={14} color={colors.text.tertiary} strokeWidth={1.5} />
-        <Text style={{ fontSize: 12, color: colors.text.tertiary }}>Same</Text>
+        <Text style={{ fontSize: 12, color: colors.text.tertiary }}>{t('body.same')}</Text>
       </View>
     );
   }
@@ -126,25 +128,28 @@ function MeasurementCard({
   previousWeight: number | null;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useTranslation();
+
   const handleDelete = () => {
-    Alert.alert('Delete Measurement', 'Are you sure you want to delete this entry?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => onDelete(measurement.id) },
+    Alert.alert(t('body.deleteTitle'), t('body.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.delete'), style: 'destructive', onPress: () => onDelete(measurement.id) },
     ]);
   };
 
   const details: Array<{ label: string; value: string }> = [];
   if (measurement.bodyFat !== null)
-    details.push({ label: 'Body Fat', value: `${measurement.bodyFat}%` });
+    details.push({ label: t('body.bodyFat'), value: `${measurement.bodyFat}%` });
   if (measurement.chest !== null)
-    details.push({ label: 'Chest', value: `${measurement.chest} cm` });
+    details.push({ label: t('body.chest'), value: `${measurement.chest} cm` });
   if (measurement.waist !== null)
-    details.push({ label: 'Waist', value: `${measurement.waist} cm` });
-  if (measurement.hips !== null) details.push({ label: 'Hips', value: `${measurement.hips} cm` });
+    details.push({ label: t('body.waist'), value: `${measurement.waist} cm` });
+  if (measurement.hips !== null)
+    details.push({ label: t('body.hips'), value: `${measurement.hips} cm` });
   if (measurement.biceps !== null)
-    details.push({ label: 'Biceps', value: `${measurement.biceps} cm` });
+    details.push({ label: t('body.biceps'), value: `${measurement.biceps} cm` });
   if (measurement.thighs !== null)
-    details.push({ label: 'Thighs', value: `${measurement.thighs} cm` });
+    details.push({ label: t('body.thighs'), value: `${measurement.thighs} cm` });
 
   return (
     <View
@@ -231,6 +236,7 @@ function MeasurementCard({
 
 export default function BodyScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
   const { measurements, isLoading, reload: reloadMeasurements } = useBodyMeasurements();
   const { data: weightData, reload: reloadWeight } = useWeightProgress();
@@ -283,7 +289,7 @@ export default function BodyScreen() {
             letterSpacing: -0.5,
           }}
         >
-          Body
+          {t('body.title')}
         </Text>
         <Pressable
           onPress={() => router.push('/body/add')}
@@ -310,8 +316,8 @@ export default function BodyScreen() {
       ) : measurements.length === 0 ? (
         <EmptyState
           icon={Scale}
-          message="No measurements yet. Track your weight and body measurements over time."
-          actionLabel="Add Measurement"
+          message={t('body.empty')}
+          actionLabel={t('body.addMeasurement')}
           onAction={() => router.push('/body/add')}
         />
       ) : (
