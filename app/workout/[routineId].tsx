@@ -10,6 +10,7 @@ import { useRestTimer } from '@/hooks/useRestTimer';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { WorkoutSetRow } from '@/components/WorkoutSetRow';
 import { RestTimer } from '@/components/RestTimer';
+import { useTranslation } from '@/i18n';
 import type { WorkoutSet } from '@/types';
 
 function formatElapsedTime(totalSeconds: number): string {
@@ -32,6 +33,7 @@ export default function WorkoutScreen() {
     workoutId: string;
   }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const [lastExerciseName, setLastExerciseName] = useLocalState('');
 
   const workout = useWorkout(routineId ?? 'empty', workoutId ?? '0');
@@ -60,10 +62,10 @@ export default function WorkoutScreen() {
     const totalSets = workout.exercises.reduce((sum, e) => sum + e.sets.length, 0);
 
     if (totalSets === 0) {
-      Alert.alert('No sets recorded', 'Are you sure you want to finish this workout?', [
-        { text: 'Cancel', style: 'cancel' },
+      Alert.alert(t('workout.discardTitle'), t('workout.discardMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Discard',
+          text: t('workout.discard'),
           style: 'destructive',
           onPress: async () => {
             restTimer.reset();
@@ -75,22 +77,18 @@ export default function WorkoutScreen() {
       return;
     }
 
-    Alert.alert(
-      'Finish Workout',
-      `You completed ${totalSets} set${totalSets !== 1 ? 's' : ''} in ${formatElapsedTime(workout.elapsedSeconds)}. Finish?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Finish',
-          onPress: async () => {
-            restTimer.reset();
-            await workout.finishWorkout();
-            router.back();
-          },
+    Alert.alert(t('workout.finishTitle'), t('workout.finishMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('workout.finishConfirm'),
+        onPress: async () => {
+          restTimer.reset();
+          await workout.finishWorkout();
+          router.back();
         },
-      ],
-    );
-  }, [workout, router, restTimer]);
+      },
+    ]);
+  }, [workout, router, restTimer, t]);
 
   if (workout.loading) {
     return (
@@ -149,7 +147,7 @@ export default function WorkoutScreen() {
                 lineHeight: 24,
               }}
             >
-              No exercises in this workout yet.
+              {t('routine.noExercises')}
             </Text>
           </View>
         )}
@@ -176,6 +174,7 @@ interface WorkoutHeaderProps {
 }
 
 function WorkoutHeader({ routineName, elapsedSeconds, onFinish }: WorkoutHeaderProps) {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -225,7 +224,7 @@ function WorkoutHeader({ routineName, elapsedSeconds, onFinish }: WorkoutHeaderP
           backgroundColor: pressed ? '#1DA34E' : colors.semantic.success,
         })}
         accessibilityRole="button"
-        accessibilityLabel="Finish workout"
+        accessibilityLabel={t('workout.finish')}
       >
         <Check size={16} color="#FFFFFF" strokeWidth={2.5} />
         <Text
@@ -235,7 +234,7 @@ function WorkoutHeader({ routineName, elapsedSeconds, onFinish }: WorkoutHeaderP
             color: '#FFFFFF',
           }}
         >
-          Finish
+          {t('workout.finishConfirm')}
         </Text>
       </Pressable>
     </View>
@@ -263,6 +262,7 @@ function ExerciseSection({
   onUpdateSet,
   onDeleteSet,
 }: ExerciseSectionProps) {
+  const { t } = useTranslation();
   const { exercise, sets } = exerciseState;
   const hasSets = sets.length > 0;
 
@@ -356,7 +356,7 @@ function ExerciseSection({
           gap: 4,
         })}
         accessibilityRole="button"
-        accessibilityLabel={`Add set for ${exercise.name}`}
+        accessibilityLabel={`${t('workout.addSet')} - ${exercise.name}`}
       >
         <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
         <Text
@@ -366,7 +366,7 @@ function ExerciseSection({
             color: colors.brand.blue,
           }}
         >
-          Add Set
+          {t('workout.addSet')}
         </Text>
       </Pressable>
     </View>
@@ -374,6 +374,10 @@ function ExerciseSection({
 }
 
 function SetColumnHeaders({ exerciseType }: { exerciseType: string }) {
+  // Column headers are short uppercase labels used as table headers.
+  // These are kept as hardcoded short abbreviations since they are
+  // universal gym terminology and no matching i18n keys exist for
+  // the abbreviated uppercase form (DURATION, DISTANCE, VALUE).
   const getHeaders = () => {
     switch (exerciseType) {
       case 'weights':

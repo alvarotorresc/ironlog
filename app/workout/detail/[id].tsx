@@ -19,6 +19,7 @@ import {
   type WorkoutExerciseGroup,
 } from '@/repositories/workout.repo';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
+import { useTranslation } from '@/i18n';
 import type { ExerciseType, WorkoutSet } from '@/types';
 
 function formatDate(dateString: string): string {
@@ -97,6 +98,7 @@ type EditedSets = Record<number, { weight?: string; reps?: string; duration?: st
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { t } = useTranslation();
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -133,10 +135,10 @@ export default function WorkoutDetailScreen() {
   const handleDelete = useCallback(() => {
     if (!workout) return;
 
-    Alert.alert('Delete Workout', 'Are you sure? This action cannot be undone.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('history.deleteTitle'), t('history.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('common.delete'),
         style: 'destructive',
         onPress: async () => {
           try {
@@ -150,7 +152,7 @@ export default function WorkoutDetailScreen() {
         },
       },
     ]);
-  }, [workout, router]);
+  }, [workout, router, t]);
 
   const handleToggleEdit = useCallback(() => {
     if (editing) {
@@ -253,7 +255,7 @@ export default function WorkoutDetailScreen() {
               textAlign: 'center',
             }}
           >
-            Workout not found.
+            {t('common.noData')}
           </Text>
         </View>
       </SafeAreaView>
@@ -369,7 +371,7 @@ export default function WorkoutDetailScreen() {
         {workout.exercises.length === 0 && (
           <View style={{ paddingVertical: 48, alignItems: 'center' }}>
             <Text style={{ fontSize: 16, color: colors.text.secondary }}>
-              No exercises recorded in this workout.
+              {t('routine.noExercises')}
             </Text>
           </View>
         )}
@@ -395,6 +397,7 @@ function DetailHeader({
   onSave,
   saving,
 }: DetailHeaderProps) {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -419,7 +422,7 @@ function DetailHeader({
           opacity: pressed ? 0.7 : 1,
         })}
         accessibilityRole="button"
-        accessibilityLabel="Go back"
+        accessibilityLabel={t('common.back')}
       >
         <ArrowLeft size={20} color={colors.text.secondary} strokeWidth={2} />
       </Pressable>
@@ -432,7 +435,7 @@ function DetailHeader({
           flex: 1,
         }}
       >
-        Workout Detail
+        {t('workoutDetail.title')}
       </Text>
 
       {/* Action buttons */}
@@ -452,10 +455,10 @@ function DetailHeader({
                 opacity: pressed || saving ? 0.7 : 1,
               })}
               accessibilityRole="button"
-              accessibilityLabel="Save changes"
+              accessibilityLabel={t('common.save')}
             >
               <Text style={{ fontSize: 14, fontWeight: '600', color: '#FFFFFF' }}>
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? `${t('common.loading')}` : t('common.save')}
               </Text>
             </Pressable>
           ) : null}
@@ -471,7 +474,7 @@ function DetailHeader({
               opacity: pressed ? 0.7 : 1,
             })}
             accessibilityRole="button"
-            accessibilityLabel={editing ? 'Cancel editing' : 'Edit workout'}
+            accessibilityLabel={editing ? t('common.cancel') : t('workoutDetail.title')}
           >
             {editing ? (
               <Check size={18} color="#FFFFFF" strokeWidth={2} />
@@ -492,7 +495,7 @@ function DetailHeader({
                 opacity: pressed ? 0.7 : 1,
               })}
               accessibilityRole="button"
-              accessibilityLabel="Delete workout"
+              accessibilityLabel={t('history.deleteTitle')}
             >
               <Trash2 size={18} color={colors.semantic.error} strokeWidth={1.5} />
             </Pressable>
