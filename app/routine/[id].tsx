@@ -19,6 +19,7 @@ import { Button, Input } from '@/components/ui';
 import { ExercisePickerModal } from '@/components/ExercisePickerModal';
 import { RoutineExerciseList } from '@/components/RoutineExerciseList';
 import { useRoutineForm, type RoutineExerciseItem } from '@/hooks/useRoutineForm';
+import { useTranslation } from '@/i18n';
 import type { Exercise } from '@/types';
 
 function routineToExerciseItems(routine: RoutineWithExercises): RoutineExerciseItem[] {
@@ -32,6 +33,7 @@ function routineToExerciseItems(routine: RoutineWithExercises): RoutineExerciseI
 
 export default function EditRoutineScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
   const isValidId = !isNaN(routineId) && routineId > 0;
@@ -119,31 +121,27 @@ export default function EditRoutineScreen() {
   }, [name, exercises, validate, router, routineId, originalRoutine]);
 
   const handleDelete = useCallback(() => {
-    Alert.alert(
-      'Delete Routine',
-      `Are you sure you want to delete "${name.trim() || 'this routine'}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            setDeleting(true);
-            try {
-              const db = await getDatabase();
-              const repo = new RoutineRepository(db);
-              await repo.delete(routineId);
-              router.back();
-            } catch (error) {
-              console.error('Failed to delete routine:', error);
-              Alert.alert('Error', 'Failed to delete routine. Please try again.');
-              setDeleting(false);
-            }
-          },
+    Alert.alert(t('routine.deleteTitle'), t('routine.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          setDeleting(true);
+          try {
+            const db = await getDatabase();
+            const repo = new RoutineRepository(db);
+            await repo.delete(routineId);
+            router.back();
+          } catch (error) {
+            console.error('Failed to delete routine:', error);
+            Alert.alert('Error', 'Failed to delete routine. Please try again.');
+            setDeleting(false);
+          }
         },
-      ],
-    );
-  }, [name, routineId, router]);
+      },
+    ]);
+  }, [routineId, router, t]);
 
   if (loadingRoutine) {
     return (
@@ -179,14 +177,14 @@ export default function EditRoutineScreen() {
               opacity: pressed ? 0.7 : 1,
             })}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('common.back')}
           >
             <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
           </Pressable>
         </View>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 }}>
           <Text style={{ fontSize: 16, color: colors.text.secondary, textAlign: 'center' }}>
-            Routine not found.
+            {t('common.noData')}
           </Text>
         </View>
       </SafeAreaView>
@@ -222,7 +220,7 @@ export default function EditRoutineScreen() {
                 opacity: pressed ? 0.7 : 1,
               })}
               accessibilityRole="button"
-              accessibilityLabel="Go back"
+              accessibilityLabel={t('common.back')}
             >
               <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
             </Pressable>
@@ -249,7 +247,7 @@ export default function EditRoutineScreen() {
               opacity: deleting ? 0.5 : pressed ? 0.7 : 1,
             })}
             accessibilityRole="button"
-            accessibilityLabel="Delete routine"
+            accessibilityLabel={t('routine.deleteTitle')}
           >
             <Trash2 size={18} color={colors.semantic.error} strokeWidth={1.5} />
           </Pressable>
@@ -268,8 +266,8 @@ export default function EditRoutineScreen() {
         >
           {/* Name input */}
           <Input
-            label="Routine Name"
-            placeholder="e.g. Push Day"
+            label={t('routine.create.name')}
+            placeholder={t('routine.create.namePlaceholder')}
             value={name}
             onChangeText={(text) => {
               setName(text);
@@ -296,7 +294,7 @@ export default function EditRoutineScreen() {
                   color: colors.text.secondary,
                 }}
               >
-                Exercises
+                {t('routine.exercises')}
               </Text>
               {exercises.length > 0 && (
                 <Text
@@ -339,7 +337,7 @@ export default function EditRoutineScreen() {
                 opacity: pressed ? 0.7 : 1,
               })}
               accessibilityRole="button"
-              accessibilityLabel="Add exercise to routine"
+              accessibilityLabel={t('routine.create.addExercise')}
             >
               <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
               <Text
@@ -349,7 +347,7 @@ export default function EditRoutineScreen() {
                   color: colors.brand.blue,
                 }}
               >
-                Add Exercise
+                {t('routine.create.addExercise')}
               </Text>
             </Pressable>
           </View>
@@ -365,7 +363,7 @@ export default function EditRoutineScreen() {
           }}
         >
           <Button
-            title="Save Changes"
+            title={t('common.save')}
             onPress={handleSave}
             loading={saving}
             disabled={saving || deleting}

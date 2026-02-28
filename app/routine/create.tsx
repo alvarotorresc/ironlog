@@ -18,10 +18,12 @@ import { Button, Input } from '@/components/ui';
 import { ExercisePickerModal } from '@/components/ExercisePickerModal';
 import { RoutineExerciseList } from '@/components/RoutineExerciseList';
 import { useRoutineForm } from '@/hooks/useRoutineForm';
+import { useTranslation } from '@/i18n';
 import type { Exercise } from '@/types';
 
 export default function CreateRoutineScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     name,
     setName,
@@ -92,7 +94,7 @@ export default function CreateRoutineScreen() {
               opacity: pressed ? 0.7 : 1,
             })}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('common.back')}
           >
             <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
           </Pressable>
@@ -103,7 +105,7 @@ export default function CreateRoutineScreen() {
               color: colors.text.primary,
             }}
           >
-            New Routine
+            {t('routine.create.title')}
           </Text>
         </View>
 
@@ -120,8 +122,8 @@ export default function CreateRoutineScreen() {
         >
           {/* Name input */}
           <Input
-            label="Routine Name"
-            placeholder="e.g. Push Day"
+            label={t('routine.create.name')}
+            placeholder={t('routine.create.namePlaceholder')}
             value={name}
             onChangeText={(text) => {
               setName(text);
@@ -149,7 +151,7 @@ export default function CreateRoutineScreen() {
                   color: colors.text.secondary,
                 }}
               >
-                Exercises
+                {t('routine.exercises')}
               </Text>
               {exercises.length > 0 && (
                 <Text
@@ -192,7 +194,7 @@ export default function CreateRoutineScreen() {
                 opacity: pressed ? 0.7 : 1,
               })}
               accessibilityRole="button"
-              accessibilityLabel="Add exercise to routine"
+              accessibilityLabel={t('routine.create.addExercise')}
             >
               <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
               <Text
@@ -202,7 +204,7 @@ export default function CreateRoutineScreen() {
                   color: colors.brand.blue,
                 }}
               >
-                Add Exercise
+                {t('routine.create.addExercise')}
               </Text>
             </Pressable>
           </View>
@@ -218,7 +220,7 @@ export default function CreateRoutineScreen() {
           }}
         >
           <Button
-            title="Save Routine"
+            title={t('routine.create.save')}
             onPress={handleSave}
             loading={saving}
             disabled={saving}
