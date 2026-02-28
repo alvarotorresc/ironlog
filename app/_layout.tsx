@@ -8,6 +8,7 @@ import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { runMigrations } from '@/db/schema';
 import { seedExercises } from '@/db/seed';
+import { I18nProvider } from '@/i18n';
 
 import '../global.css';
 
@@ -48,14 +49,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg.primary }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.bg.primary },
-            animation: 'slide_from_right',
-          }}
-        />
+        <I18nProvider>
+          <StatusBar style="light" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.bg.primary },
+              animation: 'slide_from_right',
+            }}
+          />
+        </I18nProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

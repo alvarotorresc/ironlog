@@ -1,8 +1,11 @@
 import { Tabs } from 'expo-router';
 import { Home, Dumbbell, ListChecks, Clock, Scale } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
+import { useTranslation } from '@/i18n';
 
 export default function TabsLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -23,35 +26,35 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t('tabs.home'),
           tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="exercises"
         options={{
-          title: 'Exercises',
+          title: t('tabs.exercises'),
           tabBarIcon: ({ color, size }) => <Dumbbell size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="routines"
         options={{
-          title: 'Routines',
+          title: t('tabs.routines'),
           tabBarIcon: ({ color, size }) => <ListChecks size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: 'History',
+          title: t('tabs.history'),
           tabBarIcon: ({ color, size }) => <Clock size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="body"
         options={{
-          title: 'Body',
+          title: t('tabs.body'),
           tabBarIcon: ({ color, size }) => <Scale size={size} color={color} />,
         }}
       />
