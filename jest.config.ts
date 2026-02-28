@@ -6,7 +6,11 @@ const config: Config = {
     {
       displayName: 'node',
       testEnvironment: 'node',
-      testMatch: ['<rootDir>/src/repositories/**/*.test.ts', '<rootDir>/src/db/**/*.test.ts'],
+      testMatch: [
+        '<rootDir>/src/repositories/**/*.test.ts',
+        '<rootDir>/src/db/**/*.test.ts',
+        '<rootDir>/src/i18n/**/*.test.ts',
+      ],
       transform: {
         '^.+\\.tsx?$': [
           'ts-jest',

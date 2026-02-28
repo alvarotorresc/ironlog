@@ -25,6 +25,9 @@ importers:
       expo-linking:
         specifier: ~55.0.7
         version: 55.0.7(expo@55.0.3)(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+      expo-localization:
+        specifier: ^55.0.8
+        version: 55.0.8(expo@55.0.3)(react@19.2.0)
       expo-router:
         specifier: ~55.0.3
         version: 55.0.3(1ea74b5b7d6c7887ebe830e761fa74a8)
@@ -4405,6 +4408,15 @@ packages:
       react: '*'
       react-native: '*'
 
+  expo-localization@55.0.8:
+    resolution:
+      {
+        integrity: sha512-uFmpTsoDT7JE5Nwgt0EQ5gBvFVo7/u458SlY6V9Ep9wY/WPucL0o00VpXoFULaMtKHquKBgVUdHwk6E+JFz4dg==,
+      }
+    peerDependencies:
+      expo: '*'
+      react: '*'
+
   expo-manifests@55.0.9:
     resolution:
       {
@@ -7835,6 +7847,12 @@ packages:
       }
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
+
+  rtl-detect@1.1.2:
+    resolution:
+      {
+        integrity: sha512-PGMBq03+TTG/p/cRB7HCLKJ1MgDIi07+QU1faSjiYRfmY5UsAttV9Hs08jDAHVwcOwmVLcSJkpwyfXszVjWfIQ==,
+      }
 
   run-parallel@1.2.0:
     resolution:
@@ -12481,6 +12499,12 @@ snapshots:
       - supports-color
       - typescript
 
+  expo-localization@55.0.8(expo@55.0.3)(react@19.2.0):
+    dependencies:
+      expo: 55.0.3(@babel/core@7.29.0)(@expo/dom-webview@55.0.3)(@expo/metro-runtime@55.0.6)(expo-router@55.0.3)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+      react: 19.2.0
+      rtl-detect: 1.1.2
+
   expo-manifests@55.0.9(expo@55.0.3)(typescript@5.9.3):
     dependencies:
       '@expo/config': 55.0.8(typescript@5.9.3)
@@ -15077,6 +15101,8 @@ snapshots:
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
+
+  rtl-detect@1.1.2: {}
 
   run-parallel@1.2.0:
     dependencies:
