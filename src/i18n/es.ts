@@ -226,4 +226,19 @@ export const es: Record<TranslationKey, string> = {
   'body.chartBiceps': 'B\u00EDceps',
   'body.chartThighs': 'Muslos',
   'body.chartNoData': 'No hay suficientes datos para mostrar la gr\u00E1fica',
+
+  // Backup & Restore
+  'backup.title': 'Copia de Seguridad',
+  'backup.exportTitle': 'Exportar Datos',
+  'backup.exportDesc': 'Guarda todos tus entrenamientos, rutinas y mediciones en un archivo JSON.',
+  'backup.exportButton': 'Exportar copia',
+  'backup.importTitle': 'Importar Datos',
+  'backup.importDesc':
+    'Restaura los datos desde una copia exportada anteriormente. Los datos existentes no se eliminar\u00E1n.',
+  'backup.importButton': 'Importar copia',
+  'backup.exportSuccess': 'Copia exportada correctamente',
+  'backup.importSuccess': 'Datos importados correctamente',
+  'backup.importError': 'Error al importar la copia',
+  'backup.importing': 'Importando...',
+  'backup.exporting': 'Exportando...',
 };

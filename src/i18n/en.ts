@@ -218,6 +218,21 @@ export const en = {
   'body.chartBiceps': 'Biceps',
   'body.chartThighs': 'Thighs',
   'body.chartNoData': 'Not enough data to show chart',
+
+  // Backup & Restore
+  'backup.title': 'Backup & Restore',
+  'backup.exportTitle': 'Export Data',
+  'backup.exportDesc': 'Save all your workouts, routines and body measurements to a JSON file.',
+  'backup.exportButton': 'Export Backup',
+  'backup.importTitle': 'Import Data',
+  'backup.importDesc':
+    'Restore data from a previously exported backup file. Existing data will not be deleted.',
+  'backup.importButton': 'Import Backup',
+  'backup.exportSuccess': 'Backup exported successfully',
+  'backup.importSuccess': 'Data imported successfully',
+  'backup.importError': 'Failed to import backup',
+  'backup.importing': 'Importing...',
+  'backup.exporting': 'Exporting...',
 } as const;
 
 export type TranslationKey = keyof typeof en;
