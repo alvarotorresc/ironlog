@@ -1,7 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
-import type { BodyMeasurement, WeightDataPoint } from '@/types';
+import type {
+  BodyMeasurement,
+  WeightDataPoint,
+  BodyMetricField,
+  BodyMetricDataPoint,
+  TimePeriod,
+} from '@/types';
 
 interface UseBodyMeasurementsReturn {
   measurements: BodyMeasurement[];
@@ -94,4 +100,60 @@ export function useLatestMeasurement(): UseLatestMeasurementReturn {
   }, [load]);
 
   return { latest, isLoading, reload: load };
+}
+
+function periodToDays(period: TimePeriod): number | null {
+  switch (period) {
+    case '1w':
+      return 7;
+    case '1m':
+      return 30;
+    case '3m':
+      return 90;
+    case '6m':
+      return 180;
+    case 'all':
+      return null;
+  }
+}
+
+interface UseBodyMetricProgressReturn {
+  data: BodyMetricDataPoint[];
+  isLoading: boolean;
+  reload: () => Promise<void>;
+}
+
+export function useBodyMetricProgress(
+  metric: BodyMetricField,
+  period: TimePeriod,
+): UseBodyMetricProgressReturn {
+  const [data, setData] = useState<BodyMetricDataPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const db = await getDatabase();
+      const repo = new BodyRepository(db);
+      const days = periodToDays(period);
+      let result: BodyMetricDataPoint[];
+      if (metric === 'weight') {
+        const weightPoints = await repo.getWeightOverTime(days);
+        result = weightPoints.map((p) => ({ date: p.date, value: p.weight }));
+      } else {
+        result = await repo.getMeasurementOverTime(metric, days);
+      }
+      setData(result);
+    } catch (error) {
+      console.error('Failed to load body metric progress:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [metric, period]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { data, isLoading, reload: load };
 }

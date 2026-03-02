@@ -114,3 +114,17 @@ export interface MuscleFatigueData {
   level: FatigueLevel;
   daysSince: number | null;
 }
+
+export type BodyMetricField =
+  | 'weight'
+  | 'body_fat'
+  | 'chest'
+  | 'waist'
+  | 'hips'
+  | 'biceps'
+  | 'thighs';
+
+export interface BodyMetricDataPoint {
+  date: string;
+  value: number;
+}
