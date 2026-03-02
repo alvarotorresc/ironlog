@@ -139,15 +139,43 @@ export class BodyRepository {
     await this.db.runAsync('DELETE FROM body_measurements WHERE id = ?', id);
   }
 
-  async getWeightOverTime(limit = 90): Promise<WeightDataPoint[]> {
-    const rows = await this.db.getAllAsync<{ measured_at: string; weight: number }>(
-      `SELECT measured_at, weight FROM body_measurements
-       WHERE weight IS NOT NULL
-       ORDER BY measured_at ASC
-       LIMIT ?`,
-      limit,
-    );
+  async getWeightOverTime(days: number | null = null): Promise<WeightDataPoint[]> {
+    const rows =
+      days !== null
+        ? await this.db.getAllAsync<{ measured_at: string; weight: number }>(
+            `SELECT measured_at, weight FROM body_measurements
+             WHERE weight IS NOT NULL
+               AND measured_at >= datetime('now', ? || ' days')
+             ORDER BY measured_at ASC`,
+            String(-days),
+          )
+        : await this.db.getAllAsync<{ measured_at: string; weight: number }>(
+            `SELECT measured_at, weight FROM body_measurements
+             WHERE weight IS NOT NULL
+             ORDER BY measured_at ASC`,
+          );
     return rows.map((r) => ({ date: r.measured_at, weight: r.weight }));
+  }
+
+  async getMeasurementOverTime(
+    field: 'body_fat' | 'chest' | 'waist' | 'hips' | 'biceps' | 'thighs',
+    days: number | null,
+  ): Promise<Array<{ date: string; value: number }>> {
+    const rows =
+      days !== null
+        ? await this.db.getAllAsync<{ measured_at: string; value: number }>(
+            `SELECT measured_at, ${field} as value FROM body_measurements
+             WHERE ${field} IS NOT NULL
+               AND measured_at >= datetime('now', ? || ' days')
+             ORDER BY measured_at ASC`,
+            String(-days),
+          )
+        : await this.db.getAllAsync<{ measured_at: string; value: number }>(
+            `SELECT measured_at, ${field} as value FROM body_measurements
+             WHERE ${field} IS NOT NULL
+             ORDER BY measured_at ASC`,
+          );
+    return rows.map((r) => ({ date: r.measured_at, value: r.value }));
   }
 
   async getLatest(): Promise<BodyMeasurement | null> {
