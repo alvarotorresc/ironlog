@@ -177,13 +177,25 @@ describe('RoutineRepository', () => {
   });
 
   it('should reject empty routine name via CHECK constraint', async () => {
-    await expect(routineRepo.create('')).rejects.toThrow();
+    let threw = false;
+    try {
+      await routineRepo.create('');
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should reject addExercise with non-existent exercise id', async () => {
     const routine = await routineRepo.create('Test');
 
-    await expect(routineRepo.addExercise(routine.id, 999, 1)).rejects.toThrow();
+    let threw = false;
+    try {
+      await routineRepo.addExercise(routine.id, 999, 1);
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should return routines ordered by most recent first', async () => {

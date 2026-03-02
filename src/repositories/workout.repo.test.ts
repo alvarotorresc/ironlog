@@ -343,29 +343,37 @@ describe('WorkoutRepository', () => {
   it('should reject negative weight via CHECK constraint', async () => {
     const workout = await workoutRepo.start(routineId);
 
-    await expect(
-      workoutRepo.addSet({
+    let threw = false;
+    try {
+      await workoutRepo.addSet({
         workoutId: workout.id,
         exerciseId: benchId,
         order: 1,
         weight: -10,
         reps: 5,
-      }),
-    ).rejects.toThrow();
+      });
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should reject negative reps via CHECK constraint', async () => {
     const workout = await workoutRepo.start(routineId);
 
-    await expect(
-      workoutRepo.addSet({
+    let threw = false;
+    try {
+      await workoutRepo.addSet({
         workoutId: workout.id,
         exerciseId: benchId,
         order: 1,
         weight: 50,
         reps: -5,
-      }),
-    ).rejects.toThrow();
+      });
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   describe('getLastSetFromPreviousWorkout', () => {

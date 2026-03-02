@@ -176,14 +176,22 @@ describe('ExerciseRepository', () => {
   });
 
   it('should reject empty name via CHECK constraint', async () => {
-    await expect(
-      repo.create({ name: '', type: 'weights', muscleGroup: 'chest' }),
-    ).rejects.toThrow();
+    let threw = false;
+    try {
+      await repo.create({ name: '', type: 'weights', muscleGroup: 'chest' });
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should reject negative restSeconds via CHECK constraint', async () => {
-    await expect(
-      repo.create({ name: 'Test', type: 'weights', muscleGroup: 'chest', restSeconds: -10 }),
-    ).rejects.toThrow();
+    let threw = false;
+    try {
+      await repo.create({ name: 'Test', type: 'weights', muscleGroup: 'chest', restSeconds: -10 });
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 });

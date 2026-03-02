@@ -159,11 +159,23 @@ describe('BodyRepository', () => {
   });
 
   it('should reject body_fat outside 0-100 range', async () => {
-    await expect(repo.create({ bodyFat: 101 })).rejects.toThrow();
+    let threw = false;
+    try {
+      await repo.create({ bodyFat: 101 });
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should reject negative measurements', async () => {
-    await expect(repo.create({ chest: -5 })).rejects.toThrow();
+    let threw = false;
+    try {
+      await repo.create({ chest: -5 });
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should allow setting fields to null via update', async () => {
