@@ -23,7 +23,7 @@
       },
       "package": "com.alvarotc.ironlog"
     },
-    "plugins": ["expo-router", "expo-sqlite"],
+    "plugins": ["expo-router", "expo-sqlite", "expo-sharing"],
     "scheme": "ironlog",
     "extra": {
       "router": {},

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Clock, ChevronRight, Dumbbell, Timer } from 'lucide-react-native';
+import { Clock, ChevronRight, Dumbbell, Timer, Archive } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { WorkoutRepository } from '@/repositories/workout.repo';
@@ -113,6 +113,8 @@ export default function HistoryScreen() {
       {/* Header */}
       <View
         style={{
+          flexDirection: 'row',
+          alignItems: 'center',
           paddingHorizontal: 20,
           paddingTop: 16,
           paddingBottom: 8,
@@ -124,10 +126,33 @@ export default function HistoryScreen() {
             fontWeight: '700',
             color: colors.text.primary,
             letterSpacing: -0.5,
+            flex: 1,
           }}
         >
           {t('history.title')}
         </Text>
+
+        <Pressable
+          onPress={() => router.push('/backup')}
+          accessibilityRole="button"
+          accessibilityLabel="Backup & Restore"
+        >
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                backgroundColor: colors.bg.tertiary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              }}
+            >
+              <Archive size={18} color={colors.text.secondary} strokeWidth={1.5} />
+            </View>
+          )}
+        </Pressable>
       </View>
 
       {/* Workout count */}
@@ -194,71 +219,76 @@ function HistoryItem({ workout, onPress, onDelete }: HistoryItemProps) {
       onPress={() => onPress(workout.id)}
       onLongPress={() => onDelete(workout.id)}
       delayLongPress={500}
-      style={({ pressed }) => ({
-        backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 12,
-        padding: 16,
-        opacity: pressed ? 0.85 : 1,
-      })}
       accessibilityRole="button"
       accessibilityLabel={`View ${routineLabel} workout from ${dateLabel}. Long press to delete.`}
     >
-      {/* Top row: routine name + chevron */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 8,
-        }}
-      >
-        <Text
+      {({ pressed }) => (
+        <View
           style={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: colors.text.primary,
-            flex: 1,
-            marginRight: 8,
+            backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 12,
+            padding: 16,
+            opacity: pressed ? 0.85 : 1,
           }}
-          numberOfLines={1}
         >
-          {routineLabel}
-        </Text>
-        <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={1.5} />
-      </View>
+          {/* Top row: routine name + chevron */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: colors.text.primary,
+                flex: 1,
+                marginRight: 8,
+              }}
+              numberOfLines={1}
+            >
+              {routineLabel}
+            </Text>
+            <ChevronRight size={18} color={colors.text.tertiary} strokeWidth={1.5} />
+          </View>
 
-      {/* Bottom row: date, duration, exercises */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 16,
-        }}
-      >
-        {/* Date + time */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Clock size={13} color={colors.text.secondary} strokeWidth={1.5} />
-          <Text style={{ fontSize: 13, color: colors.text.secondary }}>
-            {dateLabel} {timeLabel}
-          </Text>
-        </View>
+          {/* Bottom row: date, duration, exercises */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 16,
+            }}
+          >
+            {/* Date + time */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Clock size={13} color={colors.text.secondary} strokeWidth={1.5} />
+              <Text style={{ fontSize: 13, color: colors.text.secondary }}>
+                {dateLabel} {timeLabel}
+              </Text>
+            </View>
 
-        {/* Duration */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Timer size={13} color={colors.text.secondary} strokeWidth={1.5} />
-          <Text style={{ fontSize: 13, color: colors.text.secondary }}>{durationLabel}</Text>
-        </View>
+            {/* Duration */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Timer size={13} color={colors.text.secondary} strokeWidth={1.5} />
+              <Text style={{ fontSize: 13, color: colors.text.secondary }}>{durationLabel}</Text>
+            </View>
 
-        {/* Exercise count */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-          <Dumbbell size={13} color={colors.text.secondary} strokeWidth={1.5} />
-          <Text style={{ fontSize: 13, color: colors.text.secondary }}>
-            {workout.exerciseCount}
-          </Text>
+            {/* Exercise count */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Dumbbell size={13} color={colors.text.secondary} strokeWidth={1.5} />
+              <Text style={{ fontSize: 13, color: colors.text.secondary }}>
+                {workout.exerciseCount}
+              </Text>
+            </View>
+          </View>
         </View>
-      </View>
+      )}
     </Pressable>
   );
 }
