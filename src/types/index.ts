@@ -128,3 +128,58 @@ export interface BodyMetricDataPoint {
   date: string;
   value: number;
 }
+
+// Backup / Restore
+
+export interface ExerciseExport {
+  id: number;
+  name: string;
+  type: string;
+  muscleGroup: string;
+  illustration: string | null;
+  restSeconds: number;
+  createdAt: string;
+}
+
+export interface RoutineExport {
+  id: number;
+  name: string;
+  createdAt: string;
+  exercises: Array<{ exerciseId: number; sortOrder: number }>;
+}
+
+export interface WorkoutExport {
+  id: number;
+  routineId: number | null;
+  startedAt: string;
+  finishedAt: string | null;
+  sets: Array<{
+    exerciseId: number;
+    sortOrder: number;
+    weight: number | null;
+    reps: number | null;
+    duration: number | null;
+    distance: number | null;
+  }>;
+}
+
+export interface BodyMeasurementExport {
+  weight: number | null;
+  bodyFat: number | null;
+  chest: number | null;
+  waist: number | null;
+  hips: number | null;
+  biceps: number | null;
+  thighs: number | null;
+  notes: string | null;
+  measuredAt: string;
+}
+
+export interface IronLogBackup {
+  version: 1;
+  exportedAt: string;
+  exercises: ExerciseExport[];
+  routines: RoutineExport[];
+  workouts: WorkoutExport[];
+  bodyMeasurements: BodyMeasurementExport[];
+}
