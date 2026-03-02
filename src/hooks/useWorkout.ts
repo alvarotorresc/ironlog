@@ -28,6 +28,7 @@ interface UseWorkoutReturn {
   deleteSet: (setId: number, exerciseId: number) => Promise<void>;
   addExercise: (exercise: Exercise) => void;
   finishWorkout: () => Promise<void>;
+  abandonWorkout: () => Promise<void>;
   isFinished: boolean;
 }
 
@@ -234,6 +235,21 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     }
   }, [workoutId]);
 
+  const abandonWorkout = useCallback(async () => {
+    if (!workoutId) return;
+    try {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      const db = await getDatabase();
+      const workoutRepo = new WorkoutRepository(db);
+      await workoutRepo.delete(workoutId);
+      setIsFinished(true);
+    } catch (error) {
+      console.error('Failed to abandon workout:', error);
+    }
+  }, [workoutId]);
+
   return {
     workoutId,
     routineName,
@@ -245,6 +261,7 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     deleteSet,
     addExercise,
     finishWorkout,
+    abandonWorkout,
     isFinished,
   };
 }
