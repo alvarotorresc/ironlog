@@ -174,4 +174,62 @@ describe('BodyRepository', () => {
     const updated = await repo.getById(created.id);
     expect(updated!.notes).toBeNull();
   });
+
+  it('should get body_fat over time in ascending order', async () => {
+    await repo.create({ bodyFat: 18, measuredAt: '2026-01-01 08:00:00' });
+    await repo.create({ bodyFat: 17, measuredAt: '2026-02-01 08:00:00' });
+    await repo.create({ weight: 80, measuredAt: '2026-02-15 08:00:00' });
+
+    const points = await repo.getMeasurementOverTime('body_fat', null);
+
+    expect(points).toHaveLength(2);
+    expect(points[0].value).toBe(18);
+    expect(points[1].value).toBe(17);
+  });
+
+  it('should return empty array when no field data exists', async () => {
+    await repo.create({ weight: 80 });
+    const points = await repo.getMeasurementOverTime('chest', null);
+    expect(points).toHaveLength(0);
+  });
+
+  it('should filter getMeasurementOverTime by days', async () => {
+    const oldDate = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .replace('T', ' ')
+      .slice(0, 19);
+    const recentDate = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .replace('T', ' ')
+      .slice(0, 19);
+
+    await repo.create({ waist: 85, measuredAt: oldDate });
+    await repo.create({ waist: 84, measuredAt: recentDate });
+
+    const points = await repo.getMeasurementOverTime('waist', 30);
+
+    expect(points).toHaveLength(1);
+    expect(points[0].value).toBe(84);
+  });
+
+  it('should filter getWeightOverTime by days', async () => {
+    const oldDate = new Date(Date.now() - 100 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .replace('T', ' ')
+      .slice(0, 19);
+    const recentDate = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .replace('T', ' ')
+      .slice(0, 19);
+
+    await repo.create({ weight: 82, measuredAt: oldDate });
+    await repo.create({ weight: 80, measuredAt: recentDate });
+
+    const filtered = await repo.getWeightOverTime(30);
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0].weight).toBe(80);
+
+    const all = await repo.getWeightOverTime(null);
+    expect(all).toHaveLength(2);
+  });
 });

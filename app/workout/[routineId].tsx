@@ -1,7 +1,7 @@
-import { useCallback, useState as useLocalState } from 'react';
+import { useCallback, useEffect, useState as useLocalState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
 import { Check, Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors } from '@/constants/theme';
@@ -38,6 +38,57 @@ export default function WorkoutScreen() {
 
   const workout = useWorkout(routineId ?? 'empty', workoutId ?? '0');
   const restTimer = useRestTimer();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (workout.isFinished) return;
+
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      if (workout.isFinished) return;
+
+      e.preventDefault();
+
+      const hasProgress = workout.exercises.some((ex) => ex.sets.length > 0);
+
+      if (!hasProgress) {
+        Alert.alert(t('workout.abandonTitle'), t('workout.abandonMessage'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('workout.abandon'),
+            style: 'destructive',
+            onPress: async () => {
+              restTimer.reset();
+              await workout.abandonWorkout();
+              navigation.dispatch(e.data.action);
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(t('workout.abandonTitle'), t('workout.abandonMessage'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('workout.finishConfirm'),
+            onPress: async () => {
+              restTimer.reset();
+              await workout.finishWorkout();
+              navigation.dispatch(e.data.action);
+            },
+          },
+          {
+            text: t('workout.abandon'),
+            style: 'destructive',
+            onPress: async () => {
+              restTimer.reset();
+              await workout.abandonWorkout();
+              navigation.dispatch(e.data.action);
+            },
+          },
+        ]);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, workout, restTimer, t]);
 
   const handleAddSet = useCallback(
     async (exerciseId: number): Promise<WorkoutSet | null> => {
