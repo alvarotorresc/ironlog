@@ -1,8 +1,17 @@
 import { useState, useCallback, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Trophy, Calendar, Hash, TrendingUp } from 'lucide-react-native';
+import {
+  ArrowLeft,
+  Trophy,
+  Calendar,
+  Hash,
+  TrendingUp,
+  Pencil,
+  Check,
+  X,
+} from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
@@ -159,6 +168,8 @@ export default function ExerciseDetailScreen() {
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loadingExercise, setLoadingExercise] = useState(true);
   const [period, setPeriod] = useState<TimePeriod>('3m');
+  const [editingRest, setEditingRest] = useState(false);
+  const [restInput, setRestInput] = useState('');
 
   const { stats, isLoading: statsLoading } = useExerciseStats(exerciseId);
   const {
@@ -166,6 +177,20 @@ export default function ExerciseDetailScreen() {
     volumeData,
     isLoading: progressLoading,
   } = useExerciseProgress(exerciseId, period);
+
+  const handleSaveRest = useCallback(async () => {
+    const parsed = parseInt(restInput, 10);
+    if (isNaN(parsed) || parsed < 0) return;
+    try {
+      const db = await getDatabase();
+      const repo = new ExerciseRepository(db);
+      await repo.update(exerciseId, { restSeconds: parsed });
+      setExercise((prev) => (prev ? { ...prev, restSeconds: parsed } : prev));
+      setEditingRest(false);
+    } catch (error) {
+      console.error('Failed to update rest time:', error);
+    }
+  }, [exerciseId, restInput]);
 
   const loadExercise = useCallback(async () => {
     if (!exerciseId) return;
@@ -222,19 +247,24 @@ export default function ExerciseDetailScreen() {
       >
         <Pressable
           onPress={() => router.back()}
-          style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: colors.bg.tertiary,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
-          })}
           accessibilityRole="button"
           accessibilityLabel={t('common.back')}
         >
-          <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                backgroundColor: colors.bg.tertiary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              }}
+            >
+              <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -274,15 +304,97 @@ export default function ExerciseDetailScreen() {
           </View>
 
           {/* Rest time */}
-          <Text
-            style={{
-              fontSize: 13,
-              color: colors.text.tertiary,
-              marginTop: 8,
-            }}
-          >
-            Rest: {exercise.restSeconds}s
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
+            {editingRest ? (
+              <>
+                <TextInput
+                  value={restInput}
+                  onChangeText={setRestInput}
+                  keyboardType="number-pad"
+                  style={{
+                    fontSize: 13,
+                    color: colors.text.primary,
+                    backgroundColor: colors.bg.tertiary,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    borderRadius: 6,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    minWidth: 56,
+                    textAlign: 'center',
+                  }}
+                  autoFocus
+                  selectTextOnFocus
+                  accessibilityLabel={t('exercise.restTimeEdit')}
+                />
+                <Text style={{ fontSize: 13, color: colors.text.tertiary }}>s</Text>
+                <Pressable
+                  onPress={handleSaveRest}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('exercise.restTimeSave')}
+                >
+                  {({ pressed }) => (
+                    <View
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        backgroundColor: colors.semantic.success,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: pressed ? 0.7 : 1,
+                      }}
+                    >
+                      <Check size={14} color="#FFFFFF" strokeWidth={2.5} />
+                    </View>
+                  )}
+                </Pressable>
+                <Pressable
+                  onPress={() => setEditingRest(false)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('common.cancel')}
+                >
+                  {({ pressed }) => (
+                    <View
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 6,
+                        backgroundColor: colors.bg.elevated,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: pressed ? 0.7 : 1,
+                      }}
+                    >
+                      <X size={14} color={colors.text.secondary} strokeWidth={2} />
+                    </View>
+                  )}
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
+                  {t('exercise.restTime')}: {exercise.restSeconds}s
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setRestInput(String(exercise.restSeconds));
+                    setEditingRest(true);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('exercise.restTimeEdit')}
+                >
+                  {({ pressed }) => (
+                    <View style={{ opacity: pressed ? 0.5 : 1, padding: 2 }}>
+                      <Pencil size={14} color={colors.text.tertiary} strokeWidth={1.5} />
+                    </View>
+                  )}
+                </Pressable>
+              </>
+            )}
+          </View>
         </View>
 
         {/* Stats section */}
