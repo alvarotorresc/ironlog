@@ -206,4 +206,24 @@ export const es: Record<TranslationKey, string> = {
 
   // Empty State
   'emptyState.default': 'Nada aqu\u00ED todav\u00EDa.',
+
+  // Workout — abandon
+  'workout.abandonTitle': '\u00BFCancelar entrenamiento?',
+  'workout.abandonMessage': 'Se perder\u00E1 tu progreso.',
+  'workout.abandon': 'Cancelar entrenamiento',
+
+  // Exercise Detail — rest time
+  'exercise.restTime': 'Tiempo de descanso',
+  'exercise.restTimeEdit': 'Editar tiempo de descanso',
+  'exercise.restTimeSave': 'Guardar',
+
+  // Body — charts
+  'body.chartWeight': 'Peso',
+  'body.chartBodyFat': 'Grasa Corporal',
+  'body.chartChest': 'Pecho',
+  'body.chartWaist': 'Cintura',
+  'body.chartHips': 'Cadera',
+  'body.chartBiceps': 'B\u00EDceps',
+  'body.chartThighs': 'Muslos',
+  'body.chartNoData': 'No hay suficientes datos para mostrar la gr\u00E1fica',
 };

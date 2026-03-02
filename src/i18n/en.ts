@@ -198,6 +198,26 @@ export const en = {
 
   // Empty State
   'emptyState.default': 'Nothing here yet.',
+
+  // Workout — abandon
+  'workout.abandonTitle': 'Cancel Workout?',
+  'workout.abandonMessage': 'Your progress will be lost.',
+  'workout.abandon': 'Cancel Workout',
+
+  // Exercise Detail — rest time
+  'exercise.restTime': 'Rest time',
+  'exercise.restTimeEdit': 'Edit rest time',
+  'exercise.restTimeSave': 'Save',
+
+  // Body — charts
+  'body.chartWeight': 'Weight',
+  'body.chartBodyFat': 'Body Fat',
+  'body.chartChest': 'Chest',
+  'body.chartWaist': 'Waist',
+  'body.chartHips': 'Hips',
+  'body.chartBiceps': 'Biceps',
+  'body.chartThighs': 'Thighs',
+  'body.chartNoData': 'Not enough data to show chart',
 } as const;
 
 export type TranslationKey = keyof typeof en;
