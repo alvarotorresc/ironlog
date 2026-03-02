@@ -237,8 +237,11 @@ export const es: Record<TranslationKey, string> = {
     'Restaura los datos desde una copia exportada anteriormente. Los datos existentes no se eliminar\u00E1n.',
   'backup.importButton': 'Importar copia',
   'backup.exportSuccess': 'Copia exportada correctamente',
+  'backup.exportError': 'Error al exportar la copia',
   'backup.importSuccess': 'Datos importados correctamente',
   'backup.importError': 'Error al importar la copia',
+  'backup.importInvalidFormat': 'Formato de copia incorrecto',
+  'backup.sharingUnavailable': 'El uso compartido no está disponible en este dispositivo',
   'backup.importing': 'Importando...',
   'backup.exporting': 'Exportando...',
 };

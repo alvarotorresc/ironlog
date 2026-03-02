@@ -229,8 +229,11 @@ export const en = {
     'Restore data from a previously exported backup file. Existing data will not be deleted.',
   'backup.importButton': 'Import Backup',
   'backup.exportSuccess': 'Backup exported successfully',
+  'backup.exportError': 'Failed to export backup',
   'backup.importSuccess': 'Data imported successfully',
   'backup.importError': 'Failed to import backup',
+  'backup.importInvalidFormat': 'Invalid backup format',
+  'backup.sharingUnavailable': 'Sharing is not available on this device',
   'backup.importing': 'Importing...',
   'backup.exporting': 'Exporting...',
 } as const;

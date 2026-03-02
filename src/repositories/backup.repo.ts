@@ -198,7 +198,12 @@ export class BackupRepository {
 
         for (const re of routine.exercises) {
           const localExerciseId = exerciseIdMap.get(re.exerciseId);
-          if (localExerciseId === undefined) continue;
+          if (localExerciseId === undefined) {
+            console.warn(
+              `[backup] skipping routine_exercise: exerciseId ${re.exerciseId} not in map`,
+            );
+            continue;
+          }
 
           await this.db.runAsync(
             `INSERT INTO routine_exercises (routine_id, exercise_id, sort_order)
@@ -228,7 +233,10 @@ export class BackupRepository {
 
         for (const set of workout.sets) {
           const localExerciseId = exerciseIdMap.get(set.exerciseId);
-          if (localExerciseId === undefined) continue;
+          if (localExerciseId === undefined) {
+            console.warn(`[backup] skipping set: exerciseId ${set.exerciseId} not in map`);
+            continue;
+          }
 
           await this.db.runAsync(
             `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance)

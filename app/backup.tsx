@@ -16,7 +16,7 @@ export default function BackupScreen() {
       await exportData();
       Alert.alert(t('backup.exportSuccess'));
     } catch {
-      Alert.alert(t('common.error'), t('backup.importError'));
+      Alert.alert(t('common.error'), t('backup.exportError'));
     }
   };
 
