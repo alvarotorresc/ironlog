@@ -410,21 +410,22 @@ function DetailHeader({
         gap: 12,
       }}
     >
-      <Pressable
-        onPress={onBack}
-        style={({ pressed }) => ({
-          width: 36,
-          height: 36,
-          borderRadius: 8,
-          backgroundColor: colors.bg.tertiary,
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: pressed ? 0.7 : 1,
-        })}
-        accessibilityRole="button"
-        accessibilityLabel={t('common.back')}
-      >
-        <ArrowLeft size={20} color={colors.text.secondary} strokeWidth={2} />
+      <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel={t('common.back')}>
+        {({ pressed }) => (
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              backgroundColor: colors.bg.tertiary,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.7 : 1,
+            }}
+          >
+            <ArrowLeft size={20} color={colors.text.secondary} strokeWidth={2} />
+          </View>
+        )}
       </Pressable>
       <Text
         style={{
@@ -445,59 +446,74 @@ function DetailHeader({
             <Pressable
               onPress={onSave}
               disabled={saving}
-              style={({ pressed }) => ({
-                height: 36,
-                paddingHorizontal: 14,
-                borderRadius: 8,
-                backgroundColor: colors.brand.blue,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed || saving ? 0.7 : 1,
-              })}
               accessibilityRole="button"
               accessibilityLabel={t('common.save')}
             >
-              <Text style={{ fontSize: 14, fontWeight: '600', color: '#FFFFFF' }}>
-                {saving ? `${t('common.loading')}` : t('common.save')}
-              </Text>
+              {({ pressed }) => (
+                <View
+                  style={{
+                    height: 36,
+                    paddingHorizontal: 14,
+                    borderRadius: 8,
+                    backgroundColor: colors.brand.blue,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed || saving ? 0.7 : 1,
+                  }}
+                >
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: '#FFFFFF' }}>
+                    {saving ? `${t('common.loading')}` : t('common.save')}
+                  </Text>
+                </View>
+              )}
             </Pressable>
           ) : null}
           <Pressable
             onPress={onToggleEdit}
-            style={({ pressed }) => ({
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              backgroundColor: editing ? colors.brand.blue : colors.bg.tertiary,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.7 : 1,
-            })}
             accessibilityRole="button"
             accessibilityLabel={editing ? t('common.cancel') : t('workoutDetail.title')}
           >
-            {editing ? (
-              <Check size={18} color="#FFFFFF" strokeWidth={2} />
-            ) : (
-              <Pencil size={18} color={colors.text.secondary} strokeWidth={1.5} />
+            {({ pressed }) => (
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  backgroundColor: editing ? colors.brand.blue : colors.bg.tertiary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                {editing ? (
+                  <Check size={18} color="#FFFFFF" strokeWidth={2} />
+                ) : (
+                  <Pencil size={18} color={colors.text.secondary} strokeWidth={1.5} />
+                )}
+              </View>
             )}
           </Pressable>
           {!editing && (
             <Pressable
               onPress={onDelete}
-              style={({ pressed }) => ({
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                backgroundColor: colors.bg.tertiary,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
               accessibilityRole="button"
               accessibilityLabel={t('history.deleteTitle')}
             >
-              <Trash2 size={18} color={colors.semantic.error} strokeWidth={1.5} />
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Trash2 size={18} color={colors.semantic.error} strokeWidth={1.5} />
+                </View>
+              )}
             </Pressable>
           )}
         </View>

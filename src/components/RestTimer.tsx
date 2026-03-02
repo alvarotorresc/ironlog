@@ -112,17 +112,22 @@ export function RestTimer({
           {isFinished ? (
             <Pressable
               onPress={onDismiss}
-              style={({ pressed }) => ({
-                paddingVertical: 6,
-                paddingHorizontal: 14,
-                borderRadius: 6,
-                backgroundColor: colors.semantic.success,
-                opacity: pressed ? 0.7 : 1,
-              })}
               accessibilityRole="button"
               accessibilityLabel="Dismiss timer"
             >
-              <Text style={{ fontSize: 13, fontWeight: '700', color: '#FFFFFF' }}>OK</Text>
+              {({ pressed }) => (
+                <View
+                  style={{
+                    paddingVertical: 6,
+                    paddingHorizontal: 14,
+                    borderRadius: 6,
+                    backgroundColor: colors.semantic.success,
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: '#FFFFFF' }}>OK</Text>
+                </View>
+              )}
             </Pressable>
           ) : (
             <>

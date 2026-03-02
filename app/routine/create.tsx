@@ -84,19 +84,24 @@ export default function CreateRoutineScreen() {
         >
           <Pressable
             onPress={() => router.back()}
-            style={({ pressed }) => ({
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              backgroundColor: colors.bg.tertiary,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.7 : 1,
-            })}
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
           >
-            <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
+            {({ pressed }) => (
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  backgroundColor: colors.bg.tertiary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
+              </View>
+            )}
           </Pressable>
           <Text
             style={{
@@ -180,32 +185,37 @@ export default function CreateRoutineScreen() {
             {/* Add exercise button */}
             <Pressable
               onPress={() => setPickerVisible(true)}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                paddingVertical: 14,
-                borderWidth: 1,
-                borderColor: colors.border,
-                borderRadius: 12,
-                borderStyle: 'dashed',
-                backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
-                opacity: pressed ? 0.7 : 1,
-              })}
               accessibilityRole="button"
               accessibilityLabel={t('routine.create.addExercise')}
             >
-              <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: '500',
-                  color: colors.brand.blue,
-                }}
-              >
-                {t('routine.create.addExercise')}
-              </Text>
+              {({ pressed }) => (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    paddingVertical: 14,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                    borderRadius: 12,
+                    borderStyle: 'dashed',
+                    backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Plus size={18} color={colors.brand.blue} strokeWidth={2} />
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: '500',
+                      color: colors.brand.blue,
+                    }}
+                  >
+                    {t('routine.create.addExercise')}
+                  </Text>
+                </View>
+              )}
             </Pressable>
           </View>
         </ScrollView>

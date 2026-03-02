@@ -421,19 +421,24 @@ export default function HomeScreen() {
             </Text>
             <Pressable
               onPress={() => setShowPicker(false)}
-              style={({ pressed }) => ({
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                backgroundColor: colors.bg.tertiary,
-                alignItems: 'center',
-                justifyContent: 'center',
-                opacity: pressed ? 0.7 : 1,
-              })}
               accessibilityRole="button"
               accessibilityLabel="Close"
             >
-              <X size={20} color={colors.text.secondary} strokeWidth={2} />
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <X size={20} color={colors.text.secondary} strokeWidth={2} />
+                </View>
+              )}
             </Pressable>
           </View>
 
@@ -443,56 +448,61 @@ export default function HomeScreen() {
               <Pressable
                 onPress={handleStartEmpty}
                 disabled={starting}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 12,
-                  marginHorizontal: 20,
-                  marginTop: 16,
-                  marginBottom: 8,
-                  padding: 16,
-                  backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                  borderRadius: 12,
-                  borderStyle: 'dashed',
-                  opacity: starting ? 0.5 : 1,
-                })}
                 accessibilityRole="button"
                 accessibilityLabel="Start empty workout without a routine"
               >
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    backgroundColor: colors.bg.tertiary,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Dumbbell size={20} color={colors.text.tertiary} strokeWidth={1.5} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text
+                {({ pressed }) => (
+                  <View
                     style={{
-                      fontSize: 16,
-                      fontWeight: '600',
-                      color: colors.text.primary,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 12,
+                      marginHorizontal: 20,
+                      marginTop: 16,
+                      marginBottom: 8,
+                      padding: 16,
+                      backgroundColor: pressed ? colors.bg.elevated : colors.bg.secondary,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      borderRadius: 12,
+                      borderStyle: 'dashed',
+                      opacity: starting ? 0.5 : 1,
                     }}
                   >
-                    {t('home.emptyWorkout')}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 13,
-                      color: colors.text.secondary,
-                      marginTop: 2,
-                    }}
-                  >
-                    {t('home.emptyWorkoutDesc')}
-                  </Text>
-                </View>
+                    <View
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 8,
+                        backgroundColor: colors.bg.tertiary,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Dumbbell size={20} color={colors.text.tertiary} strokeWidth={1.5} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: '600',
+                          color: colors.text.primary,
+                        }}
+                      >
+                        {t('home.emptyWorkout')}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: colors.text.secondary,
+                          marginTop: 2,
+                        }}
+                      >
+                        {t('home.emptyWorkoutDesc')}
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </Pressable>
 
               {/* Divider */}

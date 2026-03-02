@@ -87,19 +87,24 @@ export default function RoutinesScreen() {
         </Text>
         <Pressable
           onPress={handleCreatePress}
-          style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: colors.brand.blue,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
-          })}
           accessibilityRole="button"
           accessibilityLabel={t('routines.createNew')}
         >
-          <Plus size={20} color="#FFFFFF" strokeWidth={2} />
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                backgroundColor: colors.brand.blue,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              }}
+            >
+              <Plus size={20} color="#FFFFFF" strokeWidth={2} />
+            </View>
+          )}
         </Pressable>
       </View>
 

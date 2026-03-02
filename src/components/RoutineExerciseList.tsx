@@ -89,55 +89,70 @@ function RoutineExerciseRow({
         <Pressable
           onPress={() => onMove(index, 'up')}
           disabled={isFirst}
-          style={({ pressed }) => ({
-            width: 32,
-            height: 32,
-            borderRadius: 6,
-            backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: isFirst ? 0.3 : pressed ? 0.7 : 1,
-          })}
           accessibilityRole="button"
           accessibilityLabel={`Move ${exercise.name} up`}
         >
-          <ChevronUp size={18} color={colors.text.secondary} strokeWidth={1.5} />
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+                backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isFirst ? 0.3 : pressed ? 0.7 : 1,
+              }}
+            >
+              <ChevronUp size={18} color={colors.text.secondary} strokeWidth={1.5} />
+            </View>
+          )}
         </Pressable>
         <Pressable
           onPress={() => onMove(index, 'down')}
           disabled={isLast}
-          style={({ pressed }) => ({
-            width: 32,
-            height: 32,
-            borderRadius: 6,
-            backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: isLast ? 0.3 : pressed ? 0.7 : 1,
-          })}
           accessibilityRole="button"
           accessibilityLabel={`Move ${exercise.name} down`}
         >
-          <ChevronDown size={18} color={colors.text.secondary} strokeWidth={1.5} />
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 6,
+                backgroundColor: pressed ? colors.bg.tertiary : 'transparent',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: isLast ? 0.3 : pressed ? 0.7 : 1,
+              }}
+            >
+              <ChevronDown size={18} color={colors.text.secondary} strokeWidth={1.5} />
+            </View>
+          )}
         </Pressable>
       </View>
 
       {/* Remove button */}
       <Pressable
         onPress={() => onRemove(index)}
-        style={({ pressed }) => ({
-          width: 32,
-          height: 32,
-          borderRadius: 6,
-          backgroundColor: pressed ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: pressed ? 0.7 : 1,
-        })}
         accessibilityRole="button"
         accessibilityLabel={`Remove ${exercise.name}`}
       >
-        <Trash2 size={16} color={colors.semantic.error} strokeWidth={1.5} />
+        {({ pressed }) => (
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 6,
+              backgroundColor: pressed ? 'rgba(239, 68, 68, 0.15)' : 'transparent',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.7 : 1,
+            }}
+          >
+            <Trash2 size={16} color={colors.semantic.error} strokeWidth={1.5} />
+          </View>
+        )}
       </Pressable>
     </View>
   );

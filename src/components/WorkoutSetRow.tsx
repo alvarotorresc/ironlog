@@ -72,19 +72,24 @@ export function WorkoutSetRow({
       {/* Delete button */}
       <Pressable
         onPress={handleDelete}
-        style={({ pressed }) => ({
-          width: 32,
-          height: 32,
-          borderRadius: 6,
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: pressed ? 0.5 : 1,
-        })}
         accessibilityRole="button"
         accessibilityLabel={`Delete set ${setNumber}`}
         hitSlop={8}
       >
-        <X size={16} color={colors.text.tertiary} strokeWidth={2} />
+        {({ pressed }) => (
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 6,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: pressed ? 0.5 : 1,
+            }}
+          >
+            <X size={16} color={colors.text.tertiary} strokeWidth={2} />
+          </View>
+        )}
       </Pressable>
     </View>
   );

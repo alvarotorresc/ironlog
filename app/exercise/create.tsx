@@ -112,19 +112,24 @@ export default function CreateExerciseScreen() {
         >
           <Pressable
             onPress={() => router.back()}
-            style={({ pressed }) => ({
-              width: 36,
-              height: 36,
-              borderRadius: 8,
-              backgroundColor: colors.bg.tertiary,
-              alignItems: 'center',
-              justifyContent: 'center',
-              opacity: pressed ? 0.7 : 1,
-            })}
             accessibilityRole="button"
             accessibilityLabel={t('common.back')}
           >
-            <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
+            {({ pressed }) => (
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  backgroundColor: colors.bg.tertiary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                <ArrowLeft size={20} color={colors.text.primary} strokeWidth={1.5} />
+              </View>
+            )}
           </Pressable>
           <Text
             style={{

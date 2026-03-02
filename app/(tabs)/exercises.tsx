@@ -35,31 +35,36 @@ function FilterChip({
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => ({
-        height: 32,
-        paddingHorizontal: 14,
-        borderRadius: 16,
-        backgroundColor: active ? colors.brand.blue : colors.bg.tertiary,
-        borderWidth: 1,
-        borderColor: active ? colors.brand.blue : colors.border,
-        alignItems: 'center' as const,
-        justifyContent: 'center' as const,
-        opacity: pressed ? 0.7 : 1,
-      })}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       accessibilityLabel={`Filter by ${label}`}
     >
-      <Text
-        style={{
-          fontSize: 13,
-          fontWeight: active ? '600' : '400',
-          color: active ? '#FFFFFF' : colors.text.secondary,
-        }}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
+      {({ pressed }) => (
+        <View
+          style={{
+            height: 32,
+            paddingHorizontal: 14,
+            borderRadius: 16,
+            backgroundColor: active ? colors.brand.blue : colors.bg.tertiary,
+            borderWidth: 1,
+            borderColor: active ? colors.brand.blue : colors.border,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: pressed ? 0.7 : 1,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 13,
+              fontWeight: active ? '600' : '400',
+              color: active ? '#FFFFFF' : colors.text.secondary,
+            }}
+            numberOfLines={1}
+          >
+            {label}
+          </Text>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -140,19 +145,24 @@ export default function ExercisesScreen() {
         </Text>
         <Pressable
           onPress={handleCreatePress}
-          style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: colors.brand.blue,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
-          })}
           accessibilityRole="button"
           accessibilityLabel={t('exercises.createNew')}
         >
-          <Plus size={20} color="#FFFFFF" strokeWidth={2} />
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                backgroundColor: colors.brand.blue,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              }}
+            >
+              <Plus size={20} color="#FFFFFF" strokeWidth={2} />
+            </View>
+          )}
         </Pressable>
       </View>
 
