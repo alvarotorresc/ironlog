@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,17 +7,21 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Plus, Scale, TrendingDown, TrendingUp, Minus, Trash2 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
-import { useBodyMeasurements, useWeightProgress } from '@/hooks/useBodyMetrics';
+import { useBodyMeasurements, useBodyMetricProgress } from '@/hooks/useBodyMetrics';
+import { ProgressChart } from '@/components/ProgressChart';
+import { PeriodSelector } from '@/components/PeriodSelector';
 import { EmptyState } from '@/components/ui';
-import type { BodyMeasurement } from '@/types';
+import type { BodyMeasurement, BodyMetricField, TimePeriod } from '@/types';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -53,18 +57,55 @@ function WeightTrend({ current, previous }: { current: number; previous: number 
   );
 }
 
-function SimpleWeightChart({ data }: { data: Array<{ date: string; weight: number }> }) {
-  if (data.length < 2) return null;
+type MetricConfig = {
+  field: BodyMetricField;
+  labelKey: TranslationKey;
+  unit: string;
+  color: string;
+};
 
-  const weights = data.map((d) => d.weight);
-  const min = Math.min(...weights);
-  const max = Math.max(...weights);
-  const range = max - min || 1;
+const METRICS: MetricConfig[] = [
+  { field: 'weight', labelKey: 'body.chartWeight', unit: 'kg', color: colors.brand.blue },
+  { field: 'body_fat', labelKey: 'body.chartBodyFat', unit: '%', color: colors.brand.red },
+  { field: 'waist', labelKey: 'body.chartWaist', unit: 'cm', color: colors.semantic.warning },
+  { field: 'chest', labelKey: 'body.chartChest', unit: 'cm', color: colors.semantic.success },
+  { field: 'hips', labelKey: 'body.chartHips', unit: 'cm', color: colors.theme.slateBright },
+  { field: 'biceps', labelKey: 'body.chartBiceps', unit: 'cm', color: colors.brand.blue },
+  { field: 'thighs', labelKey: 'body.chartThighs', unit: 'cm', color: colors.semantic.success },
+];
 
-  const chartHeight = 120;
-  const chartWidth = 300;
-  const pointSpacing = Math.min(chartWidth / (data.length - 1), 40);
-  const actualWidth = pointSpacing * (data.length - 1);
+function BodyMetricsCharts({ measurements }: { measurements: BodyMeasurement[] }) {
+  const { t } = useTranslation();
+  const [selectedMetric, setSelectedMetric] = useState<BodyMetricField | null>(null);
+  const [period, setPeriod] = useState<TimePeriod>('3m');
+
+  const availableMetrics = useMemo(() => {
+    return METRICS.filter((m) => {
+      const count = measurements.filter((entry) => {
+        if (m.field === 'weight') return entry.weight !== null;
+        if (m.field === 'body_fat') return entry.bodyFat !== null;
+        const val =
+          entry[
+            m.field as keyof Pick<BodyMeasurement, 'chest' | 'waist' | 'hips' | 'biceps' | 'thighs'>
+          ];
+        return val !== null && val !== undefined;
+      }).length;
+      return count >= 2;
+    });
+  }, [measurements]);
+
+  const activeMetric = useMemo<BodyMetricField>(() => {
+    if (selectedMetric !== null && availableMetrics.some((m) => m.field === selectedMetric)) {
+      return selectedMetric;
+    }
+    return availableMetrics[0]?.field ?? 'weight';
+  }, [selectedMetric, availableMetrics]);
+
+  const activeConfig = METRICS.find((m) => m.field === activeMetric) ?? null;
+
+  const { data, isLoading } = useBodyMetricProgress(activeMetric, period);
+
+  if (availableMetrics.length === 0) return null;
 
   return (
     <View
@@ -77,44 +118,70 @@ function SimpleWeightChart({ data }: { data: Array<{ date: string; weight: numbe
         marginBottom: 16,
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-        <Text style={{ fontSize: 13, color: colors.text.tertiary }}>{max.toFixed(1)} kg</Text>
-        <Text style={{ fontSize: 13, color: colors.text.tertiary }}>{min.toFixed(1)} kg</Text>
-      </View>
-      <View
-        style={{
-          height: chartHeight,
-          width: actualWidth,
-          alignSelf: 'center',
-        }}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, marginBottom: 12 }}
       >
-        {data.map((point, i) => {
-          const x = i * pointSpacing;
-          const y = chartHeight - ((point.weight - min) / range) * (chartHeight - 8);
+        {availableMetrics.map((m) => {
+          const active = activeMetric === m.field;
           return (
-            <View
-              key={point.date}
-              style={{
-                position: 'absolute',
-                left: x - 3,
-                top: y - 3,
-                width: 6,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: colors.brand.blue,
-              }}
-            />
+            <Pressable
+              key={m.field}
+              onPress={() => setSelectedMetric(m.field)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    height: 30,
+                    paddingHorizontal: 12,
+                    borderRadius: 15,
+                    backgroundColor: active ? m.color : colors.bg.tertiary,
+                    borderWidth: 1,
+                    borderColor: active ? m.color : colors.border,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      fontWeight: active ? '600' : '400',
+                      color: active ? '#FFFFFF' : colors.text.secondary,
+                    }}
+                  >
+                    {t(m.labelKey)}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
           );
         })}
+      </ScrollView>
+
+      <View style={{ marginBottom: 12 }}>
+        <PeriodSelector value={period} onChange={setPeriod} />
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-        <Text style={{ fontSize: 11, color: colors.text.tertiary }}>
-          {data.length > 0 ? formatDate(data[0].date) : ''}
-        </Text>
-        <Text style={{ fontSize: 11, color: colors.text.tertiary }}>
-          {data.length > 0 ? formatDate(data[data.length - 1].date) : ''}
-        </Text>
-      </View>
+
+      {isLoading ? (
+        <View style={{ height: 160, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="small" color={colors.brand.blue} />
+        </View>
+      ) : data.length < 2 ? (
+        <View style={{ height: 160, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 13, color: colors.text.tertiary }}>{t('body.chartNoData')}</Text>
+        </View>
+      ) : (
+        <ProgressChart
+          data={data}
+          color={activeConfig?.color ?? colors.brand.blue}
+          height={160}
+          showArea
+        />
+      )}
     </View>
   );
 }
@@ -168,11 +235,14 @@ function MeasurementCard({
         </Text>
         <Pressable
           onPress={handleDelete}
-          style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, padding: 4 })}
           accessibilityRole="button"
           accessibilityLabel="Delete measurement"
         >
-          <Trash2 size={16} color={colors.text.tertiary} strokeWidth={1.5} />
+          {({ pressed }) => (
+            <View style={{ opacity: pressed ? 0.5 : 1, padding: 4 }}>
+              <Trash2 size={16} color={colors.text.tertiary} strokeWidth={1.5} />
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -239,20 +309,18 @@ export default function BodyScreen() {
   const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
   const { measurements, isLoading, reload: reloadMeasurements } = useBodyMeasurements();
-  const { data: weightData, reload: reloadWeight } = useWeightProgress();
 
   useFocusEffect(
     useCallback(() => {
       reloadMeasurements();
-      reloadWeight();
-    }, [reloadMeasurements, reloadWeight]),
+    }, [reloadMeasurements]),
   );
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([reloadMeasurements(), reloadWeight()]);
+    await reloadMeasurements();
     setRefreshing(false);
-  }, [reloadMeasurements, reloadWeight]);
+  }, [reloadMeasurements]);
 
   const handleDelete = useCallback(
     async (id: number) => {
@@ -260,12 +328,12 @@ export default function BodyScreen() {
         const db = await getDatabase();
         const repo = new BodyRepository(db);
         await repo.delete(id);
-        await Promise.all([reloadMeasurements(), reloadWeight()]);
+        await reloadMeasurements();
       } catch (error) {
         console.error('Failed to delete measurement:', error);
       }
     },
-    [reloadMeasurements, reloadWeight],
+    [reloadMeasurements],
   );
 
   return (
@@ -293,19 +361,24 @@ export default function BodyScreen() {
         </Text>
         <Pressable
           onPress={() => router.push('/body/add')}
-          style={({ pressed }) => ({
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: colors.brand.blue,
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: pressed ? 0.7 : 1,
-          })}
           accessibilityRole="button"
           accessibilityLabel="Add measurement"
         >
-          <Plus size={20} color="#FFFFFF" strokeWidth={2} />
+          {({ pressed }) => (
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                backgroundColor: colors.brand.blue,
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: pressed ? 0.7 : 1,
+              }}
+            >
+              <Plus size={20} color="#FFFFFF" strokeWidth={2} />
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -326,7 +399,7 @@ export default function BodyScreen() {
           keyExtractor={(item) => String(item.id)}
           ListHeaderComponent={
             <View style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 }}>
-              <SimpleWeightChart data={weightData} />
+              <BodyMetricsCharts measurements={measurements} />
             </View>
           }
           renderItem={({ item, index }) => {
