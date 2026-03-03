@@ -103,11 +103,15 @@ describe('Migration #3', () => {
     await db.runAsync(
       "INSERT INTO exercises (name, type, muscle_group) VALUES ('Bench', 'weights', 'chest')",
     );
-    await expect(
-      db.runAsync(
+    let threw = false;
+    try {
+      await db.runAsync(
         "INSERT INTO routine_exercises (routine_id, exercise_id, sort_order, group_type) VALUES (1, 1, 1, 'invalid')",
-      ),
-    ).rejects.toThrow();
+      );
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should populate pivot table from existing exercises', async () => {
@@ -142,12 +146,16 @@ describe('Migration #3', () => {
       'INSERT INTO exercise_muscle_groups (exercise_id, muscle_group, is_primary) VALUES (1, ?, 1)',
       'chest',
     );
-    await expect(
-      db.runAsync(
+    let threw = false;
+    try {
+      await db.runAsync(
         'INSERT INTO exercise_muscle_groups (exercise_id, muscle_group, is_primary) VALUES (1, ?, 0)',
         'chest',
-      ),
-    ).rejects.toThrow();
+      );
+    } catch {
+      threw = true;
+    }
+    expect(threw).toBe(true);
   });
 
   it('should cascade delete pivot rows when exercise is deleted', async () => {
