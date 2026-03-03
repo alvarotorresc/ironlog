@@ -8,6 +8,8 @@ function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
     name: 'Bench Press',
     type: 'weights',
     muscleGroup: 'chest',
+    muscleGroups: ['chest'],
+    isPredefined: true,
     illustration: 'bench-press',
     restSeconds: 90,
     createdAt: '2026-01-01T00:00:00',

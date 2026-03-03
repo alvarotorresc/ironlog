@@ -22,6 +22,8 @@ describe('ExerciseRepository', () => {
     expect(exercise.name).toBe('Bench Press');
     expect(exercise.type).toBe('weights');
     expect(exercise.muscleGroup).toBe('chest');
+    expect(exercise.muscleGroups).toEqual(['chest']);
+    expect(exercise.isPredefined).toBe(false);
     expect(exercise.createdAt).toBeDefined();
   });
 
@@ -193,5 +195,163 @@ describe('ExerciseRepository', () => {
       threw = true;
     }
     expect(threw).toBe(true);
+  });
+
+  // --- Multi-muscle-group tests ---
+
+  it('should create an exercise with multiple muscle groups', async () => {
+    const exercise = await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      muscleGroups: ['chest', 'arms', 'shoulders'],
+    });
+
+    expect(exercise.muscleGroups).toEqual(['chest', 'arms', 'shoulders']);
+    expect(exercise.muscleGroup).toBe('chest');
+  });
+
+  it('should return muscleGroups from pivot in getAll', async () => {
+    await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      muscleGroups: ['chest', 'arms', 'shoulders'],
+    });
+    await repo.create({
+      name: 'Squat',
+      type: 'weights',
+      muscleGroup: 'legs',
+      muscleGroups: ['legs', 'core'],
+    });
+
+    const exercises = await repo.getAll();
+    const bench = exercises.find((e) => e.name === 'Bench Press')!;
+    const squat = exercises.find((e) => e.name === 'Squat')!;
+
+    expect(bench.muscleGroups).toEqual(['chest', 'arms', 'shoulders']);
+    expect(squat.muscleGroups).toEqual(['legs', 'core']);
+  });
+
+  it('should return muscleGroups from pivot in getById', async () => {
+    const created = await repo.create({
+      name: 'Deadlift',
+      type: 'weights',
+      muscleGroup: 'back',
+      muscleGroups: ['back', 'legs', 'core'],
+    });
+
+    const exercise = await repo.getById(created.id);
+
+    expect(exercise!.muscleGroups).toEqual(['back', 'legs', 'core']);
+  });
+
+  it('should find exercises by secondary muscle group', async () => {
+    await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      muscleGroups: ['chest', 'arms', 'shoulders'],
+    });
+    await repo.create({
+      name: 'Barbell Curl',
+      type: 'weights',
+      muscleGroup: 'arms',
+      muscleGroups: ['arms'],
+    });
+
+    // Bench Press has 'arms' as secondary muscle group
+    const armsExercises = await repo.getByMuscleGroup('arms');
+
+    expect(armsExercises).toHaveLength(2);
+    expect(armsExercises.map((e) => e.name).sort()).toEqual(['Barbell Curl', 'Bench Press']);
+  });
+
+  it('should update muscleGroups via pivot table', async () => {
+    const created = await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      muscleGroups: ['chest'],
+    });
+
+    await repo.update(created.id, {
+      muscleGroups: ['chest', 'arms', 'shoulders'],
+    });
+
+    const updated = await repo.getById(created.id);
+    expect(updated!.muscleGroups).toEqual(['chest', 'arms', 'shoulders']);
+  });
+
+  it('should update primary muscle_group when muscleGroups changes', async () => {
+    const created = await repo.create({
+      name: 'Test',
+      type: 'weights',
+      muscleGroup: 'chest',
+      muscleGroups: ['chest'],
+    });
+
+    await repo.update(created.id, {
+      muscleGroups: ['back', 'arms'],
+    });
+
+    const updated = await repo.getById(created.id);
+    expect(updated!.muscleGroup).toBe('back');
+    expect(updated!.muscleGroups).toEqual(['back', 'arms']);
+  });
+
+  it('should cascade delete pivot rows when exercise is deleted', async () => {
+    const created = await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      muscleGroups: ['chest', 'arms', 'shoulders'],
+    });
+
+    await repo.delete(created.id);
+
+    const pivotRows = await db.getAllAsync(
+      'SELECT * FROM exercise_muscle_groups WHERE exercise_id = ?',
+      created.id,
+    );
+    expect(pivotRows).toHaveLength(0);
+  });
+
+  it('should create predefined exercise with isPredefined flag', async () => {
+    const exercise = await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      isPredefined: true,
+    });
+
+    expect(exercise.isPredefined).toBe(true);
+
+    const fetched = await repo.getById(exercise.id);
+    expect(fetched!.isPredefined).toBe(true);
+  });
+
+  it('should default isPredefined to false', async () => {
+    const exercise = await repo.create({
+      name: 'My Custom Exercise',
+      type: 'weights',
+      muscleGroup: 'chest',
+    });
+
+    expect(exercise.isPredefined).toBe(false);
+  });
+
+  it('should return empty muscleGroups array as single primary group fallback', async () => {
+    // Insert directly into DB without pivot data to test fallback
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group) VALUES ('LegacyExercise', 'weights', 'chest')",
+    );
+    const row = await db.getFirstAsync<{ id: number }>(
+      "SELECT id FROM exercises WHERE name = 'LegacyExercise'",
+    );
+
+    const exercise = await repo.getById(row!.id);
+    // Falls back to primary muscle_group when no pivot data
+    expect(exercise!.muscleGroups).toEqual(['chest']);
   });
 });
