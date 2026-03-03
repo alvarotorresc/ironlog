@@ -1,5 +1,5 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
-import type { Workout, WorkoutSet, Exercise, WorkoutHistoryItem } from '../types';
+import type { Workout, WorkoutSet, Exercise, WorkoutHistoryItem, GroupType } from '../types';
 
 interface WorkoutRow {
   id: number;
@@ -17,6 +17,8 @@ interface WorkoutSetRow {
   reps: number | null;
   duration: number | null;
   distance: number | null;
+  group_id: number | null;
+  group_type: string | null;
 }
 
 interface WorkoutHistoryRow extends WorkoutRow {
@@ -29,6 +31,7 @@ interface WorkoutSetJoinRow extends WorkoutSetRow {
   e_name: string;
   e_type: string;
   e_muscle_group: string;
+  e_is_predefined: number;
   e_illustration: string | null;
   e_rest_seconds: number;
   e_created_at: string;
@@ -80,6 +83,8 @@ function rowToSet(row: WorkoutSetRow): WorkoutSet {
     reps: row.reps,
     duration: row.duration,
     distance: row.distance,
+    groupId: row.group_id,
+    groupType: row.group_type as GroupType | null,
   };
 }
 
@@ -235,10 +240,12 @@ export class WorkoutRepository {
       `SELECT
         ws.id, ws.workout_id, ws.exercise_id, ws.sort_order,
         ws.weight, ws.reps, ws.duration, ws.distance,
+        ws.group_id, ws.group_type,
         e.id as e_id,
         e.name as e_name,
         e.type as e_type,
         e.muscle_group as e_muscle_group,
+        e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
         e.created_at as e_created_at
@@ -259,6 +266,8 @@ export class WorkoutRepository {
             name: row.e_name,
             type: row.e_type as Exercise['type'],
             muscleGroup: row.e_muscle_group as Exercise['muscleGroup'],
+            muscleGroups: [row.e_muscle_group as Exercise['muscleGroup']],
+            isPredefined: row.e_is_predefined === 1,
             illustration: row.e_illustration,
             restSeconds: row.e_rest_seconds,
             createdAt: row.e_created_at,

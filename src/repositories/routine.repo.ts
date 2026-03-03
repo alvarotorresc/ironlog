@@ -1,5 +1,5 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
-import type { Routine, RoutineExercise, Exercise } from '../types';
+import type { Routine, RoutineExercise, Exercise, GroupType } from '../types';
 
 export interface RoutineWithExercises extends Routine {
   exercises: (RoutineExercise & { exercise: Exercise })[];
@@ -8,6 +8,8 @@ export interface RoutineWithExercises extends Routine {
 interface RoutineRow {
   id: number;
   name: string;
+  is_template: number;
+  description: string | null;
   created_at: string;
 }
 
@@ -16,10 +18,13 @@ interface RoutineExerciseJoinRow {
   routine_id: number;
   exercise_id: number;
   sort_order: number;
+  re_group_id: number | null;
+  re_group_type: string | null;
   e_id: number;
   e_name: string;
   e_type: string;
   e_muscle_group: string;
+  e_is_predefined: number;
   e_illustration: string | null;
   e_rest_seconds: number;
   e_created_at: string;
@@ -39,6 +44,8 @@ export class RoutineRepository {
     return {
       id: row!.id,
       name: row!.name,
+      isTemplate: row!.is_template === 1,
+      description: row!.description,
       createdAt: row!.created_at,
     };
   }
@@ -51,6 +58,8 @@ export class RoutineRepository {
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
+      isTemplate: row.is_template === 1,
+      description: row.description,
       createdAt: row.created_at,
     }));
   }
@@ -69,10 +78,13 @@ export class RoutineRepository {
         re.routine_id,
         re.exercise_id,
         re.sort_order,
+        re.group_id as re_group_id,
+        re.group_type as re_group_type,
         e.id as e_id,
         e.name as e_name,
         e.type as e_type,
         e.muscle_group as e_muscle_group,
+        e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
         e.created_at as e_created_at
@@ -86,17 +98,23 @@ export class RoutineRepository {
     return {
       id: routineRow.id,
       name: routineRow.name,
+      isTemplate: routineRow.is_template === 1,
+      description: routineRow.description,
       createdAt: routineRow.created_at,
       exercises: exerciseRows.map((row) => ({
         id: row.re_id,
         routineId: row.routine_id,
         exerciseId: row.exercise_id,
         order: row.sort_order,
+        groupId: row.re_group_id,
+        groupType: row.re_group_type as GroupType | null,
         exercise: {
           id: row.e_id,
           name: row.e_name,
           type: row.e_type as Exercise['type'],
           muscleGroup: row.e_muscle_group as Exercise['muscleGroup'],
+          muscleGroups: [row.e_muscle_group as Exercise['muscleGroup']],
+          isPredefined: row.e_is_predefined === 1,
           illustration: row.e_illustration,
           restSeconds: row.e_rest_seconds,
           createdAt: row.e_created_at,
@@ -118,6 +136,8 @@ export class RoutineRepository {
       routine = {
         id: row!.id,
         name: row!.name,
+        isTemplate: row!.is_template === 1,
+        description: row!.description,
         createdAt: row!.created_at,
       };
 
@@ -186,11 +206,14 @@ export class RoutineRepository {
         re.routine_id,
         re.exercise_id,
         re.sort_order,
+        re.group_id as re_group_id,
+        re.group_type as re_group_type,
         r.id as r_id,
         e.id as e_id,
         e.name as e_name,
         e.type as e_type,
         e.muscle_group as e_muscle_group,
+        e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
         e.created_at as e_created_at
@@ -208,11 +231,15 @@ export class RoutineRepository {
         routineId: row.routine_id,
         exerciseId: row.exercise_id,
         order: row.sort_order,
+        groupId: row.re_group_id,
+        groupType: row.re_group_type as GroupType | null,
         exercise: {
           id: row.e_id,
           name: row.e_name,
           type: row.e_type as Exercise['type'],
           muscleGroup: row.e_muscle_group as Exercise['muscleGroup'],
+          muscleGroups: [row.e_muscle_group as Exercise['muscleGroup']],
+          isPredefined: row.e_is_predefined === 1,
           illustration: row.e_illustration,
           restSeconds: row.e_rest_seconds,
           createdAt: row.e_created_at,
@@ -224,6 +251,8 @@ export class RoutineRepository {
     return routineRows.map((row) => ({
       id: row.id,
       name: row.name,
+      isTemplate: row.is_template === 1,
+      description: row.description,
       createdAt: row.created_at,
       exercises: exercisesByRoutine.get(row.id) ?? [],
     }));
