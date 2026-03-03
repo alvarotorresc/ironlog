@@ -2,11 +2,15 @@ export type ExerciseType = 'weights' | 'cardio' | 'calisthenics' | 'hiit' | 'fle
 
 export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'full_body';
 
+export type GroupType = 'superset' | 'circuit' | 'dropset';
+
 export interface Exercise {
   id: number;
   name: string;
   type: ExerciseType;
   muscleGroup: MuscleGroup;
+  muscleGroups: MuscleGroup[];
+  isPredefined: boolean;
   illustration: string | null;
   restSeconds: number;
   createdAt: string;
@@ -15,6 +19,8 @@ export interface Exercise {
 export interface Routine {
   id: number;
   name: string;
+  isTemplate: boolean;
+  description: string | null;
   createdAt: string;
 }
 
@@ -23,6 +29,8 @@ export interface RoutineExercise {
   routineId: number;
   exerciseId: number;
   order: number;
+  groupId: number | null;
+  groupType: GroupType | null;
 }
 
 export interface Workout {
@@ -41,6 +49,8 @@ export interface WorkoutSet {
   reps: number | null;
   duration: number | null;
   distance: number | null;
+  groupId: number | null;
+  groupType: GroupType | null;
 }
 
 export interface WorkoutHistoryItem extends Workout {
@@ -176,10 +186,34 @@ export interface BodyMeasurementExport {
 }
 
 export interface IronLogBackup {
-  version: 1;
+  version: 1 | 2;
   exportedAt: string;
   exercises: ExerciseExport[];
   routines: RoutineExport[];
   workouts: WorkoutExport[];
   bodyMeasurements: BodyMeasurementExport[];
+}
+
+// Body photos
+
+export interface BodyPhoto {
+  id: number;
+  measurementId: number;
+  photoPath: string;
+  createdAt: string;
+}
+
+// User settings
+
+export interface UserSetting {
+  key: string;
+  value: string;
+}
+
+// Badges
+
+export interface Badge {
+  id: number;
+  badgeKey: string;
+  unlockedAt: string;
 }
