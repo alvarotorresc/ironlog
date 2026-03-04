@@ -207,6 +207,49 @@ describe('Migration #4', () => {
     db = await createTestDatabase();
   });
 
+  it('should add notes column to workout_sets', async () => {
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group) VALUES ('Bench', 'weights', 'chest')",
+    );
+    await db.runAsync('INSERT INTO workouts (routine_id) VALUES (NULL)');
+    await db.runAsync(
+      "INSERT INTO workout_sets (workout_id, exercise_id, sort_order, notes) VALUES (1, 1, 1, 'Felt strong')",
+    );
+    const row = await db.getFirstAsync<{ notes: string }>(
+      'SELECT notes FROM workout_sets WHERE id = 1',
+    );
+    expect(row!.notes).toBe('Felt strong');
+  });
+
+  it('should default workout_sets notes to null', async () => {
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group) VALUES ('Bench', 'weights', 'chest')",
+    );
+    await db.runAsync('INSERT INTO workouts (routine_id) VALUES (NULL)');
+    await db.runAsync(
+      'INSERT INTO workout_sets (workout_id, exercise_id, sort_order) VALUES (1, 1, 1)',
+    );
+    const row = await db.getFirstAsync<{ notes: string | null }>(
+      'SELECT notes FROM workout_sets WHERE id = 1',
+    );
+    expect(row!.notes).toBeNull();
+  });
+
+  it('should record schema version 4', async () => {
+    const row = await db.getFirstAsync<{ version: number }>(
+      'SELECT MAX(version) as version FROM schema_version',
+    );
+    expect(row!.version).toBeGreaterThanOrEqual(4);
+  });
+});
+
+describe('Migration #5', () => {
+  let db: SQLiteDatabase;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+  });
+
   it('should add notes column to exercises', async () => {
     await db.runAsync(
       "INSERT INTO exercises (name, type, muscle_group, notes) VALUES ('Test', 'weights', 'chest', 'Keep elbows in')",
@@ -231,6 +274,6 @@ describe('Migration #4', () => {
     const row = await db.getFirstAsync<{ version: number }>(
       'SELECT MAX(version) as version FROM schema_version',
     );
-    expect(row!.version).toBe(4);
+    expect(row!.version).toBe(5);
   });
 });
