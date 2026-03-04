@@ -258,4 +258,53 @@ export const es: Record<TranslationKey, string> = {
   'backup.sharingUnavailable': 'El uso compartido no está disponible en este dispositivo',
   'backup.importing': 'Importando...',
   'backup.exporting': 'Exportando...',
+
+  // Badges
+  'badges.title': 'Logros',
+  'badges.unlocked': '{count}/{total} desbloqueados',
+  'badges.locked': '???',
+  'badges.newBadge': '\u00A1Logro desbloqueado!',
+  'badges.unlockedOn': 'Desbloqueado {date}',
+
+  // Badge: Workout milestones
+  'badge.first_workout.title': 'Primeros Pasos',
+  'badge.first_workout.desc': 'Completa tu primer entrenamiento',
+  'badge.workout_10.title': 'En Serio',
+  'badge.workout_10.desc': 'Completa 10 entrenamientos',
+  'badge.workout_50.title': 'Dedicado',
+  'badge.workout_50.desc': 'Completa 50 entrenamientos',
+  'badge.workout_100.title': 'Centuri\u00F3n',
+  'badge.workout_100.desc': 'Completa 100 entrenamientos',
+
+  // Badge: Streak
+  'badge.streak_3.title': 'En Llamas',
+  'badge.streak_3.desc': 'Racha de 3 d\u00EDas de entrenamiento',
+  'badge.streak_7.title': 'Imparable',
+  'badge.streak_7.desc': 'Racha de 7 d\u00EDas de entrenamiento',
+  'badge.streak_30.title': 'Voluntad de Hierro',
+  'badge.streak_30.desc': 'Racha de 30 d\u00EDas de entrenamiento',
+
+  // Badge: Volume
+  'badge.volume_1000.title': 'Primera Tonelada',
+  'badge.volume_1000.desc': 'Levanta 1.000 kg en total',
+  'badge.volume_10000.title': 'Levantador Pesado',
+  'badge.volume_10000.desc': 'Levanta 10.000 kg en total',
+  'badge.volume_100000.title': 'Mueve Monta\u00F1as',
+  'badge.volume_100000.desc': 'Levanta 100.000 kg en total',
+
+  // Badge: Exercise variety
+  'badge.exercises_10.title': 'Explorador',
+  'badge.exercises_10.desc': 'Usa 10 ejercicios diferentes',
+  'badge.exercises_25.title': 'Vers\u00E1til',
+  'badge.exercises_25.desc': 'Usa 25 ejercicios diferentes',
+
+  // Badge: Body tracking
+  'badge.first_measurement.title': 'Autoconsciente',
+  'badge.first_measurement.desc': 'Registra tu primera medida corporal',
+  'badge.measurements_10.title': 'Rastreador de Progreso',
+  'badge.measurements_10.desc': 'Registra 10 medidas corporales',
+
+  // Badge: Special
+  'badge.early_bird.title': 'Madrugador',
+  'badge.early_bird.desc': 'Completa un entrenamiento antes de las 7 AM',
 };

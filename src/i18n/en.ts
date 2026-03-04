@@ -250,6 +250,55 @@ export const en = {
   'backup.sharingUnavailable': 'Sharing is not available on this device',
   'backup.importing': 'Importing...',
   'backup.exporting': 'Exporting...',
+
+  // Badges
+  'badges.title': 'Badges',
+  'badges.unlocked': '{count}/{total} unlocked',
+  'badges.locked': '???',
+  'badges.newBadge': 'Badge unlocked!',
+  'badges.unlockedOn': 'Unlocked {date}',
+
+  // Badge: Workout milestones
+  'badge.first_workout.title': 'First Steps',
+  'badge.first_workout.desc': 'Complete your first workout',
+  'badge.workout_10.title': 'Getting Serious',
+  'badge.workout_10.desc': 'Complete 10 workouts',
+  'badge.workout_50.title': 'Dedicated',
+  'badge.workout_50.desc': 'Complete 50 workouts',
+  'badge.workout_100.title': 'Centurion',
+  'badge.workout_100.desc': 'Complete 100 workouts',
+
+  // Badge: Streak
+  'badge.streak_3.title': 'On Fire',
+  'badge.streak_3.desc': '3-day workout streak',
+  'badge.streak_7.title': 'Unstoppable',
+  'badge.streak_7.desc': '7-day workout streak',
+  'badge.streak_30.title': 'Iron Will',
+  'badge.streak_30.desc': '30-day workout streak',
+
+  // Badge: Volume
+  'badge.volume_1000.title': 'First Ton',
+  'badge.volume_1000.desc': 'Lift 1,000 kg total',
+  'badge.volume_10000.title': 'Heavy Lifter',
+  'badge.volume_10000.desc': 'Lift 10,000 kg total',
+  'badge.volume_100000.title': 'Mountain Mover',
+  'badge.volume_100000.desc': 'Lift 100,000 kg total',
+
+  // Badge: Exercise variety
+  'badge.exercises_10.title': 'Explorer',
+  'badge.exercises_10.desc': 'Use 10 different exercises',
+  'badge.exercises_25.title': 'Versatile',
+  'badge.exercises_25.desc': 'Use 25 different exercises',
+
+  // Badge: Body tracking
+  'badge.first_measurement.title': 'Self-Aware',
+  'badge.first_measurement.desc': 'Log your first body measurement',
+  'badge.measurements_10.title': 'Progress Tracker',
+  'badge.measurements_10.desc': 'Log 10 body measurements',
+
+  // Badge: Special
+  'badge.early_bird.title': 'Early Bird',
+  'badge.early_bird.desc': 'Complete a workout before 7 AM',
 } as const;
 
 export type TranslationKey = keyof typeof en;
