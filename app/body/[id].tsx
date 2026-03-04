@@ -16,7 +16,12 @@ import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
+import { BodyPhotoRepository } from '@/repositories/body-photo.repo';
 import { Input } from '@/components/ui';
+import { PhotoSection } from '@/components/PhotoSection';
+import { PhotoViewer } from '@/components/PhotoViewer';
+import { pickFromGallery, takePhoto, savePhoto, deletePhotoFile } from '@/services/photo.service';
+import type { BodyPhoto } from '@/types';
 
 interface FormData {
   weight: string;
@@ -27,6 +32,12 @@ interface FormData {
   biceps: string;
   thighs: string;
   notes: string;
+}
+
+interface PhotoItem {
+  id?: number;
+  uri: string;
+  isNew?: boolean;
 }
 
 function parseOptionalNumber(value: string): number | null {
@@ -48,6 +59,10 @@ export default function EditMeasurementScreen() {
   const [notFound, setNotFound] = useState(false);
   const [saving, setSaving] = useState(false);
   const [measuredAt, setMeasuredAt] = useState('');
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
+  const [photosToDelete, setPhotosToDelete] = useState<BodyPhoto[]>([]);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
   const [form, setForm] = useState<FormData>({
     weight: '',
     bodyFat: '',
@@ -81,6 +96,11 @@ export default function EditMeasurementScreen() {
           thighs: numberToString(measurement.thighs),
           notes: measurement.notes ?? '',
         });
+
+        // Load existing photos
+        const photoRepo = new BodyPhotoRepository(db);
+        const existingPhotos = await photoRepo.getPhotos(Number(id));
+        setPhotos(existingPhotos.map((p) => ({ id: p.id, uri: p.photoPath })));
       } catch (error) {
         console.error('Failed to load measurement:', error);
         setNotFound(true);
@@ -93,6 +113,48 @@ export default function EditMeasurementScreen() {
   const updateField = useCallback((field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }, []);
+
+  const handleAddFromCamera = useCallback(async () => {
+    try {
+      const result = await takePhoto();
+      if (result.cancelled) return;
+      setPhotos((prev) => [...prev, { uri: result.uri, isNew: true }]);
+    } catch {
+      Alert.alert(t('common.error'), t('body.photoError'));
+    }
+  }, [t]);
+
+  const handleAddFromGallery = useCallback(async () => {
+    try {
+      const result = await pickFromGallery();
+      if (result.cancelled) return;
+      setPhotos((prev) => [...prev, { uri: result.uri, isNew: true }]);
+    } catch {
+      Alert.alert(t('common.error'), t('body.photoError'));
+    }
+  }, [t]);
+
+  const handleDeletePhoto = useCallback(
+    (index: number) => {
+      setPhotos((prev) => {
+        const removed = prev[index];
+        if (removed && removed.id) {
+          // Mark existing photo for deletion on save
+          setPhotosToDelete((old) => [
+            ...old,
+            { id: removed.id!, measurementId: Number(id), photoPath: removed.uri, createdAt: '' },
+          ]);
+        }
+        return prev.filter((_, i) => i !== index);
+      });
+    },
+    [id],
+  );
+
+  const handlePhotoPress = useCallback((index: number) => {
+    setViewerIndex(index);
+    setViewerVisible(true);
   }, []);
 
   const validate = useCallback((): boolean => {
@@ -133,8 +195,8 @@ export default function EditMeasurementScreen() {
 
     try {
       const db = await getDatabase();
-      const repo = new BodyRepository(db);
-      await repo.update(Number(id), {
+      const bodyRepo = new BodyRepository(db);
+      await bodyRepo.update(Number(id), {
         weight: parseOptionalNumber(form.weight),
         bodyFat: parseOptionalNumber(form.bodyFat),
         chest: parseOptionalNumber(form.chest),
@@ -144,6 +206,25 @@ export default function EditMeasurementScreen() {
         thighs: parseOptionalNumber(form.thighs),
         notes: form.notes.trim() || null,
       });
+
+      // Handle photo changes
+      const photoRepo = new BodyPhotoRepository(db);
+
+      // Delete removed photos
+      for (const photo of photosToDelete) {
+        const deletedPath = await photoRepo.deletePhoto(photo.id);
+        if (deletedPath) {
+          await deletePhotoFile(deletedPath);
+        }
+      }
+
+      // Save new photos
+      const newPhotos = photos.filter((p) => p.isNew);
+      for (const photo of newPhotos) {
+        const savedPath = await savePhoto(photo.uri);
+        await photoRepo.addPhoto(Number(id), savedPath);
+      }
+
       router.back();
     } catch (error) {
       console.error('Failed to update measurement:', error);
@@ -151,7 +232,7 @@ export default function EditMeasurementScreen() {
     } finally {
       setSaving(false);
     }
-  }, [form, validate, saving, router, t, id]);
+  }, [form, photos, photosToDelete, validate, saving, router, t, id]);
 
   if (loading) {
     return (
@@ -290,14 +371,14 @@ export default function EditMeasurementScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Date — read-only */}
+          {/* Date -- read-only */}
           {measuredAt ? (
             <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
               {new Date(measuredAt).toLocaleDateString()}
             </Text>
           ) : null}
 
-          {/* Weight — Primary */}
+          {/* Weight -- Primary */}
           <Input
             label={t('body.add.weight')}
             placeholder={t('body.add.weightPlaceholder')}
@@ -393,8 +474,27 @@ export default function EditMeasurementScreen() {
             maxLength={500}
             style={{ minHeight: 80, textAlignVertical: 'top' }}
           />
+
+          {/* Photos Section */}
+          <PhotoSection
+            photos={photos}
+            onAddFromCamera={handleAddFromCamera}
+            onAddFromGallery={handleAddFromGallery}
+            onDelete={handleDeletePhoto}
+            onPhotoPress={handlePhotoPress}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Full-screen photo viewer */}
+      {photos.length > 0 && (
+        <PhotoViewer
+          photos={photos.map((p) => p.uri)}
+          initialIndex={viewerIndex}
+          visible={viewerVisible}
+          onClose={() => setViewerVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }

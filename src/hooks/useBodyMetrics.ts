@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
+import { BodyPhotoRepository } from '@/repositories/body-photo.repo';
 import type {
   BodyMeasurement,
   WeightDataPoint,
@@ -11,6 +12,7 @@ import type {
 
 interface UseBodyMeasurementsReturn {
   measurements: BodyMeasurement[];
+  photoCounts: Map<number, number>;
   isLoading: boolean;
   reload: () => Promise<void>;
 }
@@ -29,6 +31,7 @@ interface UseLatestMeasurementReturn {
 
 export function useBodyMeasurements(): UseBodyMeasurementsReturn {
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([]);
+  const [photoCounts, setPhotoCounts] = useState<Map<number, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -38,6 +41,15 @@ export function useBodyMeasurements(): UseBodyMeasurementsReturn {
       const repo = new BodyRepository(db);
       const result = await repo.getAll();
       setMeasurements(result);
+
+      if (result.length > 0) {
+        const photoRepo = new BodyPhotoRepository(db);
+        const ids = result.map((m) => m.id);
+        const counts = await photoRepo.getPhotoCountsForMeasurements(ids);
+        setPhotoCounts(counts);
+      } else {
+        setPhotoCounts(new Map());
+      }
     } catch (error) {
       console.error('Failed to load body measurements:', error);
     } finally {
@@ -49,7 +61,7 @@ export function useBodyMeasurements(): UseBodyMeasurementsReturn {
     load();
   }, [load]);
 
-  return { measurements, isLoading, reload: load };
+  return { measurements, photoCounts, isLoading, reload: load };
 }
 
 export function useWeightProgress(): UseWeightProgressReturn {
