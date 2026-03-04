@@ -16,6 +16,7 @@ import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
+import { MuscleGroupBadges } from '@/components/MuscleGroupBadges';
 import { ProgressChart } from '@/components/ProgressChart';
 import { PeriodSelector } from '@/components/PeriodSelector';
 import { Card } from '@/components/ui';
@@ -63,33 +64,6 @@ function TypeBadge({ type }: { type: string }) {
           fontSize: 12,
           fontWeight: '600',
           color: c.text,
-        }}
-      >
-        {t(key)}
-      </Text>
-    </View>
-  );
-}
-
-function MuscleGroupBadge({ group }: { group: string }) {
-  const { t } = useTranslation();
-  const key = `muscle.${group}` as TranslationKey;
-  return (
-    <View
-      style={{
-        backgroundColor: colors.bg.tertiary,
-        paddingVertical: 4,
-        paddingHorizontal: 10,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: colors.border,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: '500',
-          color: colors.text.secondary,
         }}
       >
         {t(key)}
@@ -300,7 +274,10 @@ export default function ExerciseDetailScreen() {
             }}
           >
             <TypeBadge type={exercise.type} />
-            <MuscleGroupBadge group={exercise.muscleGroup} />
+            <MuscleGroupBadges
+              muscleGroups={exercise.muscleGroups}
+              primaryGroup={exercise.muscleGroup}
+            />
           </View>
 
           {/* Rest time */}

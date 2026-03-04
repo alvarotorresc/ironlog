@@ -23,28 +23,28 @@ IronLog transmite energia. No es una app delicada ni decorativa — es una herra
 
 ## Paleta de colores (dark-only)
 
-| Token | Hex | Uso |
-|-------|-----|-----|
-| `bg-primary` | `#0A0A0A` | Fondo principal, base de toda la app |
-| `bg-secondary` | `#111111` | Cards, secciones elevadas |
-| `bg-tertiary` | `#1A1A1A` | Inputs, hovers, elementos interactivos |
-| `bg-elevated` | `#1F1F1F` | Cards destacadas, modals |
-| `border` | `#2E2E2E` | Bordes de cards, divisores |
-| `border-bright` | `#3A3A3A` | Bordes en hover, focus |
-| `text-primary` | `#EDEDED` | Texto principal, headings, numeros grandes |
-| `text-secondary` | `#A3A3A3` | Labels, metadata, texto de apoyo |
-| `text-tertiary` | `#525252` | Placeholders, hints, texto deshabilitado |
-| `brand-blue` | `#3291FF` | Botones primarios, links, focus rings |
-| `brand-red` | `#F43F5E` | PRs, records, badges de logro |
-| `theme-slate` | `#64748B` | Color tematico: iconos decorativos, acentos |
-| `theme-slate-bright` | `#94A3B8` | Variante clara del slate para contraste |
-| `success` | `#22C55E` | Racha activa, set completado, positivo |
-| `warning` | `#F59E0B` | Timer corriendo, alertas |
-| `error` | `#EF4444` | Borrar, descartar, errores |
-| `chart-line` | `#3291FF` | Linea principal de graficas |
-| `chart-area` | `rgba(50,145,255,0.15)` | Area bajo la curva en graficas |
-| `chart-grid` | `#2E2E2E` | Gridlines de graficas |
-| `chart-pr` | `#F43F5E` | Marcadores de PR en graficas |
+| Token                | Hex                     | Uso                                         |
+| -------------------- | ----------------------- | ------------------------------------------- |
+| `bg-primary`         | `#0A0A0A`               | Fondo principal, base de toda la app        |
+| `bg-secondary`       | `#111111`               | Cards, secciones elevadas                   |
+| `bg-tertiary`        | `#1A1A1A`               | Inputs, hovers, elementos interactivos      |
+| `bg-elevated`        | `#1F1F1F`               | Cards destacadas, modals                    |
+| `border`             | `#2E2E2E`               | Bordes de cards, divisores                  |
+| `border-bright`      | `#3A3A3A`               | Bordes en hover, focus                      |
+| `text-primary`       | `#EDEDED`               | Texto principal, headings, numeros grandes  |
+| `text-secondary`     | `#A3A3A3`               | Labels, metadata, texto de apoyo            |
+| `text-tertiary`      | `#525252`               | Placeholders, hints, texto deshabilitado    |
+| `brand-blue`         | `#3291FF`               | Botones primarios, links, focus rings       |
+| `brand-red`          | `#F43F5E`               | PRs, records, badges de logro               |
+| `theme-slate`        | `#64748B`               | Color tematico: iconos decorativos, acentos |
+| `theme-slate-bright` | `#94A3B8`               | Variante clara del slate para contraste     |
+| `success`            | `#22C55E`               | Racha activa, set completado, positivo      |
+| `warning`            | `#F59E0B`               | Timer corriendo, alertas                    |
+| `error`              | `#EF4444`               | Borrar, descartar, errores                  |
+| `chart-line`         | `#3291FF`               | Linea principal de graficas                 |
+| `chart-area`         | `rgba(50,145,255,0.15)` | Area bajo la curva en graficas              |
+| `chart-grid`         | `#2E2E2E`               | Gridlines de graficas                       |
+| `chart-pr`           | `#F43F5E`               | Marcadores de PR en graficas                |
 
 ---
 
@@ -57,19 +57,20 @@ IronLog transmite energia. No es una app delicada ni decorativa — es una herra
 
 ### Escala
 
-| Token | Size | Line Height | Uso |
-|-------|------|-------------|-----|
-| `xs` | 12px | 16px | Badges de tipo, timestamps |
-| `sm` | 14px | 20px | Labels de campos, metadata |
-| `base` | 16px | 24px | Body text, nombres de ejercicios en listas |
-| `lg` | 18px | 28px | Subtitulos de seccion |
-| `xl` | 20px | 28px | Nombres de ejercicio en workout |
-| `2xl` | 24px | 32px | Titulos de seccion (Home stats) |
-| `3xl` | 30px | 36px | Titulos de pantalla |
-| `4xl` | 36px | 40px | Numeros grandes de stats |
-| `5xl` | 48px | 48px | Timer countdown, numero hero |
+| Token  | Size | Line Height | Uso                                        |
+| ------ | ---- | ----------- | ------------------------------------------ |
+| `xs`   | 12px | 16px        | Badges de tipo, timestamps                 |
+| `sm`   | 14px | 20px        | Labels de campos, metadata                 |
+| `base` | 16px | 24px        | Body text, nombres de ejercicios en listas |
+| `lg`   | 18px | 28px        | Subtitulos de seccion                      |
+| `xl`   | 20px | 28px        | Nombres de ejercicio en workout            |
+| `2xl`  | 24px | 32px        | Titulos de seccion (Home stats)            |
+| `3xl`  | 30px | 36px        | Titulos de pantalla                        |
+| `4xl`  | 36px | 40px        | Numeros grandes de stats                   |
+| `5xl`  | 48px | 48px        | Timer countdown, numero hero               |
 
 ### Regla clave para gym UX
+
 Los **numeros de rendimiento** (peso, reps, timer) usan Geist Mono en tamano grande. Son el protagonista visual de la app — el usuario necesita leerlos en un vistazo rapido.
 
 ---
@@ -82,26 +83,27 @@ Los **numeros de rendimiento** (peso, reps, timer) usan Geist Mono en tamano gra
 - **Color:** `currentColor` (hereda del contexto)
 
 ### Iconos de tabs
-| Tab | Icono Lucide | Activo |
-|-----|-------------|--------|
-| Home | `Home` | brand-blue |
-| Exercises | `Dumbbell` | brand-blue |
-| Routines | `ListChecks` | brand-blue |
-| History | `Clock` | brand-blue |
+
+| Tab       | Icono Lucide | Activo     |
+| --------- | ------------ | ---------- |
+| Home      | `Home`       | brand-blue |
+| Exercises | `Dumbbell`   | brand-blue |
+| Routines  | `ListChecks` | brand-blue |
+| History   | `Clock`      | brand-blue |
 
 ---
 
 ## Espaciado clave (mobile-first)
 
-| Token | Valor | Uso |
-|-------|-------|-----|
-| `space-1` | 4px | Gap minimo |
-| `space-2` | 8px | Padding compacto, gap entre badges |
-| `space-3` | 12px | Gap entre sets |
-| `space-4` | 16px | Padding de cards, gap entre items |
-| `space-5` | 20px | Padding lateral de pantalla |
-| `space-6` | 24px | Separacion entre secciones |
-| `space-8` | 32px | Espacio grande entre bloques |
+| Token     | Valor | Uso                                |
+| --------- | ----- | ---------------------------------- |
+| `space-1` | 4px   | Gap minimo                         |
+| `space-2` | 8px   | Padding compacto, gap entre badges |
+| `space-3` | 12px  | Gap entre sets                     |
+| `space-4` | 16px  | Padding de cards, gap entre items  |
+| `space-5` | 20px  | Padding lateral de pantalla        |
+| `space-6` | 24px  | Separacion entre secciones         |
+| `space-8` | 32px  | Espacio grande entre bloques       |
 
 ---
 

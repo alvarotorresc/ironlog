@@ -146,6 +146,7 @@ export interface ExerciseExport {
   name: string;
   type: string;
   muscleGroup: string;
+  muscleGroups?: string[];
   illustration: string | null;
   restSeconds: number;
   createdAt: string;

@@ -77,6 +77,8 @@ export const es: Record<TranslationKey, string> = {
   'exercise.create.namePlaceholder': 'ej. Press de Banca',
   'exercise.create.type': 'Tipo',
   'exercise.create.muscleGroup': 'Grupo Muscular',
+  'exercise.create.muscleGroups': 'Grupos Musculares',
+  'exercise.create.muscleGroupsPlaceholder': 'Selecciona grupos musculares...',
   'exercise.create.restTime': 'Descanso por defecto (segundos)',
   'exercise.create.restPlaceholder': 'ej. 90',
 
@@ -178,6 +180,7 @@ export const es: Record<TranslationKey, string> = {
   'muscle.arms': 'Brazos',
   'muscle.core': 'Core',
   'muscle.full_body': 'Cuerpo Completo',
+  'muscle.more': '+{count} más',
 
   // Exercise types
   'type.weights': 'Pesas',

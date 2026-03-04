@@ -73,6 +73,8 @@ export const en = {
   'exercise.create.namePlaceholder': 'e.g. Bench Press',
   'exercise.create.type': 'Type',
   'exercise.create.muscleGroup': 'Muscle Group',
+  'exercise.create.muscleGroups': 'Muscle Groups',
+  'exercise.create.muscleGroupsPlaceholder': 'Select muscle groups...',
   'exercise.create.restTime': 'Default Rest (seconds)',
   'exercise.create.restPlaceholder': 'e.g. 90',
 
@@ -170,6 +172,7 @@ export const en = {
   'muscle.arms': 'Arms',
   'muscle.core': 'Core',
   'muscle.full_body': 'Full Body',
+  'muscle.more': '+{count} more',
 
   // Exercise types
   'type.weights': 'Weights',

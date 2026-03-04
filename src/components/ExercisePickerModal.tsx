@@ -3,10 +3,10 @@ import { View, Text, Pressable, Modal, FlatList, ActivityIndicator, TextInput } 
 import { X, Check, Search } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
-import type { TranslationKey } from '@/i18n';
 import { getDatabase } from '@/db/connection';
 import { ExerciseRepository } from '@/repositories/exercise.repo';
 import { ExerciseIllustration } from './ExerciseIllustration';
+import { MuscleGroupBadges } from './MuscleGroupBadges';
 import type { Exercise } from '@/types';
 
 interface ExercisePickerModalProps {
@@ -51,7 +51,10 @@ export function ExercisePickerModal({
     if (!searchQuery.trim()) return exercises;
     const q = searchQuery.toLowerCase();
     return exercises.filter(
-      (e) => e.name.toLowerCase().includes(q) || e.muscleGroup.toLowerCase().includes(q),
+      (e) =>
+        e.name.toLowerCase().includes(q) ||
+        e.muscleGroups.some((g) => g.toLowerCase().includes(q)) ||
+        e.muscleGroup.toLowerCase().includes(q),
     );
   }, [exercises, searchQuery]);
 
@@ -223,16 +226,11 @@ export function ExercisePickerModal({
                             >
                               {item.name}
                             </Text>
-                            <Text
-                              style={{
-                                fontSize: 12,
-                                color: colors.text.tertiary,
-                                flexShrink: 0,
-                              }}
-                              numberOfLines={1}
-                            >
-                              {t(`muscle.${item.muscleGroup}` as TranslationKey)}
-                            </Text>
+                            <MuscleGroupBadges
+                              muscleGroups={item.muscleGroups}
+                              primaryGroup={item.muscleGroup}
+                              compact
+                            />
                           </View>
                         </View>
                         {isSelected && (

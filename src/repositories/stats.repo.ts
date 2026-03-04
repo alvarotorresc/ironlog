@@ -386,17 +386,18 @@ export class StatsRepository {
 
     const rows = await this.db.getAllAsync<MuscleGroupVolumeRow>(
       `SELECT
-         e.muscle_group,
+         emg.muscle_group,
          COALESCE(SUM(ws.weight * ws.reps), 0) as total_volume
        FROM workout_sets ws
        JOIN workouts w ON w.id = ws.workout_id
        JOIN exercises e ON e.id = ws.exercise_id
+       JOIN exercise_muscle_groups emg ON emg.exercise_id = e.id
        WHERE w.finished_at IS NOT NULL
          AND e.type IN ${VOLUME_TYPES}
          AND ws.weight IS NOT NULL
          AND ws.reps IS NOT NULL
          ${dateFilter}
-       GROUP BY e.muscle_group
+       GROUP BY emg.muscle_group
        ORDER BY total_volume DESC`,
     );
 
@@ -416,13 +417,14 @@ export class StatsRepository {
 
     const rows = await this.db.getAllAsync<FatigueRow>(
       `SELECT
-         e.muscle_group,
+         emg.muscle_group,
          MAX(date(w.started_at)) as last_workout
        FROM workout_sets ws
        JOIN workouts w ON w.id = ws.workout_id
        JOIN exercises e ON e.id = ws.exercise_id
+       JOIN exercise_muscle_groups emg ON emg.exercise_id = e.id
        WHERE w.finished_at IS NOT NULL
-       GROUP BY e.muscle_group`,
+       GROUP BY emg.muscle_group`,
     );
 
     const rowMap = new Map(rows.map((r) => [r.muscle_group, r.last_workout]));
