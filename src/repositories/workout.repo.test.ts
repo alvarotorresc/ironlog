@@ -425,6 +425,84 @@ describe('WorkoutRepository', () => {
     });
   });
 
+  it('should add a set with notes', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    const set = await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 80,
+      reps: 10,
+      notes: 'Felt strong',
+    });
+
+    expect(set.notes).toBe('Felt strong');
+  });
+
+  it('should default notes to null when not provided', async () => {
+    const workout = await workoutRepo.start(routineId);
+
+    const set = await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 80,
+      reps: 10,
+    });
+
+    expect(set.notes).toBeNull();
+  });
+
+  it('should update set notes', async () => {
+    const workout = await workoutRepo.start(routineId);
+    const set = await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 80,
+      reps: 10,
+    });
+
+    await workoutRepo.updateSet(set.id, { notes: 'Struggled on last rep' });
+
+    const sets = await workoutRepo.getSetsForWorkout(workout.id);
+    expect(sets[0].notes).toBe('Struggled on last rep');
+  });
+
+  it('should clear notes by setting to null', async () => {
+    const workout = await workoutRepo.start(routineId);
+    const set = await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 80,
+      reps: 10,
+      notes: 'Some note',
+    });
+
+    await workoutRepo.updateSet(set.id, { notes: null });
+
+    const sets = await workoutRepo.getSetsForWorkout(workout.id);
+    expect(sets[0].notes).toBeNull();
+  });
+
+  it('should include notes in workout detail', async () => {
+    const workout = await workoutRepo.start(routineId);
+    await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: benchId,
+      order: 1,
+      weight: 80,
+      reps: 10,
+      notes: 'PR attempt',
+    });
+
+    const detail = await workoutRepo.getDetail(workout.id);
+
+    expect(detail!.exercises[0].sets[0].notes).toBe('PR attempt');
+  });
+
   it('should return sets ordered by exercise and sort_order', async () => {
     const workout = await workoutRepo.start(routineId);
 

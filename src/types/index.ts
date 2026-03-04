@@ -52,6 +52,7 @@ export interface WorkoutSet {
   distance: number | null;
   groupId: number | null;
   groupType: GroupType | null;
+  notes: string | null;
 }
 
 export interface WorkoutHistoryItem extends Workout {
@@ -173,6 +174,7 @@ export interface WorkoutExport {
     reps: number | null;
     duration: number | null;
     distance: number | null;
+    notes?: string | null;
   }>;
 }
 
