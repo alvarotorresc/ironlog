@@ -15,6 +15,7 @@ import { Plus, Scale, TrendingDown, TrendingUp, Minus, Trash2, Pencil } from 'lu
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import type { TranslationKey } from '@/i18n';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
 import { useBodyMeasurements, useBodyMetricProgress } from '@/hooks/useBodyMetrics';
@@ -31,10 +32,22 @@ function formatDate(dateStr: string): string {
   return `${month} ${day}, ${year}`;
 }
 
-function WeightTrend({ current, previous }: { current: number; previous: number | null }) {
+function WeightTrend({
+  current,
+  previous,
+  convertWeight,
+  unitLabel,
+}: {
+  current: number;
+  previous: number | null;
+  convertWeight: (kg: number) => number;
+  unitLabel: string;
+}) {
   const { t } = useTranslation();
   if (previous === null) return null;
-  const diff = current - previous;
+  const displayCurrent = convertWeight(current);
+  const displayPrevious = convertWeight(previous);
+  const diff = displayCurrent - displayPrevious;
   if (Math.abs(diff) < 0.1) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -51,7 +64,7 @@ function WeightTrend({ current, previous }: { current: number; previous: number 
       <Icon size={14} color={color} strokeWidth={1.5} />
       <Text style={{ fontSize: 12, color }}>
         {isUp ? '+' : ''}
-        {diff.toFixed(1)} kg
+        {Math.round(diff * 10) / 10} {unitLabel}
       </Text>
     </View>
   );
@@ -60,22 +73,48 @@ function WeightTrend({ current, previous }: { current: number; previous: number 
 type MetricConfig = {
   field: BodyMetricField;
   labelKey: TranslationKey;
-  unit: string;
+  unitType: 'weight' | 'percent' | 'length';
   color: string;
 };
 
 const METRICS: MetricConfig[] = [
-  { field: 'weight', labelKey: 'body.chartWeight', unit: 'kg', color: colors.brand.blue },
-  { field: 'body_fat', labelKey: 'body.chartBodyFat', unit: '%', color: colors.brand.red },
-  { field: 'waist', labelKey: 'body.chartWaist', unit: 'cm', color: colors.semantic.warning },
-  { field: 'chest', labelKey: 'body.chartChest', unit: 'cm', color: colors.semantic.success },
-  { field: 'hips', labelKey: 'body.chartHips', unit: 'cm', color: colors.theme.slateBright },
-  { field: 'biceps', labelKey: 'body.chartBiceps', unit: 'cm', color: colors.brand.blue },
-  { field: 'thighs', labelKey: 'body.chartThighs', unit: 'cm', color: colors.semantic.success },
+  { field: 'weight', labelKey: 'body.chartWeight', unitType: 'weight', color: colors.brand.blue },
+  {
+    field: 'body_fat',
+    labelKey: 'body.chartBodyFat',
+    unitType: 'percent',
+    color: colors.brand.red,
+  },
+  {
+    field: 'waist',
+    labelKey: 'body.chartWaist',
+    unitType: 'length',
+    color: colors.semantic.warning,
+  },
+  {
+    field: 'chest',
+    labelKey: 'body.chartChest',
+    unitType: 'length',
+    color: colors.semantic.success,
+  },
+  {
+    field: 'hips',
+    labelKey: 'body.chartHips',
+    unitType: 'length',
+    color: colors.theme.slateBright,
+  },
+  { field: 'biceps', labelKey: 'body.chartBiceps', unitType: 'length', color: colors.brand.blue },
+  {
+    field: 'thighs',
+    labelKey: 'body.chartThighs',
+    unitType: 'length',
+    color: colors.semantic.success,
+  },
 ];
 
 function BodyMetricsCharts({ measurements }: { measurements: BodyMeasurement[] }) {
   const { t } = useTranslation();
+  const { convertWeight, convertLength } = useSettings();
   const [selectedMetric, setSelectedMetric] = useState<BodyMetricField | null>(null);
   const [period, setPeriod] = useState<TimePeriod>('3m');
 
@@ -104,6 +143,21 @@ function BodyMetricsCharts({ measurements }: { measurements: BodyMeasurement[] }
   const activeConfig = METRICS.find((m) => m.field === activeMetric) ?? null;
 
   const { data, isLoading } = useBodyMetricProgress(activeMetric, period);
+
+  const convertedData = useMemo(() => {
+    if (!activeConfig) return data;
+    const converter =
+      activeConfig.unitType === 'weight'
+        ? convertWeight
+        : activeConfig.unitType === 'length'
+          ? convertLength
+          : null;
+    if (!converter) return data;
+    return data.map((d) => ({
+      ...d,
+      value: Math.round(converter(d.value) * 10) / 10,
+    }));
+  }, [data, activeConfig, convertWeight, convertLength]);
 
   if (availableMetrics.length === 0) return null;
 
@@ -170,13 +224,13 @@ function BodyMetricsCharts({ measurements }: { measurements: BodyMeasurement[] }
         <View style={{ height: 160, alignItems: 'center', justifyContent: 'center' }}>
           <ActivityIndicator size="small" color={colors.brand.blue} />
         </View>
-      ) : data.length < 2 ? (
+      ) : convertedData.length < 2 ? (
         <View style={{ height: 160, alignItems: 'center', justifyContent: 'center' }}>
           <Text style={{ fontSize: 13, color: colors.text.tertiary }}>{t('body.chartNoData')}</Text>
         </View>
       ) : (
         <ProgressChart
-          data={data}
+          data={convertedData}
           color={activeConfig?.color ?? colors.brand.blue}
           height={160}
           showArea
@@ -191,11 +245,19 @@ function MeasurementCard({
   previousWeight,
   onEdit,
   onDelete,
+  formatWeight,
+  formatLength,
+  convertWeight,
+  weightUnitLabel,
 }: {
   measurement: BodyMeasurement;
   previousWeight: number | null;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
+  formatWeight: (kg: number) => string;
+  formatLength: (cm: number) => string;
+  convertWeight: (kg: number) => number;
+  weightUnitLabel: string;
 }) {
   const { t } = useTranslation();
 
@@ -210,15 +272,15 @@ function MeasurementCard({
   if (measurement.bodyFat !== null)
     details.push({ label: t('body.bodyFat'), value: `${measurement.bodyFat}%` });
   if (measurement.chest !== null)
-    details.push({ label: t('body.chest'), value: `${measurement.chest} cm` });
+    details.push({ label: t('body.chest'), value: formatLength(measurement.chest) });
   if (measurement.waist !== null)
-    details.push({ label: t('body.waist'), value: `${measurement.waist} cm` });
+    details.push({ label: t('body.waist'), value: formatLength(measurement.waist) });
   if (measurement.hips !== null)
-    details.push({ label: t('body.hips'), value: `${measurement.hips} cm` });
+    details.push({ label: t('body.hips'), value: formatLength(measurement.hips) });
   if (measurement.biceps !== null)
-    details.push({ label: t('body.biceps'), value: `${measurement.biceps} cm` });
+    details.push({ label: t('body.biceps'), value: formatLength(measurement.biceps) });
   if (measurement.thighs !== null)
-    details.push({ label: t('body.thighs'), value: `${measurement.thighs} cm` });
+    details.push({ label: t('body.thighs'), value: formatLength(measurement.thighs) });
 
   return (
     <View
@@ -264,11 +326,16 @@ function MeasurementCard({
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 6 }}>
         {measurement.weight !== null && (
           <Text style={{ fontSize: 24, fontWeight: '700', color: colors.text.primary }}>
-            {measurement.weight} kg
+            {formatWeight(measurement.weight)}
           </Text>
         )}
         {measurement.weight !== null && (
-          <WeightTrend current={measurement.weight} previous={previousWeight} />
+          <WeightTrend
+            current={measurement.weight}
+            previous={previousWeight}
+            convertWeight={convertWeight}
+            unitLabel={weightUnitLabel}
+          />
         )}
       </View>
 
@@ -322,6 +389,8 @@ function MeasurementCard({
 export default function BodyScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { formatWeight, formatLength, convertWeight, weightUnit } = useSettings();
+  const wUnitLabel = weightUnit();
   const [refreshing, setRefreshing] = useState(false);
   const { measurements, isLoading, reload: reloadMeasurements } = useBodyMeasurements();
 
@@ -433,6 +502,10 @@ export default function BodyScreen() {
                 previousWeight={previousWeight}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                formatWeight={formatWeight}
+                formatLength={formatLength}
+                convertWeight={convertWeight}
+                weightUnitLabel={wUnitLabel}
               />
             );
           }}

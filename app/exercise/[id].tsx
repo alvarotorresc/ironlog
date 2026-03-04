@@ -32,6 +32,7 @@ import { PeriodSelector } from '@/components/PeriodSelector';
 import { Card } from '@/components/ui';
 import { useExerciseStats, useExerciseProgress } from '@/hooks/useStats';
 import { useTranslation, type TranslationKey } from '@/i18n';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { Exercise, TimePeriod } from '@/types';
 
 const typeColors: Record<string, { bg: string; text: string }> = {
@@ -47,13 +48,6 @@ function formatDate(dateStr: string | null): string {
   const parts = dateStr.split('-');
   if (parts.length < 3) return dateStr;
   return `${parts[1]}/${parts[2]}`;
-}
-
-function formatVolume(volume: number): string {
-  if (volume >= 1000) {
-    return `${(volume / 1000).toFixed(1)}k`;
-  }
-  return String(Math.round(volume));
 }
 
 function TypeBadge({ type }: { type: string }) {
@@ -147,6 +141,7 @@ export default function ExerciseDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation();
+  const { formatWeight, formatVolume: fmtVolume, weightUnit, convertWeight } = useSettings();
   const exerciseId = parseInt(id ?? '0', 10);
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
@@ -465,7 +460,7 @@ export default function ExerciseDetailScreen() {
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <StatCard
                 icon={Trophy}
-                value={stats.currentPR !== null ? `${stats.currentPR}kg` : '-'}
+                value={stats.currentPR !== null ? formatWeight(stats.currentPR) : '-'}
                 label={t('exercise.currentPR')}
                 color={stats.currentPR !== null ? colors.chart.pr : colors.text.tertiary}
               />
@@ -483,7 +478,7 @@ export default function ExerciseDetailScreen() {
               />
               <StatCard
                 icon={TrendingUp}
-                value={stats.averageVolume > 0 ? formatVolume(stats.averageVolume) : '-'}
+                value={stats.averageVolume > 0 ? fmtVolume(stats.averageVolume) : '-'}
                 label={t('exercise.avgVolume')}
               />
             </View>
@@ -516,12 +511,12 @@ export default function ExerciseDetailScreen() {
                       marginBottom: 8,
                     }}
                   >
-                    {t('exercise.maxWeight')} ({t('common.kg')})
+                    {t('exercise.maxWeight')} ({weightUnit()})
                   </Text>
                   <ProgressChart
                     data={maxWeightData.map((d) => ({
                       date: d.date,
-                      value: d.maxWeight,
+                      value: Math.round(convertWeight(d.maxWeight) * 10) / 10,
                     }))}
                     color={colors.chart.line}
                     height={180}
@@ -538,12 +533,12 @@ export default function ExerciseDetailScreen() {
                       marginBottom: 8,
                     }}
                   >
-                    {t('exercise.volume')} ({t('common.kg')})
+                    {t('exercise.volume')} ({weightUnit()})
                   </Text>
                   <ProgressChart
                     data={volumeData.map((d) => ({
                       date: d.date,
-                      value: d.volume,
+                      value: Math.round(convertWeight(d.volume)),
                     }))}
                     color={colors.chart.line}
                     height={180}

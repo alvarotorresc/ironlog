@@ -14,6 +14,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Check } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
+import { useSettings } from '@/contexts/SettingsContext';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
 import { Input } from '@/components/ui';
@@ -36,14 +37,20 @@ function parseOptionalNumber(value: string): number | null {
   return isNaN(num) ? null : num;
 }
 
-function numberToString(value: number | null): string {
-  return value === null ? '' : String(value);
+function numberToString(value: number | null, convert?: (v: number) => number): string {
+  if (value === null) return '';
+  const displayValue = convert ? Math.round(convert(value) * 10) / 10 : value;
+  return String(displayValue);
 }
 
 export default function EditMeasurementScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t } = useTranslation();
+  const { weightUnit, lengthUnit, convertWeight, convertLength, toMetricWeight, toMetricLength } =
+    useSettings();
+  const wUnit = weightUnit();
+  const lUnit = lengthUnit();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -72,13 +79,13 @@ export default function EditMeasurementScreen() {
         }
         setMeasuredAt(measurement.measuredAt);
         setForm({
-          weight: numberToString(measurement.weight),
+          weight: numberToString(measurement.weight, convertWeight),
           bodyFat: numberToString(measurement.bodyFat),
-          chest: numberToString(measurement.chest),
-          waist: numberToString(measurement.waist),
-          hips: numberToString(measurement.hips),
-          biceps: numberToString(measurement.biceps),
-          thighs: numberToString(measurement.thighs),
+          chest: numberToString(measurement.chest, convertLength),
+          waist: numberToString(measurement.waist, convertLength),
+          hips: numberToString(measurement.hips, convertLength),
+          biceps: numberToString(measurement.biceps, convertLength),
+          thighs: numberToString(measurement.thighs, convertLength),
           notes: measurement.notes ?? '',
         });
       } catch (error) {
@@ -88,7 +95,7 @@ export default function EditMeasurementScreen() {
         setLoading(false);
       }
     })();
-  }, [id]);
+  }, [id, convertWeight, convertLength]);
 
   const updateField = useCallback((field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -134,14 +141,21 @@ export default function EditMeasurementScreen() {
     try {
       const db = await getDatabase();
       const repo = new BodyRepository(db);
+      const rawWeight = parseOptionalNumber(form.weight);
+      const rawChest = parseOptionalNumber(form.chest);
+      const rawWaist = parseOptionalNumber(form.waist);
+      const rawHips = parseOptionalNumber(form.hips);
+      const rawBiceps = parseOptionalNumber(form.biceps);
+      const rawThighs = parseOptionalNumber(form.thighs);
+
       await repo.update(Number(id), {
-        weight: parseOptionalNumber(form.weight),
+        weight: rawWeight != null ? toMetricWeight(rawWeight) : null,
         bodyFat: parseOptionalNumber(form.bodyFat),
-        chest: parseOptionalNumber(form.chest),
-        waist: parseOptionalNumber(form.waist),
-        hips: parseOptionalNumber(form.hips),
-        biceps: parseOptionalNumber(form.biceps),
-        thighs: parseOptionalNumber(form.thighs),
+        chest: rawChest != null ? toMetricLength(rawChest) : null,
+        waist: rawWaist != null ? toMetricLength(rawWaist) : null,
+        hips: rawHips != null ? toMetricLength(rawHips) : null,
+        biceps: rawBiceps != null ? toMetricLength(rawBiceps) : null,
+        thighs: rawThighs != null ? toMetricLength(rawThighs) : null,
         notes: form.notes.trim() || null,
       });
       router.back();
@@ -151,7 +165,7 @@ export default function EditMeasurementScreen() {
     } finally {
       setSaving(false);
     }
-  }, [form, validate, saving, router, t, id]);
+  }, [form, validate, saving, router, t, id, toMetricWeight, toMetricLength]);
 
   if (loading) {
     return (
@@ -299,7 +313,7 @@ export default function EditMeasurementScreen() {
 
           {/* Weight — Primary */}
           <Input
-            label={t('body.add.weight')}
+            label={`${t('body.add.weight')} (${wUnit})`}
             placeholder={t('body.add.weightPlaceholder')}
             keyboardType="decimal-pad"
             value={form.weight}
@@ -325,14 +339,14 @@ export default function EditMeasurementScreen() {
               marginTop: 8,
             }}
           >
-            {t('body.add.measurements')}
+            {`${t('body.add.measurements')} (${lUnit})`}
           </Text>
 
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <View style={{ flex: 1 }}>
               <Input
                 label={t('body.chest')}
-                placeholder={t('common.cm')}
+                placeholder={lUnit}
                 keyboardType="decimal-pad"
                 value={form.chest}
                 onChangeText={(v) => updateField('chest', v)}
@@ -342,7 +356,7 @@ export default function EditMeasurementScreen() {
             <View style={{ flex: 1 }}>
               <Input
                 label={t('body.waist')}
-                placeholder={t('common.cm')}
+                placeholder={lUnit}
                 keyboardType="decimal-pad"
                 value={form.waist}
                 onChangeText={(v) => updateField('waist', v)}
@@ -355,7 +369,7 @@ export default function EditMeasurementScreen() {
             <View style={{ flex: 1 }}>
               <Input
                 label={t('body.hips')}
-                placeholder={t('common.cm')}
+                placeholder={lUnit}
                 keyboardType="decimal-pad"
                 value={form.hips}
                 onChangeText={(v) => updateField('hips', v)}
@@ -365,7 +379,7 @@ export default function EditMeasurementScreen() {
             <View style={{ flex: 1 }}>
               <Input
                 label={t('body.biceps')}
-                placeholder={t('common.cm')}
+                placeholder={lUnit}
                 keyboardType="decimal-pad"
                 value={form.biceps}
                 onChangeText={(v) => updateField('biceps', v)}
@@ -376,7 +390,7 @@ export default function EditMeasurementScreen() {
 
           <Input
             label={t('body.thighs')}
-            placeholder={t('common.cm')}
+            placeholder={lUnit}
             keyboardType="decimal-pad"
             value={form.thighs}
             onChangeText={(v) => updateField('thighs', v)}

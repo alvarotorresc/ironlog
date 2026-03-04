@@ -20,6 +20,7 @@ import {
 } from '@/repositories/workout.repo';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { useTranslation } from '@/i18n';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { ExerciseType, WorkoutSet } from '@/types';
 
 function formatDate(dateString: string): string {
@@ -55,14 +56,18 @@ function formatDuration(startedAt: string, finishedAt: string): string {
   return `${minutes}m`;
 }
 
-function formatSetValues(set: WorkoutSet, exerciseType: ExerciseType): string {
+function formatSetValues(
+  set: WorkoutSet,
+  exerciseType: ExerciseType,
+  fmtWeight: (kg: number) => string,
+): string {
   switch (exerciseType) {
     case 'weights':
-      return `${set.weight ?? 0} kg x ${set.reps ?? 0} reps`;
+      return `${fmtWeight(set.weight ?? 0)} x ${set.reps ?? 0} reps`;
     case 'calisthenics': {
       const parts = [`${set.reps ?? 0} reps`];
       if (set.weight != null && set.weight > 0) {
-        parts.push(`+${set.weight} kg`);
+        parts.push(`+${fmtWeight(set.weight)}`);
       }
       return parts.join(' ');
     }
@@ -99,6 +104,7 @@ export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { t } = useTranslation();
+  const { formatWeight, weightUnit: wUnit } = useSettings();
   const [workout, setWorkout] = useState<WorkoutDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -364,6 +370,8 @@ export default function WorkoutDetailScreen() {
               editing={editing}
               editedSets={editedSets}
               onUpdateSet={updateEditedSet}
+              formatWeight={formatWeight}
+              weightUnitLabel={wUnit()}
             />
           ))}
         </View>
@@ -527,9 +535,18 @@ interface ExerciseDetailCardProps {
   editing: boolean;
   editedSets: EditedSets;
   onUpdateSet: (setId: number, field: 'weight' | 'reps' | 'duration', value: string) => void;
+  formatWeight: (kg: number) => string;
+  weightUnitLabel: string;
 }
 
-function ExerciseDetailCard({ group, editing, editedSets, onUpdateSet }: ExerciseDetailCardProps) {
+function ExerciseDetailCard({
+  group,
+  editing,
+  editedSets,
+  onUpdateSet,
+  formatWeight: fmtWeight,
+  weightUnitLabel,
+}: ExerciseDetailCardProps) {
   const { exercise, sets } = group;
 
   return (
@@ -594,6 +611,7 @@ function ExerciseDetailCard({ group, editing, editedSets, onUpdateSet }: Exercis
                 exerciseType={exercise.type}
                 editedValues={editedSets[set.id]}
                 onUpdate={(field, value) => onUpdateSet(set.id, field, value)}
+                weightUnitLabel={weightUnitLabel}
               />
             ) : (
               <ReadOnlySetRow
@@ -601,6 +619,7 @@ function ExerciseDetailCard({ group, editing, editedSets, onUpdateSet }: Exercis
                 set={set}
                 setNumber={index + 1}
                 exerciseType={exercise.type}
+                formatWeight={fmtWeight}
               />
             ),
           )}
@@ -614,9 +633,15 @@ interface ReadOnlySetRowProps {
   set: WorkoutSet;
   setNumber: number;
   exerciseType: ExerciseType;
+  formatWeight: (kg: number) => string;
 }
 
-function ReadOnlySetRow({ set, setNumber, exerciseType }: ReadOnlySetRowProps) {
+function ReadOnlySetRow({
+  set,
+  setNumber,
+  exerciseType,
+  formatWeight: fmtWeight,
+}: ReadOnlySetRowProps) {
   return (
     <View
       style={{
@@ -634,7 +659,7 @@ function ReadOnlySetRow({ set, setNumber, exerciseType }: ReadOnlySetRowProps) {
           fontVariant: ['tabular-nums'],
         }}
       >
-        {formatSetValues(set, exerciseType)}
+        {formatSetValues(set, exerciseType, fmtWeight)}
       </Text>
     </View>
   );
@@ -646,9 +671,16 @@ interface EditableSetRowProps {
   exerciseType: ExerciseType;
   editedValues?: { weight?: string; reps?: string; duration?: string };
   onUpdate: (field: 'weight' | 'reps' | 'duration', value: string) => void;
+  weightUnitLabel: string;
 }
 
-function EditableSetRow({ setNumber, exerciseType, editedValues, onUpdate }: EditableSetRowProps) {
+function EditableSetRow({
+  setNumber,
+  exerciseType,
+  editedValues,
+  onUpdate,
+  weightUnitLabel,
+}: EditableSetRowProps) {
   const showWeight = exerciseType === 'weights' || exerciseType === 'calisthenics';
   const showReps =
     exerciseType === 'weights' || exerciseType === 'calisthenics' || exerciseType === 'hiit';
@@ -687,7 +719,7 @@ function EditableSetRow({ setNumber, exerciseType, editedValues, onUpdate }: Edi
             placeholderTextColor={colors.text.tertiary}
             placeholder="0"
           />
-          <Text style={{ fontSize: 12, color: colors.text.secondary }}>kg</Text>
+          <Text style={{ fontSize: 12, color: colors.text.secondary }}>{weightUnitLabel}</Text>
         </View>
       )}
       {showReps && (

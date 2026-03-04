@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { View, Text, TextInput } from 'react-native';
 import { colors } from '@/constants/theme';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { ExerciseType, WorkoutSet } from '@/types';
 
 interface SetInputProps {
@@ -15,15 +16,30 @@ interface SetInputProps {
 }
 
 export function SetInput({ set, exerciseType, onUpdate }: SetInputProps) {
+  const { weightUnit, convertWeight, toMetricWeight } = useSettings();
+  const wUnit = weightUnit();
+
+  // Display weight converted to user's unit system
+  const displayWeight = set.weight != null ? Math.round(convertWeight(set.weight) * 10) / 10 : null;
+
+  // When user enters a weight, convert back to metric for storage
+  const handleWeightChange = useCallback(
+    (val: number | null) => {
+      onUpdate({ weight: val != null ? Math.round(toMetricWeight(val) * 100) / 100 : null });
+    },
+    [onUpdate, toMetricWeight],
+  );
+
   switch (exerciseType) {
     case 'weights':
       return (
         <>
           <NumericField
-            value={set.weight}
-            suffix="kg"
+            value={displayWeight}
+            suffix={wUnit}
             placeholder="0"
-            onValueChange={(val) => onUpdate({ weight: val })}
+            onValueChange={handleWeightChange}
+            decimal
           />
           <NumericField
             value={set.reps}
@@ -43,10 +59,11 @@ export function SetInput({ set, exerciseType, onUpdate }: SetInputProps) {
             onValueChange={(val) => onUpdate({ reps: val })}
           />
           <NumericField
-            value={set.weight}
-            suffix="kg"
+            value={displayWeight}
+            suffix={wUnit}
             placeholder="-"
-            onValueChange={(val) => onUpdate({ weight: val })}
+            onValueChange={handleWeightChange}
+            decimal
           />
         </>
       );

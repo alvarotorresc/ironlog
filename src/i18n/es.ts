@@ -162,11 +162,11 @@ export const es: Record<TranslationKey, string> = {
 
   // Body Add
   'body.add.title': 'A\u00F1adir Medici\u00F3n',
-  'body.add.weight': 'Peso (kg)',
+  'body.add.weight': 'Peso',
   'body.add.weightPlaceholder': 'ej. 80.5',
   'body.add.bodyFat': 'Grasa Corporal (%)',
   'body.add.bodyFatPlaceholder': 'ej. 15',
-  'body.add.measurements': 'Medidas (cm)',
+  'body.add.measurements': 'Medidas',
   'body.add.notes': 'Notas',
   'body.add.notesPlaceholder': 'ej. Ma\u00F1ana, en ayunas',
   'body.add.validWeight': 'Introduce un peso v\u00E1lido',
