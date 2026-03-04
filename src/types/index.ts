@@ -110,6 +110,7 @@ export interface BodyMeasurement {
   thighs: number | null;
   notes: string | null;
   measuredAt: string;
+  photos?: BodyPhoto[];
 }
 
 export interface WeightDataPoint {
@@ -184,6 +185,7 @@ export interface BodyMeasurementExport {
   thighs: number | null;
   notes: string | null;
   measuredAt: string;
+  photoPaths?: string[];
 }
 
 export interface IronLogBackup {
