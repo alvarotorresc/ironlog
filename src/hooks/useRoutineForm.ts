@@ -6,6 +6,7 @@ export interface RoutineExerciseItem {
   name: string;
   illustration: string | null;
   muscleGroup: string;
+  notes: string | null;
 }
 
 interface FormErrors {
@@ -29,6 +30,7 @@ export function useRoutineForm(
         name: exercise.name,
         illustration: exercise.illustration,
         muscleGroup: exercise.muscleGroup,
+        notes: exercise.notes,
       },
     ]);
     setErrors((prev) => ({ ...prev, exercises: undefined }));
