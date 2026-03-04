@@ -1,6 +1,15 @@
-import { useState, useCallback, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, TextInput } from 'react-native';
+import { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+  TextInput,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowLeft,
@@ -9,6 +18,7 @@ import {
   Hash,
   TrendingUp,
   Pencil,
+  Trash2,
   Check,
   X,
 } from 'lucide-react-native';
@@ -180,9 +190,31 @@ export default function ExerciseDetailScreen() {
     }
   }, [exerciseId]);
 
-  useEffect(() => {
-    loadExercise();
-  }, [loadExercise]);
+  useFocusEffect(
+    useCallback(() => {
+      loadExercise();
+    }, [loadExercise]),
+  );
+
+  const handleDelete = useCallback(() => {
+    Alert.alert(t('exercise.deleteTitle'), t('exercise.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const db = await getDatabase();
+            const repo = new ExerciseRepository(db);
+            await repo.delete(exerciseId);
+            router.back();
+          } catch (error) {
+            console.error('Failed to delete exercise:', error);
+          }
+        },
+      },
+    ]);
+  }, [exerciseId, router, t]);
 
   const hasWorkoutData = stats !== null && stats.totalSessions > 0;
 
@@ -215,6 +247,7 @@ export default function ExerciseDetailScreen() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: 'space-between',
           paddingHorizontal: 20,
           paddingVertical: 12,
         }}
@@ -240,6 +273,53 @@ export default function ExerciseDetailScreen() {
             </View>
           )}
         </Pressable>
+
+        {!exercise.isPredefined && (
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Pressable
+              onPress={() => router.push(`/exercise/edit/${exerciseId}`)}
+              accessibilityRole="button"
+              accessibilityLabel={t('exercise.edit.title')}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Pencil size={18} color={colors.text.primary} strokeWidth={1.5} />
+                </View>
+              )}
+            </Pressable>
+            <Pressable
+              onPress={handleDelete}
+              accessibilityRole="button"
+              accessibilityLabel={t('exercise.deleteTitle')}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Trash2 size={18} color={colors.semantic.error} strokeWidth={1.5} />
+                </View>
+              )}
+            </Pressable>
+          </View>
+        )}
       </View>
 
       <ScrollView

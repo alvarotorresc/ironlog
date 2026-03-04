@@ -78,6 +78,11 @@ export const en = {
   'exercise.create.restTime': 'Default Rest (seconds)',
   'exercise.create.restPlaceholder': 'e.g. 90',
 
+  // Exercise Edit
+  'exercise.edit.title': 'Edit Exercise',
+  'exercise.edit.saveError': 'Failed to update exercise',
+  'exercise.edit.notFound': 'Exercise not found',
+
   // Routines
   'routines.title': 'Routines',
   'routines.createNew': 'Create new routine',

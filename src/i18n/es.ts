@@ -82,6 +82,11 @@ export const es: Record<TranslationKey, string> = {
   'exercise.create.restTime': 'Descanso por defecto (segundos)',
   'exercise.create.restPlaceholder': 'ej. 90',
 
+  // Exercise Edit
+  'exercise.edit.title': 'Editar Ejercicio',
+  'exercise.edit.saveError': 'Error al actualizar el ejercicio',
+  'exercise.edit.notFound': 'Ejercicio no encontrado',
+
   // Routines
   'routines.title': 'Rutinas',
   'routines.createNew': 'Crear nueva rutina',
