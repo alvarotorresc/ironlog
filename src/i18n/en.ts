@@ -11,6 +11,8 @@ export const en = {
   'common.noData': 'No data',
   'common.kg': 'kg',
   'common.cm': 'cm',
+  'common.lbs': 'lbs',
+  'common.in': 'in',
 
   // Tabs
   'tabs.home': 'Home',
@@ -249,6 +251,17 @@ export const en = {
   'backup.sharingUnavailable': 'Sharing is not available on this device',
   'backup.importing': 'Importing...',
   'backup.exporting': 'Exporting...',
+
+  // Settings
+  'settings.title': 'Settings',
+  'settings.units': 'Units',
+  'settings.metric': 'Metric (kg, cm)',
+  'settings.imperial': 'Imperial (lbs, in)',
+  'settings.language': 'Language',
+  'settings.data': 'Data',
+  'settings.backupRestore': 'Backup & Restore',
+  'settings.about': 'About',
+  'settings.version': 'Version',
 } as const;
 
 export type TranslationKey = keyof typeof en;

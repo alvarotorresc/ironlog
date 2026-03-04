@@ -13,6 +13,8 @@ export const es: Record<TranslationKey, string> = {
   'common.noData': 'Sin datos',
   'common.kg': 'kg',
   'common.cm': 'cm',
+  'common.lbs': 'lbs',
+  'common.in': 'in',
 
   // Tabs
   'tabs.home': 'Inicio',
@@ -257,4 +259,15 @@ export const es: Record<TranslationKey, string> = {
   'backup.sharingUnavailable': 'El uso compartido no está disponible en este dispositivo',
   'backup.importing': 'Importando...',
   'backup.exporting': 'Exportando...',
+
+  // Settings
+  'settings.title': 'Ajustes',
+  'settings.units': 'Unidades',
+  'settings.metric': 'M\u00E9trico (kg, cm)',
+  'settings.imperial': 'Imperial (lbs, in)',
+  'settings.language': 'Idioma',
+  'settings.data': 'Datos',
+  'settings.backupRestore': 'Copia de Seguridad',
+  'settings.about': 'Acerca de',
+  'settings.version': 'Versi\u00F3n',
 };

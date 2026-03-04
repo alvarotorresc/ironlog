@@ -9,6 +9,7 @@ import { getDatabase } from '@/db/connection';
 import { runMigrations } from '@/db/schema';
 import { seedExercises } from '@/db/seed';
 import { I18nProvider } from '@/i18n';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 
 import '../global.css';
 
@@ -50,14 +51,16 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg.primary }}>
       <SafeAreaProvider>
         <I18nProvider>
-          <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.bg.primary },
-              animation: 'slide_from_right',
-            }}
-          />
+          <SettingsProvider>
+            <StatusBar style="light" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.bg.primary },
+                animation: 'slide_from_right',
+              }}
+            />
+          </SettingsProvider>
         </I18nProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
