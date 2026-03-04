@@ -179,6 +179,7 @@ export default function WorkoutScreen() {
             exerciseState={exerciseState}
             onAddSet={handleAddSet}
             onUpdateSet={workout.updateSet}
+            onUpdateNotes={workout.updateSetNotes}
             onDeleteSet={workout.deleteSet}
           />
         ))}
@@ -309,6 +310,7 @@ interface ExerciseSectionProps {
       distance?: number | null;
     },
   ) => void;
+  onUpdateNotes: (setId: number, notes: string | null) => void;
   onDeleteSet: (setId: number, exerciseId: number) => void;
 }
 
@@ -316,6 +318,7 @@ function ExerciseSection({
   exerciseState,
   onAddSet,
   onUpdateSet,
+  onUpdateNotes,
   onDeleteSet,
 }: ExerciseSectionProps) {
   const { t } = useTranslation();
@@ -390,6 +393,7 @@ function ExerciseSection({
           setNumber={index + 1}
           exerciseType={exercise.type}
           onUpdate={onUpdateSet}
+          onUpdateNotes={onUpdateNotes}
           onDelete={handleDeleteSet}
         />
       ))}

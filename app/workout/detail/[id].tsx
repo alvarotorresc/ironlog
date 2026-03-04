@@ -618,24 +618,38 @@ interface ReadOnlySetRowProps {
 
 function ReadOnlySetRow({ set, setNumber, exerciseType }: ReadOnlySetRowProps) {
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        paddingVertical: 4,
-      }}
-    >
-      <SetNumberBadge number={setNumber} />
-      <Text
+    <View style={{ paddingVertical: 4 }}>
+      <View
         style={{
-          fontSize: 15,
-          color: colors.text.primary,
-          fontVariant: ['tabular-nums'],
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
         }}
       >
-        {formatSetValues(set, exerciseType)}
-      </Text>
+        <SetNumberBadge number={setNumber} />
+        <Text
+          style={{
+            fontSize: 15,
+            color: colors.text.primary,
+            fontVariant: ['tabular-nums'],
+          }}
+        >
+          {formatSetValues(set, exerciseType)}
+        </Text>
+      </View>
+      {set.notes ? (
+        <Text
+          style={{
+            fontSize: 13,
+            color: colors.text.secondary,
+            fontStyle: 'italic',
+            marginLeft: 40,
+            marginTop: 2,
+          }}
+        >
+          {set.notes}
+        </Text>
+      ) : null}
     </View>
   );
 }
