@@ -138,8 +138,13 @@ const MIGRATIONS: Migration[] = [
   {
     version: 4,
     up: `
-      -- Optional notes per workout set
       ALTER TABLE workout_sets ADD COLUMN notes TEXT;
+    `,
+  },
+  {
+    version: 5,
+    up: `
+      ALTER TABLE exercises ADD COLUMN notes TEXT;
     `,
   },
 ];

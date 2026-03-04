@@ -12,6 +12,7 @@ function makeExercise(overrides: Partial<Exercise> = {}): Exercise {
     isPredefined: true,
     illustration: 'bench-press',
     restSeconds: 90,
+    notes: null,
     createdAt: '2026-01-01T00:00:00',
     ...overrides,
   };
@@ -23,6 +24,7 @@ function makeExerciseItem(overrides: Partial<RoutineExerciseItem> = {}): Routine
     name: 'Bench Press',
     illustration: 'bench-press',
     muscleGroup: 'chest',
+    notes: null,
     ...overrides,
   };
 }

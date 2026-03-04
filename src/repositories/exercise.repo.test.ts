@@ -382,6 +382,105 @@ describe('ExerciseRepository', () => {
     expect(sets).toHaveLength(0);
   });
 
+  // --- Notes tests ---
+
+  it('should create an exercise with notes', async () => {
+    const exercise = await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      notes: 'Keep elbows at 45 degrees',
+    });
+
+    expect(exercise.notes).toBe('Keep elbows at 45 degrees');
+  });
+
+  it('should default notes to null when not provided', async () => {
+    const exercise = await repo.create({
+      name: 'Squat',
+      type: 'weights',
+      muscleGroup: 'legs',
+    });
+
+    expect(exercise.notes).toBeNull();
+  });
+
+  it('should return notes in getById', async () => {
+    const created = await repo.create({
+      name: 'Deadlift',
+      type: 'weights',
+      muscleGroup: 'back',
+      notes: 'Hinge at hips, neutral spine',
+    });
+
+    const exercise = await repo.getById(created.id);
+
+    expect(exercise!.notes).toBe('Hinge at hips, neutral spine');
+  });
+
+  it('should return notes in getAll', async () => {
+    await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      notes: 'Retract scapula',
+    });
+    await repo.create({
+      name: 'Squat',
+      type: 'weights',
+      muscleGroup: 'legs',
+    });
+
+    const exercises = await repo.getAll();
+    const bench = exercises.find((e) => e.name === 'Bench Press')!;
+    const squat = exercises.find((e) => e.name === 'Squat')!;
+
+    expect(bench.notes).toBe('Retract scapula');
+    expect(squat.notes).toBeNull();
+  });
+
+  it('should update notes', async () => {
+    const created = await repo.create({
+      name: 'OHP',
+      type: 'weights',
+      muscleGroup: 'shoulders',
+    });
+
+    await repo.update(created.id, { notes: 'Brace core, press overhead' });
+
+    const updated = await repo.getById(created.id);
+    expect(updated!.notes).toBe('Brace core, press overhead');
+  });
+
+  it('should clear notes by setting to null', async () => {
+    const created = await repo.create({
+      name: 'OHP',
+      type: 'weights',
+      muscleGroup: 'shoulders',
+      notes: 'Some notes',
+    });
+
+    await repo.update(created.id, { notes: null });
+
+    const updated = await repo.getById(created.id);
+    expect(updated!.notes).toBeNull();
+  });
+
+  it('should not affect notes when updating other fields', async () => {
+    const created = await repo.create({
+      name: 'Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+      notes: 'Keep tight',
+    });
+
+    await repo.update(created.id, { name: 'Bench Press' });
+
+    const updated = await repo.getById(created.id);
+    expect(updated!.name).toBe('Bench Press');
+    expect(updated!.notes).toBe('Keep tight');
+  });
+
   it('should return empty muscleGroups array as single primary group fallback', async () => {
     // Insert directly into DB without pivot data to test fallback
     await db.runAsync(

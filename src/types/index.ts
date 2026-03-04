@@ -13,6 +13,7 @@ export interface Exercise {
   isPredefined: boolean;
   illustration: string | null;
   restSeconds: number;
+  notes: string | null;
   createdAt: string;
 }
 
@@ -150,6 +151,7 @@ export interface ExerciseExport {
   muscleGroups?: string[];
   illustration: string | null;
   restSeconds: number;
+  notes?: string | null;
   createdAt: string;
 }
 

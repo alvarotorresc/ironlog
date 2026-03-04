@@ -225,6 +225,11 @@ export const en = {
   'exercise.restTimeEdit': 'Edit rest time',
   'exercise.restTimeSave': 'Save',
 
+  // Exercise — notes
+  'exercise.notes': 'Notes',
+  'exercise.notesPlaceholder': 'Form tips, cues, personal notes...',
+  'exercise.addNotes': 'Add notes',
+
   // Body — charts
   'body.chartWeight': 'Weight',
   'body.chartBodyFat': 'Body Fat',

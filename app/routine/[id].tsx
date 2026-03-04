@@ -28,6 +28,7 @@ function routineToExerciseItems(routine: RoutineWithExercises): RoutineExerciseI
     name: re.exercise.name,
     illustration: re.exercise.illustration,
     muscleGroup: re.exercise.muscleGroup,
+    notes: re.exercise.notes,
   }));
 }
 
