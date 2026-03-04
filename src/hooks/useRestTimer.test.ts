@@ -297,4 +297,135 @@ describe('useRestTimer', () => {
     expect(result.current.state).toBe('idle');
     expect(result.current.remainingSeconds).toBe(0);
   });
+
+  it('should stop interval when app goes to background', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      result.current.start(60);
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+
+    expect(result.current.remainingSeconds).toBe(55);
+
+    // Simulate going to background
+    act(() => {
+      appStateCallback?.('background');
+    });
+
+    // Advance timers — interval should be cleared so no further decrements via interval
+    const remainingAfterBackground = result.current.remainingSeconds;
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
+    // remainingSeconds should NOT change because the interval was cleared
+    // (Date.now still advances in fake timers, but no interval tick to update state)
+    expect(result.current.remainingSeconds).toBe(remainingAfterBackground);
+    expect(result.current.state).toBe('running');
+  });
+
+  it('should restart interval when app returns to foreground after background', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      result.current.start(60);
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+
+    expect(result.current.remainingSeconds).toBe(55);
+
+    // Go to background
+    act(() => {
+      appStateCallback?.('background');
+    });
+
+    // Simulate 10s passing in background (Date.now advances but no interval)
+    act(() => {
+      jest.advanceTimersByTime(10000);
+    });
+
+    // Come back to foreground
+    act(() => {
+      appStateCallback?.('active');
+    });
+
+    // Should have recalculated: 60 - 15 = 45
+    expect(result.current.remainingSeconds).toBe(45);
+    expect(result.current.state).toBe('running');
+
+    // Interval should be running again — advance 2s
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.remainingSeconds).toBe(43);
+  });
+
+  it('should finish timer on foreground return when timer expired during background', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      result.current.start(10);
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
+    expect(result.current.remainingSeconds).toBe(7);
+
+    // Go to background
+    act(() => {
+      appStateCallback?.('background');
+    });
+
+    // Simulate 20s in background — more than remaining 7s
+    act(() => {
+      jest.advanceTimersByTime(20000);
+    });
+
+    // Still running because interval was cleared in background
+    expect(result.current.state).toBe('running');
+
+    // Come back to foreground — timer should detect expiration
+    act(() => {
+      appStateCallback?.('active');
+    });
+
+    expect(result.current.state).toBe('finished');
+    expect(result.current.remainingSeconds).toBe(0);
+  });
+
+  it('should not stop interval when going to background if timer is idle', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    // Go to background while idle — should not throw or change state
+    act(() => {
+      appStateCallback?.('background');
+    });
+
+    expect(result.current.state).toBe('idle');
+  });
+
+  it('should not restart interval when returning from background if timer is idle', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      appStateCallback?.('background');
+    });
+
+    act(() => {
+      appStateCallback?.('active');
+    });
+
+    expect(result.current.state).toBe('idle');
+    expect(result.current.remainingSeconds).toBe(0);
+  });
 });
