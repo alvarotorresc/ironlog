@@ -53,7 +53,7 @@ export class RoutineRepository {
 
   async getAll(): Promise<Routine[]> {
     const rows = await this.db.getAllAsync<RoutineRow>(
-      'SELECT * FROM routines ORDER BY created_at DESC, id DESC',
+      'SELECT * FROM routines WHERE is_template = 0 ORDER BY created_at DESC, id DESC',
     );
 
     return rows.map((row) => ({
@@ -198,7 +198,7 @@ export class RoutineRepository {
 
   async getAllWithExercises(): Promise<RoutineWithExercises[]> {
     const routineRows = await this.db.getAllAsync<RoutineRow>(
-      'SELECT * FROM routines ORDER BY created_at DESC, id DESC',
+      'SELECT * FROM routines WHERE is_template = 0 ORDER BY created_at DESC, id DESC',
     );
 
     if (routineRows.length === 0) return [];
@@ -261,6 +261,155 @@ export class RoutineRepository {
       createdAt: row.created_at,
       exercises: exercisesByRoutine.get(row.id) ?? [],
     }));
+  }
+
+  async getTemplates(): Promise<RoutineWithExercises[]> {
+    const routineRows = await this.db.getAllAsync<RoutineRow>(
+      'SELECT * FROM routines WHERE is_template = 1 ORDER BY id ASC',
+    );
+
+    if (routineRows.length === 0) return [];
+
+    const routineIds = routineRows.map((r) => r.id);
+    const placeholders = routineIds.map(() => '?').join(',');
+
+    const allExerciseRows = await this.db.getAllAsync<RoutineExerciseJoinRow & { r_id: number }>(
+      `SELECT
+        re.id as re_id,
+        re.routine_id,
+        re.exercise_id,
+        re.sort_order,
+        re.group_id as re_group_id,
+        re.group_type as re_group_type,
+        r.id as r_id,
+        e.id as e_id,
+        e.name as e_name,
+        e.type as e_type,
+        e.muscle_group as e_muscle_group,
+        e.is_predefined as e_is_predefined,
+        e.illustration as e_illustration,
+        e.rest_seconds as e_rest_seconds,
+        e.created_at as e_created_at
+      FROM routine_exercises re
+      JOIN exercises e ON e.id = re.exercise_id
+      JOIN routines r ON r.id = re.routine_id
+      WHERE r.id IN (${placeholders})
+      ORDER BY re.routine_id, re.sort_order ASC`,
+      ...routineIds,
+    );
+
+    const exercisesByRoutine = new Map<number, RoutineWithExercises['exercises']>();
+    for (const row of allExerciseRows) {
+      const list = exercisesByRoutine.get(row.routine_id) ?? [];
+      list.push({
+        id: row.re_id,
+        routineId: row.routine_id,
+        exerciseId: row.exercise_id,
+        order: row.sort_order,
+        groupId: row.re_group_id,
+        groupType: row.re_group_type as GroupType | null,
+        exercise: {
+          id: row.e_id,
+          name: row.e_name,
+          type: row.e_type as Exercise['type'],
+          muscleGroup: row.e_muscle_group as Exercise['muscleGroup'],
+          muscleGroups: [row.e_muscle_group as Exercise['muscleGroup']],
+          isPredefined: row.e_is_predefined === 1,
+          illustration: row.e_illustration,
+          restSeconds: row.e_rest_seconds,
+          notes: row.e_notes ?? null,
+          createdAt: row.e_created_at,
+        },
+      });
+      exercisesByRoutine.set(row.routine_id, list);
+    }
+
+    return routineRows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      isTemplate: row.is_template === 1,
+      description: row.description,
+      createdAt: row.created_at,
+      exercises: exercisesByRoutine.get(row.id) ?? [],
+    }));
+  }
+
+  async cloneTemplate(templateId: number, name: string): Promise<Routine> {
+    const template = await this.getById(templateId);
+    if (!template) {
+      throw new Error(`Template with id ${templateId} not found`);
+    }
+    if (!template.isTemplate) {
+      throw new Error(`Routine with id ${templateId} is not a template`);
+    }
+
+    let cloned: Routine | null = null;
+
+    await this.db.withTransactionAsync(async () => {
+      const result = await this.db.runAsync('INSERT INTO routines (name) VALUES (?)', name);
+      const row = await this.db.getFirstAsync<RoutineRow>(
+        'SELECT * FROM routines WHERE id = ?',
+        result.lastInsertRowId,
+      );
+
+      cloned = {
+        id: row!.id,
+        name: row!.name,
+        isTemplate: row!.is_template === 1,
+        description: row!.description,
+        createdAt: row!.created_at,
+      };
+
+      for (let i = 0; i < template.exercises.length; i++) {
+        await this.db.runAsync(
+          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+          cloned!.id,
+          template.exercises[i].exerciseId,
+          template.exercises[i].order,
+        );
+      }
+    });
+
+    return cloned!;
+  }
+
+  async createTemplate(
+    name: string,
+    description: string | null,
+    exerciseIds: number[],
+  ): Promise<Routine> {
+    let routine: Routine | null = null;
+
+    await this.db.withTransactionAsync(async () => {
+      const result = await this.db.runAsync(
+        'INSERT INTO routines (name, is_template, description) VALUES (?, 1, ?)',
+        name,
+        description,
+      );
+      const row = await this.db.getFirstAsync<RoutineRow>(
+        'SELECT * FROM routines WHERE id = ?',
+        result.lastInsertRowId,
+      );
+
+      routine = {
+        id: row!.id,
+        name: row!.name,
+        isTemplate: row!.is_template === 1,
+        description: row!.description,
+        createdAt: row!.created_at,
+      };
+
+      for (let i = 0; i < exerciseIds.length; i++) {
+        await this.db.runAsync(
+          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+          routine!.id,
+          exerciseIds[i],
+          i + 1,
+        );
+      }
+    });
+
+    return routine!;
   }
 
   async updateName(id: number, name: string): Promise<void> {
