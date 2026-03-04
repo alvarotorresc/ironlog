@@ -135,6 +135,12 @@ const MIGRATIONS: Migration[] = [
       );
     `,
   },
+  {
+    version: 4,
+    up: `
+      ALTER TABLE exercises ADD COLUMN notes TEXT;
+    `,
+  },
 ];
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {

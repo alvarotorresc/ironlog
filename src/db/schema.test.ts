@@ -196,6 +196,41 @@ describe('Migration #3', () => {
     const row = await db.getFirstAsync<{ version: number }>(
       'SELECT MAX(version) as version FROM schema_version',
     );
-    expect(row!.version).toBe(3);
+    expect(row!.version).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('Migration #4', () => {
+  let db: SQLiteDatabase;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+  });
+
+  it('should add notes column to exercises', async () => {
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group, notes) VALUES ('Test', 'weights', 'chest', 'Keep elbows in')",
+    );
+    const row = await db.getFirstAsync<{ notes: string }>(
+      "SELECT notes FROM exercises WHERE name = 'Test'",
+    );
+    expect(row!.notes).toBe('Keep elbows in');
+  });
+
+  it('should default notes to null', async () => {
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group) VALUES ('NoNotes', 'weights', 'legs')",
+    );
+    const row = await db.getFirstAsync<{ notes: string | null }>(
+      "SELECT notes FROM exercises WHERE name = 'NoNotes'",
+    );
+    expect(row!.notes).toBeNull();
+  });
+
+  it('should record schema version 4', async () => {
+    const row = await db.getFirstAsync<{ version: number }>(
+      'SELECT MAX(version) as version FROM schema_version',
+    );
+    expect(row!.version).toBe(4);
   });
 });
