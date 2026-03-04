@@ -27,6 +27,7 @@ import {
   PieChart,
   Target,
 } from 'lucide-react-native';
+import { Award } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import { getDatabase } from '@/db/connection';
@@ -37,7 +38,9 @@ import { StatsCard } from '@/components/StatsCard';
 import { MuscleDistribution } from '@/components/MuscleDistribution';
 import { PeriodSelector } from '@/components/PeriodSelector';
 import { useDashboardStats, useMuscleDistribution, useMuscleFatigue } from '@/hooks/useStats';
+import { useBadges } from '@/hooks/useBadges';
 import { MuscleFatigueMap } from '@/components/MuscleFatigueMap';
+import { TOTAL_BADGES } from '@/constants/badges';
 import type { ExercisePR, TimePeriod } from '@/types';
 
 function formatVolume(volume: number): string {
@@ -72,6 +75,7 @@ export default function HomeScreen() {
     reload: reloadDistribution,
   } = useMuscleDistribution(musclePeriod);
   const { fatigueData, reload: reloadFatigue } = useMuscleFatigue();
+  const { badges, reload: reloadBadges } = useBadges();
 
   const loadRoutines = useCallback(async () => {
     setLoadingRoutines(true);
@@ -129,16 +133,17 @@ export default function HomeScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([reloadStats(), reloadDistribution(), reloadFatigue()]);
+    await Promise.all([reloadStats(), reloadDistribution(), reloadFatigue(), reloadBadges()]);
     setRefreshing(false);
-  }, [reloadStats, reloadDistribution, reloadFatigue]);
+  }, [reloadStats, reloadDistribution, reloadFatigue, reloadBadges]);
 
   useFocusEffect(
     useCallback(() => {
       reloadStats();
       reloadDistribution();
       reloadFatigue();
-    }, [reloadStats, reloadDistribution, reloadFatigue]),
+      reloadBadges();
+    }, [reloadStats, reloadDistribution, reloadFatigue, reloadBadges]),
   );
 
   return (
@@ -156,7 +161,16 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         {/* Header */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 8,
+          }}
+        >
           <Text
             style={{
               fontSize: 28,
@@ -168,6 +182,37 @@ export default function HomeScreen() {
           >
             {t('home.title')}
           </Text>
+          <Pressable
+            onPress={() => router.push('/badges')}
+            accessibilityRole="button"
+            accessibilityLabel={t('badges.title')}
+          >
+            {({ pressed }) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  paddingVertical: 6,
+                  paddingHorizontal: 10,
+                  borderRadius: 8,
+                  backgroundColor: colors.bg.tertiary,
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                <Award size={16} color={colors.brand.blue} strokeWidth={1.5} />
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontWeight: '600',
+                    color: colors.text.secondary,
+                  }}
+                >
+                  {badges.length}/{TOTAL_BADGES}
+                </Text>
+              </View>
+            )}
+          </Pressable>
         </View>
 
         {/* Start Workout CTA */}

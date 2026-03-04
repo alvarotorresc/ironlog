@@ -7,11 +7,13 @@ import * as Haptics from 'expo-haptics';
 import { colors } from '@/constants/theme';
 import { useWorkout, type WorkoutExerciseState } from '@/hooks/useWorkout';
 import { useRestTimer } from '@/hooks/useRestTimer';
+import { useBadgeCheck } from '@/hooks/useBadges';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { WorkoutSetRow } from '@/components/WorkoutSetRow';
 import { RestTimer } from '@/components/RestTimer';
+import { BadgeUnlockToast } from '@/components/BadgeUnlockToast';
 import { useTranslation } from '@/i18n';
-import type { WorkoutSet } from '@/types';
+import type { Badge, WorkoutSet } from '@/types';
 
 function formatElapsedTime(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
@@ -39,6 +41,26 @@ export default function WorkoutScreen() {
   const workout = useWorkout(routineId ?? 'empty', workoutId ?? '0');
   const restTimer = useRestTimer();
   const navigation = useNavigation();
+  const { checkBadges } = useBadgeCheck();
+  const [toastBadge, setToastBadge] = useLocalState<Badge | null>(null);
+  const [pendingBadges, setPendingBadges] = useLocalState<Badge[]>([]);
+
+  const runBadgeCheck = useCallback(async () => {
+    const newBadges = await checkBadges();
+    if (newBadges.length > 0) {
+      setPendingBadges(newBadges.slice(1));
+      setToastBadge(newBadges[0]);
+    }
+  }, [checkBadges, setPendingBadges, setToastBadge]);
+
+  const handleToastDismiss = useCallback(() => {
+    if (pendingBadges.length > 0) {
+      setToastBadge(pendingBadges[0]);
+      setPendingBadges(pendingBadges.slice(1));
+    } else {
+      setToastBadge(null);
+    }
+  }, [pendingBadges, setPendingBadges, setToastBadge]);
 
   useEffect(() => {
     if (workout.isFinished) return;
@@ -71,6 +93,7 @@ export default function WorkoutScreen() {
             onPress: async () => {
               restTimer.reset();
               await workout.finishWorkout();
+              await runBadgeCheck();
               navigation.dispatch(e.data.action);
             },
           },
@@ -88,7 +111,7 @@ export default function WorkoutScreen() {
     });
 
     return unsubscribe;
-  }, [navigation, workout, restTimer, t]);
+  }, [navigation, workout, restTimer, runBadgeCheck, t]);
 
   const handleAddSet = useCallback(
     async (exerciseId: number): Promise<WorkoutSet | null> => {
@@ -135,11 +158,12 @@ export default function WorkoutScreen() {
         onPress: async () => {
           restTimer.reset();
           await workout.finishWorkout();
+          await runBadgeCheck();
           router.back();
         },
       },
     ]);
-  }, [workout, router, restTimer, t]);
+  }, [workout, router, restTimer, runBadgeCheck, t]);
 
   if (workout.loading) {
     return (
@@ -155,6 +179,9 @@ export default function WorkoutScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
+      {/* Badge Unlock Toast */}
+      <BadgeUnlockToast badge={toastBadge} onDismiss={handleToastDismiss} />
+
       {/* Header */}
       <WorkoutHeader
         routineName={workout.routineName}
