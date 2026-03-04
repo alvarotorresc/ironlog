@@ -7,7 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
 import { runMigrations } from '@/db/schema';
-import { seedExercises } from '@/db/seed';
+import { seedExercises, seedRoutineTemplates } from '@/db/seed';
 import { I18nProvider } from '@/i18n';
 
 import '../global.css';
@@ -21,6 +21,7 @@ export default function RootLayout() {
         const db = await getDatabase();
         await runMigrations(db);
         await seedExercises(db);
+        await seedRoutineTemplates(db);
         setDbReady(true);
       } catch (error) {
         console.error('Failed to initialize database:', error);
