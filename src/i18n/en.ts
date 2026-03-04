@@ -124,6 +124,8 @@ export const en = {
   'workout.discard': 'Discard',
   'workout.addExercise': 'Add Exercise',
   'workout.addSet': 'Add Set',
+  'workout.moveUp': 'Move up',
+  'workout.moveDown': 'Move down',
   'workout.set': 'Set {number}',
   'workout.weight': 'Weight',
   'workout.reps': 'Reps',

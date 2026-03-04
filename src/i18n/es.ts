@@ -131,6 +131,8 @@ export const es: Record<TranslationKey, string> = {
   'workout.discard': 'Descartar',
   'workout.addExercise': 'A\u00F1adir Ejercicio',
   'workout.addSet': 'A\u00F1adir Serie',
+  'workout.moveUp': 'Mover arriba',
+  'workout.moveDown': 'Mover abajo',
   'workout.set': 'Serie {number}',
   'workout.weight': 'Peso',
   'workout.reps': 'Reps',
