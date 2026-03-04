@@ -26,6 +26,7 @@ import {
   Trophy,
   PieChart,
   Target,
+  Settings,
 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
@@ -38,14 +39,8 @@ import { MuscleDistribution } from '@/components/MuscleDistribution';
 import { PeriodSelector } from '@/components/PeriodSelector';
 import { useDashboardStats, useMuscleDistribution, useMuscleFatigue } from '@/hooks/useStats';
 import { MuscleFatigueMap } from '@/components/MuscleFatigueMap';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { ExercisePR, TimePeriod } from '@/types';
-
-function formatVolume(volume: number): string {
-  if (volume >= 1000) {
-    return `${(volume / 1000).toFixed(1)}k kg`;
-  }
-  return `${volume} kg`;
-}
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -57,6 +52,7 @@ function formatDate(dateStr: string): string {
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { formatVolume } = useSettings();
   const [showPicker, setShowPicker] = useState(false);
   const [routines, setRoutines] = useState<RoutineWithExercises[]>([]);
   const [loadingRoutines, setLoadingRoutines] = useState(false);
@@ -156,7 +152,16 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         {/* Header */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 8 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 8,
+          }}
+        >
           <Text
             style={{
               fontSize: 28,
@@ -168,6 +173,27 @@ export default function HomeScreen() {
           >
             {t('home.title')}
           </Text>
+          <Pressable
+            onPress={() => router.push('/settings')}
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.title')}
+          >
+            {({ pressed }) => (
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  backgroundColor: colors.bg.tertiary,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                <Settings size={20} color={colors.text.secondary} strokeWidth={1.5} />
+              </View>
+            )}
+          </Pressable>
         </View>
 
         {/* Start Workout CTA */}
@@ -601,6 +627,7 @@ interface PRRowProps {
 }
 
 function PRRow({ pr, isLast }: PRRowProps) {
+  const { formatWeight } = useSettings();
   return (
     <View
       style={{
@@ -612,7 +639,7 @@ function PRRow({ pr, isLast }: PRRowProps) {
         borderBottomWidth: isLast ? 0 : 1,
         borderBottomColor: colors.border,
       }}
-      accessibilityLabel={`PR: ${pr.exerciseName}, ${pr.maxWeight} kg on ${formatDate(pr.date)}`}
+      accessibilityLabel={`PR: ${pr.exerciseName}, ${formatWeight(pr.maxWeight)} on ${formatDate(pr.date)}`}
     >
       <View style={{ flex: 1, marginRight: 12 }}>
         <Text
@@ -642,7 +669,7 @@ function PRRow({ pr, isLast }: PRRowProps) {
           color: colors.chart.pr,
         }}
       >
-        {pr.maxWeight} kg
+        {formatWeight(pr.maxWeight)}
       </Text>
     </View>
   );
