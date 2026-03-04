@@ -9,14 +9,14 @@
 
 ## Archivos
 
-| Archivo | Pantalla | Estado |
-|---------|----------|--------|
-| Home.jsx | Dashboard de stats + Start Workout | En revision |
-| Exercises.jsx | Lista de ejercicios con filtros y ilustraciones | En revision |
-| Routines.jsx | Lista de rutinas con boton Start | En revision |
-| WorkoutTracking.jsx | Pantalla de tracking activo (CORE) | En revision |
-| ExerciseDetail.jsx | Detalle de ejercicio con graficas de progreso | En revision |
-| History.jsx | Historial de entrenos pasados | En revision |
+| Archivo             | Pantalla                                        | Estado      |
+| ------------------- | ----------------------------------------------- | ----------- |
+| Home.jsx            | Dashboard de stats + Start Workout              | En revision |
+| Exercises.jsx       | Lista de ejercicios con filtros y ilustraciones | En revision |
+| Routines.jsx        | Lista de rutinas con boton Start                | En revision |
+| WorkoutTracking.jsx | Pantalla de tracking activo (CORE)              | En revision |
+| ExerciseDetail.jsx  | Detalle de ejercicio con graficas de progreso   | En revision |
+| History.jsx         | Historial de entrenos pasados                   | En revision |
 
 ## Notas de diseno
 
