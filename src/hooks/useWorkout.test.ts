@@ -12,6 +12,7 @@ function createExercise(overrides: Partial<Exercise> = {}): Exercise {
     isPredefined: true,
     illustration: null,
     restSeconds: 90,
+    notes: null,
     createdAt: '2024-01-01',
     ...overrides,
   };
@@ -29,6 +30,7 @@ function createSet(overrides: Partial<WorkoutSet> = {}): WorkoutSet {
     distance: null,
     groupId: null,
     groupType: null,
+    notes: null,
     ...overrides,
   };
 }
