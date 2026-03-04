@@ -27,6 +27,7 @@ interface RoutineExerciseJoinRow {
   e_is_predefined: number;
   e_illustration: string | null;
   e_rest_seconds: number;
+  e_notes: string | null;
   e_created_at: string;
 }
 
@@ -87,6 +88,7 @@ export class RoutineRepository {
         e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
+        e.notes as e_notes,
         e.created_at as e_created_at
       FROM routine_exercises re
       JOIN exercises e ON e.id = re.exercise_id
@@ -117,6 +119,7 @@ export class RoutineRepository {
           isPredefined: row.e_is_predefined === 1,
           illustration: row.e_illustration,
           restSeconds: row.e_rest_seconds,
+          notes: row.e_notes,
           createdAt: row.e_created_at,
         },
       })),
@@ -216,6 +219,7 @@ export class RoutineRepository {
         e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
+        e.notes as e_notes,
         e.created_at as e_created_at
       FROM routine_exercises re
       JOIN exercises e ON e.id = re.exercise_id
@@ -242,6 +246,7 @@ export class RoutineRepository {
           isPredefined: row.e_is_predefined === 1,
           illustration: row.e_illustration,
           restSeconds: row.e_rest_seconds,
+          notes: row.e_notes,
           createdAt: row.e_created_at,
         },
       });

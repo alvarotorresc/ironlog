@@ -144,10 +144,14 @@ export const es: Record<TranslationKey, string> = {
   'workout.discard': 'Descartar',
   'workout.addExercise': 'A\u00F1adir Ejercicio',
   'workout.addSet': 'A\u00F1adir Serie',
+  'workout.moveUp': 'Mover arriba',
+  'workout.moveDown': 'Mover abajo',
   'workout.set': 'Serie {number}',
   'workout.weight': 'Peso',
   'workout.reps': 'Reps',
   'workout.rest': 'Descanso',
+  'workout.notes': 'Notas',
+  'workout.notesPlaceholder': 'Añadir nota...',
 
   // Workout Detail
   'workoutDetail.title': 'Detalle del Entrenamiento',
@@ -243,6 +247,11 @@ export const es: Record<TranslationKey, string> = {
   'exercise.restTime': 'Tiempo de descanso',
   'exercise.restTimeEdit': 'Editar tiempo de descanso',
   'exercise.restTimeSave': 'Guardar',
+
+  // Exercise — notes
+  'exercise.notes': 'Notas',
+  'exercise.notesPlaceholder': 'Tips de forma, cues, notas personales...',
+  'exercise.addNotes': 'A\u00F1adir notas',
 
   // Body — charts
   'body.chartWeight': 'Peso',

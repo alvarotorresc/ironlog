@@ -9,6 +9,29 @@ export interface WorkoutExerciseState {
   sets: WorkoutSet[];
 }
 
+export function reorderExercises(
+  exercises: WorkoutExerciseState[],
+  index: number,
+  direction: 'up' | 'down',
+): WorkoutExerciseState[] {
+  const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+  if (
+    index < 0 ||
+    index >= exercises.length ||
+    targetIndex < 0 ||
+    targetIndex >= exercises.length
+  ) {
+    return exercises;
+  }
+
+  const reordered = [...exercises];
+  const temp = reordered[index];
+  reordered[index] = reordered[targetIndex];
+  reordered[targetIndex] = temp;
+  return reordered;
+}
+
 interface UseWorkoutReturn {
   workoutId: number | null;
   routineName: string;
@@ -25,8 +48,10 @@ interface UseWorkoutReturn {
       distance?: number | null;
     },
   ) => Promise<void>;
+  updateSetNotes: (setId: number, notes: string | null) => Promise<void>;
   deleteSet: (setId: number, exerciseId: number) => Promise<void>;
   addExercise: (exercise: Exercise) => void;
+  reorderExercise: (exerciseIndex: number, direction: 'up' | 'down') => void;
   finishWorkout: () => Promise<void>;
   abandonWorkout: () => Promise<void>;
   isFinished: boolean;
@@ -194,6 +219,23 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     [],
   );
 
+  const updateSetNotes = useCallback(async (setId: number, notes: string | null) => {
+    try {
+      const db = await getDatabase();
+      const workoutRepo = new WorkoutRepository(db);
+      await workoutRepo.updateSet(setId, { notes });
+
+      setExercises((prev) =>
+        prev.map((e) => ({
+          ...e,
+          sets: e.sets.map((s) => (s.id === setId ? { ...s, notes } : s)),
+        })),
+      );
+    } catch (error) {
+      console.error('Failed to update set notes:', error);
+    }
+  }, []);
+
   const deleteSet = useCallback(async (setId: number, exerciseId: number) => {
     try {
       const db = await getDatabase();
@@ -216,6 +258,10 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
       if (exists) return prev;
       return [...prev, { exercise, sets: [] }];
     });
+  }, []);
+
+  const reorderExercise = useCallback((exerciseIndex: number, direction: 'up' | 'down') => {
+    setExercises((prev) => reorderExercises(prev, exerciseIndex, direction));
   }, []);
 
   const finishWorkout = useCallback(async () => {
@@ -258,8 +304,10 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     loading,
     addSet,
     updateSet,
+    updateSetNotes,
     deleteSet,
     addExercise,
+    reorderExercise,
     finishWorkout,
     abandonWorkout,
     isFinished,

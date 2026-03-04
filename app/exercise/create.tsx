@@ -66,6 +66,7 @@ export default function CreateExerciseScreen() {
 
   const [name, setName] = useState('');
   const [type, setType] = useState('');
+  const [notes, setNotes] = useState('');
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([]);
   const [muscleGroupModalVisible, setMuscleGroupModalVisible] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -102,6 +103,7 @@ export default function CreateExerciseScreen() {
         muscleGroup: groups[0],
         muscleGroups: groups,
         illustration: null,
+        notes: notes.trim() || null,
       });
       router.back();
     } catch (error) {
@@ -109,7 +111,7 @@ export default function CreateExerciseScreen() {
       Alert.alert('Error', 'Could not save exercise. Please try again.');
       setSaving(false);
     }
-  }, [name, type, selectedMuscleGroups, router]);
+  }, [name, type, notes, selectedMuscleGroups, router]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }}>
@@ -371,6 +373,19 @@ export default function CreateExerciseScreen() {
               </Pressable>
             </Modal>
           </View>
+
+          {/* Notes */}
+          <Input
+            label={t('exercise.notes')}
+            placeholder={t('exercise.notesPlaceholder')}
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+            numberOfLines={3}
+            style={{ minHeight: 80, textAlignVertical: 'top' }}
+            maxLength={500}
+            returnKeyType="default"
+          />
         </ScrollView>
 
         {/* Save button */}
