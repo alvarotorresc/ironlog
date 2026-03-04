@@ -135,6 +135,8 @@ export const es: Record<TranslationKey, string> = {
   'workout.weight': 'Peso',
   'workout.reps': 'Reps',
   'workout.rest': 'Descanso',
+  'workout.notes': 'Notas',
+  'workout.notesPlaceholder': 'Añadir nota...',
 
   // Workout Detail
   'workoutDetail.title': 'Detalle del Entrenamiento',

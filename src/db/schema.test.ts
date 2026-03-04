@@ -196,6 +196,49 @@ describe('Migration #3', () => {
     const row = await db.getFirstAsync<{ version: number }>(
       'SELECT MAX(version) as version FROM schema_version',
     );
-    expect(row!.version).toBe(3);
+    expect(row!.version).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('Migration #4', () => {
+  let db: SQLiteDatabase;
+
+  beforeEach(async () => {
+    db = await createTestDatabase();
+  });
+
+  it('should add notes column to workout_sets', async () => {
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group) VALUES ('Bench', 'weights', 'chest')",
+    );
+    await db.runAsync('INSERT INTO workouts (routine_id) VALUES (NULL)');
+    await db.runAsync(
+      "INSERT INTO workout_sets (workout_id, exercise_id, sort_order, notes) VALUES (1, 1, 1, 'Heavy set')",
+    );
+    const row = await db.getFirstAsync<{ notes: string }>(
+      'SELECT notes FROM workout_sets WHERE id = 1',
+    );
+    expect(row!.notes).toBe('Heavy set');
+  });
+
+  it('should default notes to null when not provided', async () => {
+    await db.runAsync(
+      "INSERT INTO exercises (name, type, muscle_group) VALUES ('Bench', 'weights', 'chest')",
+    );
+    await db.runAsync('INSERT INTO workouts (routine_id) VALUES (NULL)');
+    await db.runAsync(
+      'INSERT INTO workout_sets (workout_id, exercise_id, sort_order) VALUES (1, 1, 1)',
+    );
+    const row = await db.getFirstAsync<{ notes: string | null }>(
+      'SELECT notes FROM workout_sets WHERE id = 1',
+    );
+    expect(row!.notes).toBeNull();
+  });
+
+  it('should record schema version 4', async () => {
+    const row = await db.getFirstAsync<{ version: number }>(
+      'SELECT MAX(version) as version FROM schema_version',
+    );
+    expect(row!.version).toBe(4);
   });
 });
