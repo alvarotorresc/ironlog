@@ -181,6 +181,7 @@ export const es: Record<TranslationKey, string> = {
   // Exercise Picker Modal
   'exercisePicker.title': 'A\u00F1adir Ejercicio',
   'exercisePicker.search': 'Buscar ejercicios...',
+  'exercisePicker.filterAll': 'Todos',
 
   // Muscle groups
   'muscle.chest': 'Pecho',

@@ -173,6 +173,7 @@ export const en = {
   // Exercise Picker Modal
   'exercisePicker.title': 'Add Exercise',
   'exercisePicker.search': 'Search exercises...',
+  'exercisePicker.filterAll': 'All',
 
   // Muscle groups
   'muscle.chest': 'Chest',
