@@ -88,6 +88,19 @@ export const en = {
   'routines.createNew': 'Create new routine',
   'routines.empty': 'No routines yet. Create your first routine to organize your workouts.',
   'routines.createRoutine': 'Create Routine',
+  'routines.templates': 'Templates',
+  'routines.useTemplate': 'Use Template',
+  'routines.templateCloned': 'Template added to your routines',
+  'routines.myRoutines': 'My Routines',
+  'routines.templateExercises': '{count} exercises',
+
+  // Template names
+  'template.pushDay': 'Push Day',
+  'template.pullDay': 'Pull Day',
+  'template.legDay': 'Leg Day',
+  'template.upperBody': 'Upper Body',
+  'template.lowerBody': 'Lower Body',
+  'template.fullBody': 'Full Body',
 
   // Routine Detail
   'routine.exercises': 'Exercises',

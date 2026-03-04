@@ -93,6 +93,19 @@ export const es: Record<TranslationKey, string> = {
   'routines.empty':
     'A\u00FAn no hay rutinas. Crea tu primera rutina para organizar tus entrenamientos.',
   'routines.createRoutine': 'Crear Rutina',
+  'routines.templates': 'Plantillas',
+  'routines.useTemplate': 'Usar Plantilla',
+  'routines.templateCloned': 'Plantilla a\u00F1adida a tus rutinas',
+  'routines.myRoutines': 'Mis Rutinas',
+  'routines.templateExercises': '{count} ejercicios',
+
+  // Template names
+  'template.pushDay': 'D\u00EDa de Empuje',
+  'template.pullDay': 'D\u00EDa de Jal\u00F3n',
+  'template.legDay': 'D\u00EDa de Piernas',
+  'template.upperBody': 'Tren Superior',
+  'template.lowerBody': 'Tren Inferior',
+  'template.fullBody': 'Cuerpo Completo',
 
   // Routine Detail
   'routine.exercises': 'Ejercicios',
