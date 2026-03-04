@@ -231,6 +231,11 @@ export const es: Record<TranslationKey, string> = {
   'exercise.restTimeEdit': 'Editar tiempo de descanso',
   'exercise.restTimeSave': 'Guardar',
 
+  // Exercise — notes
+  'exercise.notes': 'Notas',
+  'exercise.notesPlaceholder': 'Tips de forma, cues, notas personales...',
+  'exercise.addNotes': 'A\u00F1adir notas',
+
   // Body — charts
   'body.chartWeight': 'Peso',
   'body.chartBodyFat': 'Grasa Corporal',
