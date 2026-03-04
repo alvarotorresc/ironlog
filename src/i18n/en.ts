@@ -160,6 +160,11 @@ export const en = {
   'body.add.atLeastOne': 'Enter at least one measurement',
   'body.add.saveError': 'Failed to save measurement',
 
+  // Body Edit
+  'body.edit.title': 'Edit Measurement',
+  'body.edit.saveError': 'Failed to update measurement',
+  'body.edit.notFound': 'Measurement not found',
+
   // Exercise Picker Modal
   'exercisePicker.title': 'Add Exercise',
   'exercisePicker.search': 'Search exercises...',
