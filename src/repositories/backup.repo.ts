@@ -46,6 +46,12 @@ interface WorkoutSetRow {
   distance: number | null;
 }
 
+interface MuscleGroupRow {
+  exercise_id: number;
+  muscle_group: string;
+  is_primary: number;
+}
+
 interface BodyMeasurementRow {
   weight: number | null;
   body_fat: number | null;
@@ -66,11 +72,23 @@ export class BackupRepository {
     const exerciseRows = await this.db.getAllAsync<ExerciseRow>(
       'SELECT id, name, type, muscle_group, illustration, rest_seconds, created_at FROM exercises ORDER BY id ASC',
     );
+    // Muscle groups from pivot table
+    const muscleGroupRows = await this.db.getAllAsync<MuscleGroupRow>(
+      'SELECT exercise_id, muscle_group, is_primary FROM exercise_muscle_groups ORDER BY exercise_id, is_primary DESC',
+    );
+    const groupsByExercise = new Map<number, string[]>();
+    for (const mg of muscleGroupRows) {
+      const list = groupsByExercise.get(mg.exercise_id) ?? [];
+      list.push(mg.muscle_group);
+      groupsByExercise.set(mg.exercise_id, list);
+    }
+
     const exercises: ExerciseExport[] = exerciseRows.map((row) => ({
       id: row.id,
       name: row.name,
       type: row.type,
       muscleGroup: row.muscle_group,
+      muscleGroups: groupsByExercise.get(row.id) ?? [row.muscle_group],
       illustration: row.illustration,
       restSeconds: row.rest_seconds,
       createdAt: row.created_at,
@@ -180,6 +198,22 @@ export class BackupRepository {
         );
         if (row) {
           exerciseIdMap.set(ex.id, row.id);
+
+          // Sync muscle groups pivot if backup includes them
+          const groups = ex.muscleGroups ?? [ex.muscleGroup];
+          await this.db.runAsync(
+            'DELETE FROM exercise_muscle_groups WHERE exercise_id = ?',
+            row.id,
+          );
+          for (let i = 0; i < groups.length; i++) {
+            await this.db.runAsync(
+              `INSERT OR IGNORE INTO exercise_muscle_groups (exercise_id, muscle_group, is_primary)
+               VALUES (?, ?, ?)`,
+              row.id,
+              groups[i],
+              i === 0 ? 1 : 0,
+            );
+          }
         }
       }
 
