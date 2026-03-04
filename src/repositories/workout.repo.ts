@@ -19,6 +19,7 @@ interface WorkoutSetRow {
   distance: number | null;
   group_id: number | null;
   group_type: string | null;
+  notes: string | null;
 }
 
 interface WorkoutHistoryRow extends WorkoutRow {
@@ -34,6 +35,7 @@ interface WorkoutSetJoinRow extends WorkoutSetRow {
   e_is_predefined: number;
   e_illustration: string | null;
   e_rest_seconds: number;
+  e_notes: string | null;
   e_created_at: string;
 }
 
@@ -45,6 +47,7 @@ interface AddSetData {
   reps?: number | null;
   duration?: number | null;
   distance?: number | null;
+  notes?: string | null;
 }
 
 interface UpdateSetData {
@@ -52,6 +55,7 @@ interface UpdateSetData {
   reps?: number | null;
   duration?: number | null;
   distance?: number | null;
+  notes?: string | null;
 }
 
 export interface WorkoutExerciseGroup {
@@ -85,6 +89,7 @@ function rowToSet(row: WorkoutSetRow): WorkoutSet {
     distance: row.distance,
     groupId: row.group_id,
     groupType: row.group_type as GroupType | null,
+    notes: row.notes,
   };
 }
 
@@ -114,8 +119,8 @@ export class WorkoutRepository {
 
   async addSet(data: AddSetData): Promise<WorkoutSet> {
     const result = await this.db.runAsync(
-      `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       data.workoutId,
       data.exerciseId,
       data.order,
@@ -123,6 +128,7 @@ export class WorkoutRepository {
       data.reps ?? null,
       data.duration ?? null,
       data.distance ?? null,
+      data.notes ?? null,
     );
 
     const row = await this.db.getFirstAsync<WorkoutSetRow>(
@@ -135,7 +141,7 @@ export class WorkoutRepository {
 
   async updateSet(setId: number, data: UpdateSetData): Promise<void> {
     const fields: string[] = [];
-    const values: (number | null)[] = [];
+    const values: (number | string | null)[] = [];
 
     if (data.weight !== undefined) {
       fields.push('weight = ?');
@@ -152,6 +158,10 @@ export class WorkoutRepository {
     if (data.distance !== undefined) {
       fields.push('distance = ?');
       values.push(data.distance ?? null);
+    }
+    if (data.notes !== undefined) {
+      fields.push('notes = ?');
+      values.push(data.notes ?? null);
     }
 
     if (fields.length === 0) return;
@@ -240,7 +250,7 @@ export class WorkoutRepository {
       `SELECT
         ws.id, ws.workout_id, ws.exercise_id, ws.sort_order,
         ws.weight, ws.reps, ws.duration, ws.distance,
-        ws.group_id, ws.group_type,
+        ws.group_id, ws.group_type, ws.notes,
         e.id as e_id,
         e.name as e_name,
         e.type as e_type,
@@ -248,6 +258,7 @@ export class WorkoutRepository {
         e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
+        e.notes as e_notes,
         e.created_at as e_created_at
       FROM workout_sets ws
       JOIN exercises e ON e.id = ws.exercise_id
@@ -270,6 +281,7 @@ export class WorkoutRepository {
             isPredefined: row.e_is_predefined === 1,
             illustration: row.e_illustration,
             restSeconds: row.e_rest_seconds,
+            notes: row.e_notes,
             createdAt: row.e_created_at,
           },
           sets: [],

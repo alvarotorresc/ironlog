@@ -48,6 +48,7 @@ interface UseWorkoutReturn {
       distance?: number | null;
     },
   ) => Promise<void>;
+  updateSetNotes: (setId: number, notes: string | null) => Promise<void>;
   deleteSet: (setId: number, exerciseId: number) => Promise<void>;
   addExercise: (exercise: Exercise) => void;
   reorderExercise: (exerciseIndex: number, direction: 'up' | 'down') => void;
@@ -218,6 +219,23 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     [],
   );
 
+  const updateSetNotes = useCallback(async (setId: number, notes: string | null) => {
+    try {
+      const db = await getDatabase();
+      const workoutRepo = new WorkoutRepository(db);
+      await workoutRepo.updateSet(setId, { notes });
+
+      setExercises((prev) =>
+        prev.map((e) => ({
+          ...e,
+          sets: e.sets.map((s) => (s.id === setId ? { ...s, notes } : s)),
+        })),
+      );
+    } catch (error) {
+      console.error('Failed to update set notes:', error);
+    }
+  }, []);
+
   const deleteSet = useCallback(async (setId: number, exerciseId: number) => {
     try {
       const db = await getDatabase();
@@ -286,6 +304,7 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     loading,
     addSet,
     updateSet,
+    updateSetNotes,
     deleteSet,
     addExercise,
     reorderExercise,

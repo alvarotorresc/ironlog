@@ -13,6 +13,7 @@ export interface Exercise {
   isPredefined: boolean;
   illustration: string | null;
   restSeconds: number;
+  notes: string | null;
   createdAt: string;
 }
 
@@ -51,6 +52,7 @@ export interface WorkoutSet {
   distance: number | null;
   groupId: number | null;
   groupType: GroupType | null;
+  notes: string | null;
 }
 
 export interface WorkoutHistoryItem extends Workout {
@@ -149,6 +151,7 @@ export interface ExerciseExport {
   muscleGroups?: string[];
   illustration: string | null;
   restSeconds: number;
+  notes?: string | null;
   createdAt: string;
 }
 
@@ -171,6 +174,7 @@ export interface WorkoutExport {
     reps: number | null;
     duration: number | null;
     distance: number | null;
+    notes?: string | null;
   }>;
 }
 

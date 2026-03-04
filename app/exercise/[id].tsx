@@ -21,6 +21,7 @@ import {
   Trash2,
   Check,
   X,
+  StickyNote,
 } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { getDatabase } from '@/db/connection';
@@ -453,6 +454,78 @@ export default function ExerciseDetailScreen() {
             )}
           </View>
         </View>
+
+        {/* Notes section */}
+        {exercise.notes ? (
+          <Pressable
+            onPress={() => router.push(`/exercise/edit/${exerciseId}`)}
+            accessibilityRole="button"
+            accessibilityLabel={t('exercise.notes')}
+          >
+            {({ pressed }) => (
+              <Card
+                style={{
+                  marginBottom: 24,
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}
+                >
+                  <StickyNote size={16} color={colors.text.tertiary} strokeWidth={1.5} />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: '600',
+                      color: colors.text.secondary,
+                    }}
+                  >
+                    {t('exercise.notes')}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: colors.text.primary,
+                    lineHeight: 20,
+                  }}
+                >
+                  {exercise.notes}
+                </Text>
+              </Card>
+            )}
+          </Pressable>
+        ) : !exercise.isPredefined ? (
+          <Pressable
+            onPress={() => router.push(`/exercise/edit/${exerciseId}`)}
+            accessibilityRole="button"
+            accessibilityLabel={t('exercise.addNotes')}
+          >
+            {({ pressed }) => (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  marginBottom: 24,
+                  opacity: pressed ? 0.7 : 1,
+                }}
+              >
+                <StickyNote size={14} color={colors.brand.blue} strokeWidth={1.5} />
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '500',
+                    color: colors.brand.blue,
+                  }}
+                >
+                  {t('exercise.addNotes')}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        ) : null}
 
         {/* Stats section */}
         {statsLoading ? (

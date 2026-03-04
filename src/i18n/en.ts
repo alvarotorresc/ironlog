@@ -130,6 +130,8 @@ export const en = {
   'workout.weight': 'Weight',
   'workout.reps': 'Reps',
   'workout.rest': 'Rest',
+  'workout.notes': 'Notes',
+  'workout.notesPlaceholder': 'Add a note...',
 
   // Workout Detail
   'workoutDetail.title': 'Workout Detail',
@@ -224,6 +226,11 @@ export const en = {
   'exercise.restTime': 'Rest time',
   'exercise.restTimeEdit': 'Edit rest time',
   'exercise.restTimeSave': 'Save',
+
+  // Exercise — notes
+  'exercise.notes': 'Notes',
+  'exercise.notesPlaceholder': 'Form tips, cues, personal notes...',
+  'exercise.addNotes': 'Add notes',
 
   // Body — charts
   'body.chartWeight': 'Weight',

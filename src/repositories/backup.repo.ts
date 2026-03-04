@@ -14,6 +14,7 @@ interface ExerciseRow {
   muscle_group: string;
   illustration: string | null;
   rest_seconds: number;
+  notes: string | null;
   created_at: string;
 }
 
@@ -44,6 +45,7 @@ interface WorkoutSetRow {
   reps: number | null;
   duration: number | null;
   distance: number | null;
+  notes: string | null;
 }
 
 interface MuscleGroupRow {
@@ -70,7 +72,7 @@ export class BackupRepository {
   async exportData(): Promise<IronLogBackup> {
     // Exercises
     const exerciseRows = await this.db.getAllAsync<ExerciseRow>(
-      'SELECT id, name, type, muscle_group, illustration, rest_seconds, created_at FROM exercises ORDER BY id ASC',
+      'SELECT id, name, type, muscle_group, illustration, rest_seconds, notes, created_at FROM exercises ORDER BY id ASC',
     );
     // Muscle groups from pivot table
     const muscleGroupRows = await this.db.getAllAsync<MuscleGroupRow>(
@@ -91,6 +93,7 @@ export class BackupRepository {
       muscleGroups: groupsByExercise.get(row.id) ?? [row.muscle_group],
       illustration: row.illustration,
       restSeconds: row.rest_seconds,
+      notes: row.notes,
       createdAt: row.created_at,
     }));
 
@@ -121,7 +124,7 @@ export class BackupRepository {
       'SELECT id, routine_id, started_at, finished_at FROM workouts ORDER BY id ASC',
     );
     const workoutSetRows = await this.db.getAllAsync<WorkoutSetRow>(
-      'SELECT workout_id, exercise_id, sort_order, weight, reps, duration, distance FROM workout_sets ORDER BY workout_id ASC, sort_order ASC',
+      'SELECT workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes FROM workout_sets ORDER BY workout_id ASC, sort_order ASC',
     );
 
     const setsByWorkout = new Map<number, WorkoutExport['sets']>();
@@ -134,6 +137,7 @@ export class BackupRepository {
         reps: row.reps,
         duration: row.duration,
         distance: row.distance,
+        notes: row.notes,
       });
       setsByWorkout.set(row.workout_id, list);
     }
@@ -182,13 +186,14 @@ export class BackupRepository {
       //    After each upsert, resolve the real local ID.
       for (const ex of backup.exercises) {
         await this.db.runAsync(
-          `INSERT OR IGNORE INTO exercises (name, type, muscle_group, illustration, rest_seconds, created_at)
-           VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT OR IGNORE INTO exercises (name, type, muscle_group, illustration, rest_seconds, notes, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
           ex.name,
           ex.type,
           ex.muscleGroup,
           ex.illustration ?? null,
           ex.restSeconds,
+          ex.notes ?? null,
           ex.createdAt,
         );
 
@@ -273,8 +278,8 @@ export class BackupRepository {
           }
 
           await this.db.runAsync(
-            `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             workout.id,
             localExerciseId,
             set.sortOrder,
@@ -282,6 +287,7 @@ export class BackupRepository {
             set.reps ?? null,
             set.duration ?? null,
             set.distance ?? null,
+            set.notes ?? null,
           );
         }
       }

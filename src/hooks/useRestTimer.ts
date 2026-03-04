@@ -65,15 +65,30 @@ export function useRestTimer(defaultSeconds: number = 90): UseRestTimerReturn {
     playFinishFeedback();
   }, [clearTimer, playFinishFeedback]);
 
-  // Recalculate on AppState change (background -> foreground)
+  const startInterval = useCallback(() => {
+    clearTimer();
+    intervalRef.current = setInterval(() => {
+      const remaining = calcRemaining();
+      if (remaining <= 0) {
+        finishTimer();
+      } else {
+        setRemainingSeconds(remaining);
+      }
+    }, 1000);
+  }, [clearTimer, calcRemaining, finishTimer]);
+
+  // Pause interval on background, recalculate and resume on foreground
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
-      if (nextState === 'active' && startedAtRef.current > 0) {
+      if (nextState === 'background' || nextState === 'inactive') {
+        clearTimer();
+      } else if (nextState === 'active' && startedAtRef.current > 0) {
         const remaining = calcRemaining();
         if (remaining <= 0) {
           finishTimer();
         } else {
           setRemainingSeconds(remaining);
+          startInterval();
         }
       }
     });
@@ -81,7 +96,7 @@ export function useRestTimer(defaultSeconds: number = 90): UseRestTimerReturn {
     return () => {
       subscription.remove();
     };
-  }, [calcRemaining, finishTimer]);
+  }, [calcRemaining, finishTimer, clearTimer, startInterval]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -101,16 +116,9 @@ export function useRestTimer(defaultSeconds: number = 90): UseRestTimerReturn {
       setTotalSeconds(duration);
       setState('running');
 
-      intervalRef.current = setInterval(() => {
-        const remaining = calcRemaining();
-        if (remaining <= 0) {
-          finishTimer();
-        } else {
-          setRemainingSeconds(remaining);
-        }
-      }, 1000);
+      startInterval();
     },
-    [defaultSeconds, clearTimer, calcRemaining, finishTimer],
+    [defaultSeconds, clearTimer, startInterval],
   );
 
   const skip = useCallback(() => {

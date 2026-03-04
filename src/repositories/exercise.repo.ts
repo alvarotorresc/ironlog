@@ -9,6 +9,7 @@ export interface CreateExerciseData {
   illustration?: string | null;
   restSeconds?: number;
   isPredefined?: boolean;
+  notes?: string | null;
 }
 
 export interface UpdateExerciseData {
@@ -18,6 +19,7 @@ export interface UpdateExerciseData {
   muscleGroups?: MuscleGroup[];
   illustration?: string | null;
   restSeconds?: number;
+  notes?: string | null;
 }
 
 interface ExerciseRow {
@@ -28,6 +30,7 @@ interface ExerciseRow {
   is_predefined: number;
   illustration: string | null;
   rest_seconds: number;
+  notes: string | null;
   created_at: string;
 }
 
@@ -47,6 +50,7 @@ function rowToExercise(row: ExerciseRow, muscleGroups?: MuscleGroup[]): Exercise
     isPredefined: row.is_predefined === 1,
     illustration: row.illustration,
     restSeconds: row.rest_seconds,
+    notes: row.notes,
     createdAt: row.created_at,
   };
 }
@@ -59,14 +63,15 @@ export class ExerciseRepository {
 
     await this.db.withTransactionAsync(async () => {
       const result = await this.db.runAsync(
-        `INSERT INTO exercises (name, type, muscle_group, illustration, rest_seconds, is_predefined)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO exercises (name, type, muscle_group, illustration, rest_seconds, is_predefined, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         data.name,
         data.type,
         data.muscleGroup,
         data.illustration ?? null,
         data.restSeconds ?? 90,
         data.isPredefined ? 1 : 0,
+        data.notes ?? null,
       );
 
       const exerciseId = result.lastInsertRowId;
@@ -185,6 +190,10 @@ export class ExerciseRepository {
       if (data.restSeconds !== undefined) {
         fields.push('rest_seconds = ?');
         values.push(data.restSeconds);
+      }
+      if (data.notes !== undefined) {
+        fields.push('notes = ?');
+        values.push(data.notes);
       }
 
       if (fields.length > 0) {
