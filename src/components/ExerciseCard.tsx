@@ -4,6 +4,7 @@ import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import type { TranslationKey } from '@/i18n';
 import { ExerciseIllustration } from './ExerciseIllustration';
+import { MuscleGroupBadges } from './MuscleGroupBadges';
 import type { Exercise } from '@/types';
 
 interface ExerciseCardProps {
@@ -54,7 +55,7 @@ export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
     <Pressable
       onPress={() => onPress(exercise)}
       accessibilityRole="button"
-      accessibilityLabel={`${exercise.name}, ${t(`type.${exercise.type}` as TranslationKey)}, ${t(`muscle.${exercise.muscleGroup}` as TranslationKey)}`}
+      accessibilityLabel={`${exercise.name}, ${t(`type.${exercise.type}` as TranslationKey)}, ${exercise.muscleGroups.map((g) => t(`muscle.${g}` as TranslationKey)).join(', ')}`}
     >
       {({ pressed }) => (
         <View
@@ -90,9 +91,13 @@ export function ExerciseCard({ exercise, onPress }: ExerciseCardProps) {
               </Text>
               <TypeBadge type={exercise.type} />
             </View>
-            <Text style={{ fontSize: 12, color: colors.text.tertiary, marginTop: 2 }}>
-              {t(`muscle.${exercise.muscleGroup}` as TranslationKey)}
-            </Text>
+            <View style={{ marginTop: 4 }}>
+              <MuscleGroupBadges
+                muscleGroups={exercise.muscleGroups}
+                primaryGroup={exercise.muscleGroup}
+                compact
+              />
+            </View>
           </View>
           <ChevronRight size={16} color={colors.text.tertiary} strokeWidth={1.5} />
         </View>
