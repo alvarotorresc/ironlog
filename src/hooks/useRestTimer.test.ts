@@ -1,4 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
+import { AppState } from 'react-native';
 import { useRestTimer } from './useRestTimer';
 
 // Mock expo-av
@@ -23,9 +24,24 @@ jest.mock('expo-haptics', () => ({
   },
 }));
 
+// Mock AppState
+let appStateCallback: ((state: string) => void) | null = null;
+const mockRemove = jest.fn();
+jest.mock('react-native', () => ({
+  AppState: {
+    addEventListener: jest.fn((_, callback) => {
+      appStateCallback = callback;
+      return { remove: mockRemove };
+    }),
+  },
+}));
+
 describe('useRestTimer', () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    appStateCallback = null;
+    mockRemove.mockClear();
+    (AppState.addEventListener as jest.Mock).mockClear();
   });
 
   afterEach(() => {
@@ -218,5 +234,67 @@ describe('useRestTimer', () => {
 
     expect(result.current.remainingSeconds).toBe(65);
     expect(result.current.totalSeconds).toBe(75);
+  });
+
+  it('should register AppState listener on mount', () => {
+    renderHook(() => useRestTimer());
+    expect(AppState.addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+  });
+
+  it('should remove AppState listener on unmount', () => {
+    const { unmount } = renderHook(() => useRestTimer());
+    unmount();
+    expect(mockRemove).toHaveBeenCalled();
+  });
+
+  it('should recalculate remaining time when app returns to foreground', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      result.current.start(60);
+    });
+
+    // Simulate 20s passing (app goes to background, timers paused but Date.now advances)
+    act(() => {
+      jest.advanceTimersByTime(20000);
+    });
+
+    expect(result.current.remainingSeconds).toBe(40);
+
+    // Simulate AppState returning to active
+    act(() => {
+      appStateCallback?.('active');
+    });
+
+    expect(result.current.state).toBe('running');
+    expect(result.current.remainingSeconds).toBe(40);
+  });
+
+  it('should finish timer when app returns to foreground after time expired', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      result.current.start(10);
+    });
+
+    // Simulate more time passing than the timer duration
+    act(() => {
+      jest.advanceTimersByTime(15000);
+    });
+
+    // Timer should have already finished via interval
+    expect(result.current.state).toBe('finished');
+    expect(result.current.remainingSeconds).toBe(0);
+  });
+
+  it('should not recalculate when app returns to foreground if timer is idle', () => {
+    const { result } = renderHook(() => useRestTimer());
+
+    act(() => {
+      appStateCallback?.('active');
+    });
+
+    expect(result.current.state).toBe('idle');
+    expect(result.current.remainingSeconds).toBe(0);
   });
 });
