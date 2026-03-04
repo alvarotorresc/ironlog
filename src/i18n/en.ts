@@ -128,6 +128,8 @@ export const en = {
   'workout.weight': 'Weight',
   'workout.reps': 'Reps',
   'workout.rest': 'Rest',
+  'workout.notes': 'Notes',
+  'workout.notesPlaceholder': 'Add a note...',
 
   // Workout Detail
   'workoutDetail.title': 'Workout Detail',
