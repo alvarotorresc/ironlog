@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState as useLocalState } from 'react';
 import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter, useNavigation } from 'expo-router';
-import { Check, Plus } from 'lucide-react-native';
+import { Check, ChevronDown, ChevronUp, Plus } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors } from '@/constants/theme';
 import { useWorkout, type WorkoutExerciseState } from '@/hooks/useWorkout';
@@ -173,13 +173,16 @@ export default function WorkoutScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {workout.exercises.map((exerciseState) => (
+        {workout.exercises.map((exerciseState, index) => (
           <ExerciseSection
             key={exerciseState.exercise.id}
             exerciseState={exerciseState}
+            exerciseIndex={index}
+            exerciseCount={workout.exercises.length}
             onAddSet={handleAddSet}
             onUpdateSet={workout.updateSet}
             onDeleteSet={workout.deleteSet}
+            onReorder={workout.reorderExercise}
           />
         ))}
 
@@ -299,6 +302,8 @@ function WorkoutHeader({ routineName, elapsedSeconds, onFinish }: WorkoutHeaderP
 
 interface ExerciseSectionProps {
   exerciseState: WorkoutExerciseState;
+  exerciseIndex: number;
+  exerciseCount: number;
   onAddSet: (exerciseId: number) => Promise<WorkoutSet | null>;
   onUpdateSet: (
     setId: number,
@@ -310,17 +315,24 @@ interface ExerciseSectionProps {
     },
   ) => void;
   onDeleteSet: (setId: number, exerciseId: number) => void;
+  onReorder: (exerciseIndex: number, direction: 'up' | 'down') => void;
 }
 
 function ExerciseSection({
   exerciseState,
+  exerciseIndex,
+  exerciseCount,
   onAddSet,
   onUpdateSet,
   onDeleteSet,
+  onReorder,
 }: ExerciseSectionProps) {
   const { t } = useTranslation();
   const { exercise, sets } = exerciseState;
   const hasSets = sets.length > 0;
+
+  const isFirst = exerciseIndex === 0;
+  const isLast = exerciseIndex === exerciseCount - 1;
 
   const handleAddSet = useCallback(() => {
     onAddSet(exercise.id);
@@ -332,6 +344,14 @@ function ExerciseSection({
     },
     [onDeleteSet, exercise.id],
   );
+
+  const handleMoveUp = useCallback(() => {
+    onReorder(exerciseIndex, 'up');
+  }, [onReorder, exerciseIndex]);
+
+  const handleMoveDown = useCallback(() => {
+    onReorder(exerciseIndex, 'down');
+  }, [onReorder, exerciseIndex]);
 
   return (
     <View
@@ -377,6 +397,58 @@ function ExerciseSection({
             </Text>
           )}
         </View>
+
+        {/* Reorder buttons */}
+        {exerciseCount > 1 && (
+          <View style={{ flexDirection: 'row', gap: 4 }}>
+            <Pressable
+              onPress={handleMoveUp}
+              disabled={isFirst}
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.moveUp')}
+              hitSlop={6}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: pressed && !isFirst ? colors.bg.tertiary : 'transparent',
+                    opacity: isFirst ? 0.3 : 1,
+                  }}
+                >
+                  <ChevronUp size={16} color={colors.text.secondary} strokeWidth={2} />
+                </View>
+              )}
+            </Pressable>
+            <Pressable
+              onPress={handleMoveDown}
+              disabled={isLast}
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.moveDown')}
+              hitSlop={6}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 6,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: pressed && !isLast ? colors.bg.tertiary : 'transparent',
+                    opacity: isLast ? 0.3 : 1,
+                  }}
+                >
+                  <ChevronDown size={16} color={colors.text.secondary} strokeWidth={2} />
+                </View>
+              )}
+            </Pressable>
+          </View>
+        )}
       </View>
 
       {/* Column headers */}
