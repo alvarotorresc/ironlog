@@ -258,4 +258,13 @@ export const es: Record<TranslationKey, string> = {
   'backup.sharingUnavailable': 'El uso compartido no está disponible en este dispositivo',
   'backup.importing': 'Importando...',
   'backup.exporting': 'Exportando...',
+
+  // Exercise Groups
+  'group.superset': 'Superserie',
+  'group.circuit': 'Circuito',
+  'group.dropset': 'Dropset',
+  'group.group': 'Agrupar',
+  'group.ungroup': 'Desagrupar',
+  'group.selectType': 'Seleccionar tipo de grupo',
+  'group.label': '{type} {letter}',
 };

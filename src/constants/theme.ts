@@ -30,6 +30,14 @@ export const colors = {
     blue10: 'rgba(50, 145, 255, 0.10)',
     blue20: 'rgba(50, 145, 255, 0.20)',
   },
+  group: {
+    superset: '#3B82F6',
+    circuit: '#22C55E',
+    dropset: '#F97316',
+    supersetBg: 'rgba(59, 130, 246, 0.10)',
+    circuitBg: 'rgba(34, 197, 94, 0.10)',
+    dropsetBg: 'rgba(249, 115, 22, 0.10)',
+  },
   chart: {
     line: '#3291FF',
     area: 'rgba(50, 145, 255, 0.15)',

@@ -210,4 +210,173 @@ describe('RoutineRepository', () => {
     expect(routines[1].name).toBe('Second');
     expect(routines[2].name).toBe('First');
   });
+
+  describe('exercise grouping', () => {
+    it('should group exercises with a shared group_id and group_type', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Bench Press',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+      const e2 = await exerciseRepo.create({
+        name: 'Dumbbell Fly',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+
+      const routine = await routineRepo.create('Push Day');
+      await routineRepo.addExercise(routine.id, e1.id, 1);
+      await routineRepo.addExercise(routine.id, e2.id, 2);
+
+      const before = await routineRepo.getById(routine.id);
+      const reIds = before!.exercises.map((re) => re.id);
+
+      const groupId = await routineRepo.groupExercises(routine.id, reIds, 'superset');
+
+      const after = await routineRepo.getById(routine.id);
+
+      expect(groupId).toBeGreaterThan(0);
+      expect(after!.exercises[0].groupId).toBe(groupId);
+      expect(after!.exercises[0].groupType).toBe('superset');
+      expect(after!.exercises[1].groupId).toBe(groupId);
+      expect(after!.exercises[1].groupType).toBe('superset');
+    });
+
+    it('should assign incremental group_ids for multiple groups', async () => {
+      const e1 = await exerciseRepo.create({ name: 'Ex1', type: 'weights', muscleGroup: 'chest' });
+      const e2 = await exerciseRepo.create({ name: 'Ex2', type: 'weights', muscleGroup: 'chest' });
+      const e3 = await exerciseRepo.create({ name: 'Ex3', type: 'weights', muscleGroup: 'back' });
+      const e4 = await exerciseRepo.create({ name: 'Ex4', type: 'weights', muscleGroup: 'back' });
+
+      const routine = await routineRepo.create('Full Body');
+      await routineRepo.addExercise(routine.id, e1.id, 1);
+      await routineRepo.addExercise(routine.id, e2.id, 2);
+      await routineRepo.addExercise(routine.id, e3.id, 3);
+      await routineRepo.addExercise(routine.id, e4.id, 4);
+
+      const result = await routineRepo.getById(routine.id);
+      const reIds = result!.exercises.map((re) => re.id);
+
+      const groupA = await routineRepo.groupExercises(routine.id, [reIds[0], reIds[1]], 'superset');
+      const groupB = await routineRepo.groupExercises(routine.id, [reIds[2], reIds[3]], 'circuit');
+
+      expect(groupB).toBe(groupA + 1);
+
+      const after = await routineRepo.getById(routine.id);
+      expect(after!.exercises[0].groupId).toBe(groupA);
+      expect(after!.exercises[0].groupType).toBe('superset');
+      expect(after!.exercises[2].groupId).toBe(groupB);
+      expect(after!.exercises[2].groupType).toBe('circuit');
+    });
+
+    it('should ungroup a single exercise', async () => {
+      const e1 = await exerciseRepo.create({ name: 'Ex1', type: 'weights', muscleGroup: 'chest' });
+      const e2 = await exerciseRepo.create({ name: 'Ex2', type: 'weights', muscleGroup: 'chest' });
+
+      const routine = await routineRepo.create('Test');
+      await routineRepo.addExercise(routine.id, e1.id, 1);
+      await routineRepo.addExercise(routine.id, e2.id, 2);
+
+      const result = await routineRepo.getById(routine.id);
+      const reIds = result!.exercises.map((re) => re.id);
+      await routineRepo.groupExercises(routine.id, reIds, 'dropset');
+
+      // Ungroup first exercise
+      await routineRepo.ungroupExercise(reIds[0]);
+
+      const after = await routineRepo.getById(routine.id);
+      expect(after!.exercises[0].groupId).toBeNull();
+      expect(after!.exercises[0].groupType).toBeNull();
+      expect(after!.exercises[1].groupId).not.toBeNull();
+      expect(after!.exercises[1].groupType).toBe('dropset');
+    });
+
+    it('should ungroup all exercises in a group', async () => {
+      const e1 = await exerciseRepo.create({ name: 'Ex1', type: 'weights', muscleGroup: 'chest' });
+      const e2 = await exerciseRepo.create({ name: 'Ex2', type: 'weights', muscleGroup: 'chest' });
+
+      const routine = await routineRepo.create('Test');
+      await routineRepo.addExercise(routine.id, e1.id, 1);
+      await routineRepo.addExercise(routine.id, e2.id, 2);
+
+      const result = await routineRepo.getById(routine.id);
+      const reIds = result!.exercises.map((re) => re.id);
+      const groupId = await routineRepo.groupExercises(routine.id, reIds, 'circuit');
+
+      await routineRepo.ungroupAll(routine.id, groupId);
+
+      const after = await routineRepo.getById(routine.id);
+      expect(after!.exercises[0].groupId).toBeNull();
+      expect(after!.exercises[0].groupType).toBeNull();
+      expect(after!.exercises[1].groupId).toBeNull();
+      expect(after!.exercises[1].groupType).toBeNull();
+    });
+
+    it('should return group info from getById', async () => {
+      const e1 = await exerciseRepo.create({ name: 'Ex1', type: 'weights', muscleGroup: 'chest' });
+      const e2 = await exerciseRepo.create({ name: 'Ex2', type: 'weights', muscleGroup: 'chest' });
+      const e3 = await exerciseRepo.create({ name: 'Ex3', type: 'weights', muscleGroup: 'legs' });
+
+      const routine = await routineRepo.create('Test');
+      await routineRepo.addExercise(routine.id, e1.id, 1);
+      await routineRepo.addExercise(routine.id, e2.id, 2);
+      await routineRepo.addExercise(routine.id, e3.id, 3);
+
+      const result = await routineRepo.getById(routine.id);
+      const reIds = result!.exercises.map((re) => re.id);
+      await routineRepo.groupExercises(routine.id, [reIds[0], reIds[1]], 'superset');
+
+      const after = await routineRepo.getById(routine.id);
+
+      // Grouped exercises
+      expect(after!.exercises[0].groupId).not.toBeNull();
+      expect(after!.exercises[0].groupType).toBe('superset');
+      expect(after!.exercises[1].groupId).toBe(after!.exercises[0].groupId);
+
+      // Ungrouped exercise
+      expect(after!.exercises[2].groupId).toBeNull();
+      expect(after!.exercises[2].groupType).toBeNull();
+    });
+
+    it('should persist group info via createWithExercises', async () => {
+      const e1 = await exerciseRepo.create({ name: 'Ex1', type: 'weights', muscleGroup: 'chest' });
+      const e2 = await exerciseRepo.create({ name: 'Ex2', type: 'weights', muscleGroup: 'chest' });
+
+      const routine = await routineRepo.createWithExercises(
+        'Grouped',
+        [e1.id, e2.id],
+        [
+          { exerciseId: e1.id, groupId: 1, groupType: 'superset' },
+          { exerciseId: e2.id, groupId: 1, groupType: 'superset' },
+        ],
+      );
+
+      const result = await routineRepo.getById(routine.id);
+      expect(result!.exercises[0].groupId).toBe(1);
+      expect(result!.exercises[0].groupType).toBe('superset');
+      expect(result!.exercises[1].groupId).toBe(1);
+      expect(result!.exercises[1].groupType).toBe('superset');
+    });
+
+    it('should persist group info via replaceExercises', async () => {
+      const e1 = await exerciseRepo.create({ name: 'Ex1', type: 'weights', muscleGroup: 'chest' });
+      const e2 = await exerciseRepo.create({ name: 'Ex2', type: 'weights', muscleGroup: 'chest' });
+
+      const routine = await routineRepo.create('Test');
+      await routineRepo.replaceExercises(
+        routine.id,
+        [e1.id, e2.id],
+        [
+          { index: 0, groupId: 1, groupType: 'circuit' },
+          { index: 1, groupId: 1, groupType: 'circuit' },
+        ],
+      );
+
+      const result = await routineRepo.getById(routine.id);
+      expect(result!.exercises[0].groupId).toBe(1);
+      expect(result!.exercises[0].groupType).toBe('circuit');
+      expect(result!.exercises[1].groupId).toBe(1);
+      expect(result!.exercises[1].groupType).toBe('circuit');
+    });
+  });
 });

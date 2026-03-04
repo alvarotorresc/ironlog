@@ -123,8 +123,18 @@ export class RoutineRepository {
     };
   }
 
-  async createWithExercises(name: string, exerciseIds: number[]): Promise<Routine> {
+  async createWithExercises(
+    name: string,
+    exerciseIds: number[],
+    groups?: Array<{ exerciseId: number; groupId: number; groupType: GroupType }>,
+  ): Promise<Routine> {
     let routine: Routine | null = null;
+    const groupMap = new Map<number, { groupId: number; groupType: GroupType }>();
+    if (groups) {
+      for (const g of groups) {
+        groupMap.set(g.exerciseId, { groupId: g.groupId, groupType: g.groupType });
+      }
+    }
 
     await this.db.withTransactionAsync(async () => {
       const result = await this.db.runAsync('INSERT INTO routines (name) VALUES (?)', name);
@@ -142,11 +152,14 @@ export class RoutineRepository {
       };
 
       for (let i = 0; i < exerciseIds.length; i++) {
+        const groupInfo = groupMap.get(exerciseIds[i]);
         await this.db.runAsync(
-          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order, group_id, group_type) VALUES (?, ?, ?, ?, ?)',
           routine!.id,
           exerciseIds[i],
           i + 1,
+          groupInfo?.groupId ?? null,
+          groupInfo?.groupType ?? null,
         );
       }
     });
@@ -154,16 +167,30 @@ export class RoutineRepository {
     return routine!;
   }
 
-  async replaceExercises(routineId: number, exerciseIds: number[]): Promise<void> {
+  async replaceExercises(
+    routineId: number,
+    exerciseIds: number[],
+    groups?: Array<{ index: number; groupId: number; groupType: GroupType }>,
+  ): Promise<void> {
+    const groupMap = new Map<number, { groupId: number; groupType: GroupType }>();
+    if (groups) {
+      for (const g of groups) {
+        groupMap.set(g.index, { groupId: g.groupId, groupType: g.groupType });
+      }
+    }
+
     await this.db.withTransactionAsync(async () => {
       await this.db.runAsync('DELETE FROM routine_exercises WHERE routine_id = ?', routineId);
 
       for (let i = 0; i < exerciseIds.length; i++) {
+        const groupInfo = groupMap.get(i);
         await this.db.runAsync(
-          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+          'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order, group_id, group_type) VALUES (?, ?, ?, ?, ?)',
           routineId,
           exerciseIds[i],
           i + 1,
+          groupInfo?.groupId ?? null,
+          groupInfo?.groupType ?? null,
         );
       }
     });
@@ -180,6 +207,46 @@ export class RoutineRepository {
 
   async removeExercise(routineExerciseId: number): Promise<void> {
     await this.db.runAsync('DELETE FROM routine_exercises WHERE id = ?', routineExerciseId);
+  }
+
+  async groupExercises(
+    routineId: number,
+    routineExerciseIds: number[],
+    groupType: GroupType,
+  ): Promise<number> {
+    // Find the next available group_id for this routine
+    const maxRow = await this.db.getFirstAsync<{ max_group: number | null }>(
+      'SELECT MAX(group_id) as max_group FROM routine_exercises WHERE routine_id = ?',
+      routineId,
+    );
+    const nextGroupId = (maxRow?.max_group ?? 0) + 1;
+
+    for (const reId of routineExerciseIds) {
+      await this.db.runAsync(
+        'UPDATE routine_exercises SET group_id = ?, group_type = ? WHERE id = ? AND routine_id = ?',
+        nextGroupId,
+        groupType,
+        reId,
+        routineId,
+      );
+    }
+
+    return nextGroupId;
+  }
+
+  async ungroupExercise(routineExerciseId: number): Promise<void> {
+    await this.db.runAsync(
+      'UPDATE routine_exercises SET group_id = NULL, group_type = NULL WHERE id = ?',
+      routineExerciseId,
+    );
+  }
+
+  async ungroupAll(routineId: number, groupId: number): Promise<void> {
+    await this.db.runAsync(
+      'UPDATE routine_exercises SET group_id = NULL, group_type = NULL WHERE routine_id = ? AND group_id = ?',
+      routineId,
+      groupId,
+    );
   }
 
   async reorderExercises(routineId: number, orderedRoutineExerciseIds: number[]): Promise<void> {
