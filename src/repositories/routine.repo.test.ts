@@ -210,4 +210,177 @@ describe('RoutineRepository', () => {
     expect(routines[1].name).toBe('Second');
     expect(routines[2].name).toBe('First');
   });
+
+  // --- Template tests ---
+
+  describe('templates', () => {
+    it('should create a template with exercises', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Bench Press',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+      const e2 = await exerciseRepo.create({
+        name: 'Overhead Press',
+        type: 'weights',
+        muscleGroup: 'shoulders',
+      });
+
+      const template = await routineRepo.createTemplate('Push Day', 'Push workout', [e1.id, e2.id]);
+
+      expect(template.isTemplate).toBe(true);
+      expect(template.description).toBe('Push workout');
+      expect(template.name).toBe('Push Day');
+    });
+
+    it('should return only templates from getTemplates', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Bench Press',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+
+      await routineRepo.createTemplate('Push Day', null, [e1.id]);
+      await routineRepo.create('My Custom Routine');
+
+      const templates = await routineRepo.getTemplates();
+
+      expect(templates).toHaveLength(1);
+      expect(templates[0].name).toBe('Push Day');
+      expect(templates[0].isTemplate).toBe(true);
+    });
+
+    it('should return templates with their exercises', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Bench Press',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+      const e2 = await exerciseRepo.create({
+        name: 'Overhead Press',
+        type: 'weights',
+        muscleGroup: 'shoulders',
+      });
+
+      await routineRepo.createTemplate('Push Day', null, [e1.id, e2.id]);
+
+      const templates = await routineRepo.getTemplates();
+
+      expect(templates[0].exercises).toHaveLength(2);
+      expect(templates[0].exercises[0].exercise.name).toBe('Bench Press');
+      expect(templates[0].exercises[1].exercise.name).toBe('Overhead Press');
+    });
+
+    it('should exclude templates from getAll', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Squat',
+        type: 'weights',
+        muscleGroup: 'legs',
+      });
+
+      await routineRepo.createTemplate('Leg Day', null, [e1.id]);
+      await routineRepo.create('My Routine');
+
+      const routines = await routineRepo.getAll();
+
+      expect(routines).toHaveLength(1);
+      expect(routines[0].name).toBe('My Routine');
+    });
+
+    it('should exclude templates from getAllWithExercises', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Squat',
+        type: 'weights',
+        muscleGroup: 'legs',
+      });
+
+      await routineRepo.createTemplate('Leg Day', null, [e1.id]);
+      await routineRepo.create('My Routine');
+
+      const routines = await routineRepo.getAllWithExercises();
+
+      expect(routines).toHaveLength(1);
+      expect(routines[0].name).toBe('My Routine');
+    });
+
+    it('should clone a template into a user routine with same exercises', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Bench Press',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+      const e2 = await exerciseRepo.create({
+        name: 'Overhead Press',
+        type: 'weights',
+        muscleGroup: 'shoulders',
+      });
+      const e3 = await exerciseRepo.create({
+        name: 'Tricep Pushdown',
+        type: 'weights',
+        muscleGroup: 'arms',
+      });
+
+      const template = await routineRepo.createTemplate('Push Day', null, [e1.id, e2.id, e3.id]);
+
+      const cloned = await routineRepo.cloneTemplate(template.id, 'My Push Day');
+
+      expect(cloned.isTemplate).toBe(false);
+      expect(cloned.name).toBe('My Push Day');
+
+      // Verify exercises were copied
+      const clonedFull = await routineRepo.getById(cloned.id);
+      expect(clonedFull).not.toBeNull();
+      expect(clonedFull!.exercises).toHaveLength(3);
+      expect(clonedFull!.exercises[0].exercise.name).toBe('Bench Press');
+      expect(clonedFull!.exercises[1].exercise.name).toBe('Overhead Press');
+      expect(clonedFull!.exercises[2].exercise.name).toBe('Tricep Pushdown');
+    });
+
+    it('should clone template with correct exercise order', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Exercise A',
+        type: 'weights',
+        muscleGroup: 'chest',
+      });
+      const e2 = await exerciseRepo.create({
+        name: 'Exercise B',
+        type: 'weights',
+        muscleGroup: 'back',
+      });
+
+      const template = await routineRepo.createTemplate('Test', null, [e1.id, e2.id]);
+      const cloned = await routineRepo.cloneTemplate(template.id, 'Cloned');
+
+      const clonedFull = await routineRepo.getById(cloned.id);
+      expect(clonedFull!.exercises[0].order).toBe(1);
+      expect(clonedFull!.exercises[1].order).toBe(2);
+    });
+
+    it('should throw when cloning a non-existent template', async () => {
+      await expect(routineRepo.cloneTemplate(999, 'Test')).rejects.toThrow('not found');
+    });
+
+    it('should throw when cloning a non-template routine', async () => {
+      const routine = await routineRepo.create('Not a template');
+
+      await expect(routineRepo.cloneTemplate(routine.id, 'Test')).rejects.toThrow('not a template');
+    });
+
+    it('should keep template unchanged after cloning', async () => {
+      const e1 = await exerciseRepo.create({
+        name: 'Squat',
+        type: 'weights',
+        muscleGroup: 'legs',
+      });
+
+      const template = await routineRepo.createTemplate('Leg Day', null, [e1.id]);
+      await routineRepo.cloneTemplate(template.id, 'My Leg Day');
+
+      // Template should still exist and be a template
+      const templates = await routineRepo.getTemplates();
+      expect(templates).toHaveLength(1);
+      expect(templates[0].name).toBe('Leg Day');
+      expect(templates[0].isTemplate).toBe(true);
+    });
+  });
 });

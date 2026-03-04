@@ -1,5 +1,7 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { PREDEFINED_EXERCISES } from '@/constants/exercises';
+import { ROUTINE_TEMPLATES } from '@/constants/routine-templates';
+import { en } from '@/i18n/en';
 
 export async function seedExercises(db: SQLiteDatabase): Promise<void> {
   await db.withTransactionAsync(async () => {
@@ -37,6 +39,42 @@ export async function seedExercises(db: SQLiteDatabase): Promise<void> {
           exercise.muscleGroups[i],
           i === 0 ? 1 : 0,
         );
+      }
+    }
+  });
+}
+
+export async function seedRoutineTemplates(db: SQLiteDatabase): Promise<void> {
+  // Check if templates already exist — idempotent
+  const existing = await db.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM routines WHERE is_template = 1',
+  );
+  if (existing && existing.count > 0) return;
+
+  await db.withTransactionAsync(async () => {
+    for (const template of ROUTINE_TEMPLATES) {
+      const templateName = en[template.nameKey];
+
+      const result = await db.runAsync(
+        'INSERT INTO routines (name, is_template, description) VALUES (?, 1, NULL)',
+        templateName,
+      );
+      const routineId = result.lastInsertRowId;
+
+      for (let i = 0; i < template.exerciseNames.length; i++) {
+        const exercise = await db.getFirstAsync<{ id: number }>(
+          'SELECT id FROM exercises WHERE name = ?',
+          template.exerciseNames[i],
+        );
+
+        if (exercise) {
+          await db.runAsync(
+            'INSERT INTO routine_exercises (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)',
+            routineId,
+            exercise.id,
+            i + 1,
+          );
+        }
       }
     }
   });
