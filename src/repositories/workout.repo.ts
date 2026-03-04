@@ -34,6 +34,7 @@ interface WorkoutSetJoinRow extends WorkoutSetRow {
   e_is_predefined: number;
   e_illustration: string | null;
   e_rest_seconds: number;
+  e_notes: string | null;
   e_created_at: string;
 }
 
@@ -248,6 +249,7 @@ export class WorkoutRepository {
         e.is_predefined as e_is_predefined,
         e.illustration as e_illustration,
         e.rest_seconds as e_rest_seconds,
+        e.notes as e_notes,
         e.created_at as e_created_at
       FROM workout_sets ws
       JOIN exercises e ON e.id = ws.exercise_id
@@ -270,6 +272,7 @@ export class WorkoutRepository {
             isPredefined: row.e_is_predefined === 1,
             illustration: row.e_illustration,
             restSeconds: row.e_rest_seconds,
+            notes: row.e_notes,
             createdAt: row.e_created_at,
           },
           sets: [],
