@@ -317,6 +317,7 @@ export class RoutineRepository {
           isPredefined: row.e_is_predefined === 1,
           illustration: row.e_illustration,
           restSeconds: row.e_rest_seconds,
+          notes: row.e_notes ?? null,
           createdAt: row.e_created_at,
         },
       });
