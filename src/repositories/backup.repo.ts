@@ -146,21 +146,35 @@ export class BackupRepository {
       sets: setsByWorkout.get(row.id) ?? [],
     }));
 
-    // Body measurements
-    const bodyRows = await this.db.getAllAsync<BodyMeasurementRow>(
-      'SELECT weight, body_fat, chest, waist, hips, biceps, thighs, notes, measured_at FROM body_measurements ORDER BY measured_at ASC',
+    // Body measurements with photo paths
+    const bodyRows = await this.db.getAllAsync<BodyMeasurementRow & { id: number }>(
+      'SELECT id, weight, body_fat, chest, waist, hips, biceps, thighs, notes, measured_at FROM body_measurements ORDER BY measured_at ASC',
     );
-    const bodyMeasurements: BodyMeasurementExport[] = bodyRows.map((row) => ({
-      weight: row.weight,
-      bodyFat: row.body_fat,
-      chest: row.chest,
-      waist: row.waist,
-      hips: row.hips,
-      biceps: row.biceps,
-      thighs: row.thighs,
-      notes: row.notes,
-      measuredAt: row.measured_at,
-    }));
+    const photoRows = await this.db.getAllAsync<{ measurement_id: number; photo_path: string }>(
+      'SELECT measurement_id, photo_path FROM body_photos ORDER BY measurement_id, created_at ASC',
+    );
+    const photosByMeasurement = new Map<number, string[]>();
+    for (const pr of photoRows) {
+      const list = photosByMeasurement.get(pr.measurement_id) ?? [];
+      list.push(pr.photo_path);
+      photosByMeasurement.set(pr.measurement_id, list);
+    }
+
+    const bodyMeasurements: BodyMeasurementExport[] = bodyRows.map((row) => {
+      const photoPaths = photosByMeasurement.get(row.id);
+      return {
+        weight: row.weight,
+        bodyFat: row.body_fat,
+        chest: row.chest,
+        waist: row.waist,
+        hips: row.hips,
+        biceps: row.biceps,
+        thighs: row.thighs,
+        notes: row.notes,
+        measuredAt: row.measured_at,
+        ...(photoPaths && photoPaths.length > 0 ? { photoPaths } : {}),
+      };
+    });
 
     return {
       version: 1,
