@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Modal } from 'react-native';
 import { Link2, Zap, TrendingDown } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
-import { useTranslation } from '@/i18n';
+import { useTranslation, type TranslationKey } from '@/i18n';
 import type { GroupType } from '@/types';
 
 interface GroupTypePickerProps {
@@ -13,7 +13,7 @@ interface GroupTypePickerProps {
 interface GroupOption {
   type: GroupType;
   icon: typeof Link2;
-  descriptionKey: string;
+  descriptionKey: TranslationKey;
 }
 
 const GROUP_OPTIONS: GroupOption[] = [
