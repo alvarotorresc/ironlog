@@ -1,6 +1,8 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 import { createTestDatabase } from '../db/test-helpers';
 import { ExerciseRepository } from './exercise.repo';
+import { RoutineRepository } from './routine.repo';
+import { WorkoutRepository } from './workout.repo';
 
 describe('ExerciseRepository', () => {
   let db: SQLiteDatabase;
@@ -339,6 +341,45 @@ describe('ExerciseRepository', () => {
     });
 
     expect(exercise.isPredefined).toBe(false);
+  });
+
+  it('should delete exercise and cascade to routine_exercises', async () => {
+    const exercise = await repo.create({
+      name: 'Bench Press',
+      type: 'weights',
+      muscleGroup: 'chest',
+    });
+
+    const routineRepo = new RoutineRepository(db);
+    const routine = await routineRepo.createWithExercises('Push Day', [exercise.id]);
+
+    await repo.delete(exercise.id);
+
+    const updated = await routineRepo.getById(routine.id);
+    expect(updated!.exercises).toHaveLength(0);
+  });
+
+  it('should delete exercise and cascade to workout_sets', async () => {
+    const exercise = await repo.create({
+      name: 'Squat',
+      type: 'weights',
+      muscleGroup: 'legs',
+    });
+
+    const workoutRepo = new WorkoutRepository(db);
+    const workout = await workoutRepo.start();
+    await workoutRepo.addSet({
+      workoutId: workout.id,
+      exerciseId: exercise.id,
+      order: 1,
+      weight: 100,
+      reps: 5,
+    });
+
+    await repo.delete(exercise.id);
+
+    const sets = await workoutRepo.getSetsForWorkout(workout.id);
+    expect(sets).toHaveLength(0);
   });
 
   it('should return empty muscleGroups array as single primary group fallback', async () => {
