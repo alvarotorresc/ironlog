@@ -71,6 +71,7 @@ export default function EditExerciseScreen() {
   const [notFound, setNotFound] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
+  const [notes, setNotes] = useState('');
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([]);
   const [muscleGroupModalVisible, setMuscleGroupModalVisible] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -88,6 +89,7 @@ export default function EditExerciseScreen() {
         }
         setName(exercise.name);
         setType(exercise.type);
+        setNotes(exercise.notes ?? '');
         setSelectedMuscleGroups(exercise.muscleGroups);
       } catch (error) {
         console.error('Failed to load exercise:', error);
@@ -128,6 +130,7 @@ export default function EditExerciseScreen() {
         type: type as ExerciseType,
         muscleGroup: groups[0],
         muscleGroups: groups,
+        notes: notes.trim() || null,
       });
       router.back();
     } catch (error) {
@@ -135,7 +138,7 @@ export default function EditExerciseScreen() {
       Alert.alert(t('common.error'), t('exercise.edit.saveError'));
       setSaving(false);
     }
-  }, [name, type, selectedMuscleGroups, exerciseId, router, t]);
+  }, [name, type, notes, selectedMuscleGroups, exerciseId, router, t]);
 
   if (loading) {
     return (
@@ -419,6 +422,19 @@ export default function EditExerciseScreen() {
               </Pressable>
             </Modal>
           </View>
+
+          {/* Notes */}
+          <Input
+            label={t('exercise.notes')}
+            placeholder={t('exercise.notesPlaceholder')}
+            value={notes}
+            onChangeText={setNotes}
+            multiline
+            numberOfLines={3}
+            style={{ minHeight: 80, textAlignVertical: 'top' }}
+            maxLength={500}
+            returnKeyType="default"
+          />
         </ScrollView>
 
         {/* Save button */}
