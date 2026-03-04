@@ -168,6 +168,11 @@ export const es: Record<TranslationKey, string> = {
   'body.add.atLeastOne': 'Introduce al menos una medida',
   'body.add.saveError': 'Error al guardar la medici\u00F3n',
 
+  // Body Edit
+  'body.edit.title': 'Editar Medici\u00F3n',
+  'body.edit.saveError': 'Error al actualizar la medici\u00F3n',
+  'body.edit.notFound': 'Medici\u00F3n no encontrada',
+
   // Exercise Picker Modal
   'exercisePicker.title': 'A\u00F1adir Ejercicio',
   'exercisePicker.search': 'Buscar ejercicios...',
