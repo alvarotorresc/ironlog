@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getDatabase } from '@/db/connection';
 import { WorkoutRepository } from '@/repositories/workout.repo';
 import { RoutineRepository } from '@/repositories/routine.repo';
-import type { Exercise, WorkoutSet } from '@/types';
+import type { Exercise, WorkoutSet, GroupType } from '@/types';
 
 export interface WorkoutExerciseState {
   exercise: Exercise;
   sets: WorkoutSet[];
+  groupId: number | null;
+  groupType: GroupType | null;
 }
 
 interface UseWorkoutReturn {
@@ -65,6 +67,8 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
               routine.exercises.map((re) => ({
                 exercise: re.exercise,
                 sets: [],
+                groupId: re.groupId,
+                groupType: re.groupType,
               })),
             );
           }
@@ -91,7 +95,11 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
                 if (existingIndex >= 0) {
                   merged[existingIndex] = { ...merged[existingIndex], sets: group.sets };
                 } else {
-                  merged.push(group);
+                  merged.push({
+                    ...group,
+                    groupId: null,
+                    groupType: null,
+                  });
                 }
               }
               return merged;
@@ -214,7 +222,7 @@ export function useWorkout(routineIdParam: string, workoutIdParam: string): UseW
     setExercises((prev) => {
       const exists = prev.some((e) => e.exercise.id === exercise.id);
       if (exists) return prev;
-      return [...prev, { exercise, sets: [] }];
+      return [...prev, { exercise, sets: [], groupId: null, groupType: null }];
     });
   }, []);
 
