@@ -210,6 +210,8 @@ export interface BodyPhoto {
 
 // User settings
 
+export type UnitSystem = 'metric' | 'imperial';
+
 export interface UserSetting {
   key: string;
   value: string;

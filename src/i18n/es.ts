@@ -13,6 +13,8 @@ export const es: Record<TranslationKey, string> = {
   'common.noData': 'Sin datos',
   'common.kg': 'kg',
   'common.cm': 'cm',
+  'common.lbs': 'lbs',
+  'common.in': 'in',
 
   // Tabs
   'tabs.home': 'Inicio',
@@ -177,11 +179,11 @@ export const es: Record<TranslationKey, string> = {
 
   // Body Add
   'body.add.title': 'A\u00F1adir Medici\u00F3n',
-  'body.add.weight': 'Peso (kg)',
+  'body.add.weight': 'Peso',
   'body.add.weightPlaceholder': 'ej. 80.5',
   'body.add.bodyFat': 'Grasa Corporal (%)',
   'body.add.bodyFatPlaceholder': 'ej. 15',
-  'body.add.measurements': 'Medidas (cm)',
+  'body.add.measurements': 'Medidas',
   'body.add.notes': 'Notas',
   'body.add.notesPlaceholder': 'ej. Ma\u00F1ana, en ayunas',
   'body.add.validWeight': 'Introduce un peso v\u00E1lido',
@@ -289,4 +291,15 @@ export const es: Record<TranslationKey, string> = {
   'group.ungroup': 'Desagrupar',
   'group.selectType': 'Seleccionar tipo de grupo',
   'group.label': '{type} {letter}',
+
+  // Settings
+  'settings.title': 'Ajustes',
+  'settings.units': 'Unidades',
+  'settings.metric': 'Métrico (kg, cm)',
+  'settings.imperial': 'Imperial (lbs, in)',
+  'settings.language': 'Idioma',
+  'settings.data': 'Datos',
+  'settings.backupRestore': 'Copia de Seguridad',
+  'settings.about': 'Acerca de',
+  'settings.version': 'Versión',
 };

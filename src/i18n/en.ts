@@ -11,6 +11,8 @@ export const en = {
   'common.noData': 'No data',
   'common.kg': 'kg',
   'common.cm': 'cm',
+  'common.lbs': 'lbs',
+  'common.in': 'in',
 
   // Tabs
   'tabs.home': 'Home',
@@ -169,11 +171,11 @@ export const en = {
 
   // Body Add
   'body.add.title': 'Add Measurement',
-  'body.add.weight': 'Weight (kg)',
+  'body.add.weight': 'Weight',
   'body.add.weightPlaceholder': 'e.g. 80.5',
   'body.add.bodyFat': 'Body Fat (%)',
   'body.add.bodyFatPlaceholder': 'e.g. 15',
-  'body.add.measurements': 'Measurements (cm)',
+  'body.add.measurements': 'Measurements',
   'body.add.notes': 'Notes',
   'body.add.notesPlaceholder': 'e.g. Morning, fasted',
   'body.add.validWeight': 'Enter a valid weight',
@@ -281,6 +283,17 @@ export const en = {
   'group.ungroup': 'Ungroup',
   'group.selectType': 'Select group type',
   'group.label': '{type} {letter}',
+
+  // Settings
+  'settings.title': 'Settings',
+  'settings.units': 'Units',
+  'settings.metric': 'Metric (kg, cm)',
+  'settings.imperial': 'Imperial (lbs, in)',
+  'settings.language': 'Language',
+  'settings.data': 'Data',
+  'settings.backupRestore': 'Backup & Restore',
+  'settings.about': 'About',
+  'settings.version': 'Version',
 } as const;
 
 export type TranslationKey = keyof typeof en;
