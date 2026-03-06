@@ -28,6 +28,7 @@ import {
   Target,
   Settings,
 } from 'lucide-react-native';
+import { Award } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import { getDatabase } from '@/db/connection';
@@ -38,8 +39,10 @@ import { StatsCard } from '@/components/StatsCard';
 import { MuscleDistribution } from '@/components/MuscleDistribution';
 import { PeriodSelector } from '@/components/PeriodSelector';
 import { useDashboardStats, useMuscleDistribution, useMuscleFatigue } from '@/hooks/useStats';
+import { useBadges } from '@/hooks/useBadges';
 import { MuscleFatigueMap } from '@/components/MuscleFatigueMap';
 import { useSettings } from '@/contexts/SettingsContext';
+import { TOTAL_BADGES } from '@/constants/badges';
 import type { ExercisePR, TimePeriod } from '@/types';
 
 function formatDate(dateStr: string): string {
@@ -68,6 +71,7 @@ export default function HomeScreen() {
     reload: reloadDistribution,
   } = useMuscleDistribution(musclePeriod);
   const { fatigueData, reload: reloadFatigue } = useMuscleFatigue();
+  const { badges, reload: reloadBadges } = useBadges();
 
   const loadRoutines = useCallback(async () => {
     setLoadingRoutines(true);
@@ -125,16 +129,17 @@ export default function HomeScreen() {
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([reloadStats(), reloadDistribution(), reloadFatigue()]);
+    await Promise.all([reloadStats(), reloadDistribution(), reloadFatigue(), reloadBadges()]);
     setRefreshing(false);
-  }, [reloadStats, reloadDistribution, reloadFatigue]);
+  }, [reloadStats, reloadDistribution, reloadFatigue, reloadBadges]);
 
   useFocusEffect(
     useCallback(() => {
       reloadStats();
       reloadDistribution();
       reloadFatigue();
-    }, [reloadStats, reloadDistribution, reloadFatigue]),
+      reloadBadges();
+    }, [reloadStats, reloadDistribution, reloadFatigue, reloadBadges]),
   );
 
   return (
@@ -173,27 +178,60 @@ export default function HomeScreen() {
           >
             {t('home.title')}
           </Text>
-          <Pressable
-            onPress={() => router.push('/settings')}
-            accessibilityRole="button"
-            accessibilityLabel={t('settings.title')}
-          >
-            {({ pressed }) => (
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 8,
-                  backgroundColor: colors.bg.tertiary,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  opacity: pressed ? 0.7 : 1,
-                }}
-              >
-                <Settings size={20} color={colors.text.secondary} strokeWidth={1.5} />
-              </View>
-            )}
-          </Pressable>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Pressable
+              onPress={() => router.push('/badges')}
+              accessibilityRole="button"
+              accessibilityLabel={t('badges.title')}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 6,
+                    paddingVertical: 6,
+                    paddingHorizontal: 10,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Award size={16} color={colors.brand.blue} strokeWidth={1.5} />
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: '600',
+                      color: colors.text.secondary,
+                    }}
+                  >
+                    {badges.length}/{TOTAL_BADGES}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+            <Pressable
+              onPress={() => router.push('/settings')}
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.title')}
+            >
+              {({ pressed }) => (
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 8,
+                    backgroundColor: colors.bg.tertiary,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    opacity: pressed ? 0.7 : 1,
+                  }}
+                >
+                  <Settings size={20} color={colors.text.secondary} strokeWidth={1.5} />
+                </View>
+              )}
+            </Pressable>
+          </View>
         </View>
 
         {/* Start Workout CTA */}
