@@ -16,7 +16,10 @@ import { useTranslation } from '@/i18n';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getDatabase } from '@/db/connection';
 import { BodyRepository } from '@/repositories/body.repo';
+import { BodyPhotoRepository } from '@/repositories/body-photo.repo';
 import { Input } from '@/components/ui';
+import { PhotoSection } from '@/components/PhotoSection';
+import { pickFromGallery, takePhoto, savePhoto, deletePhotoFile } from '@/services/photo.service';
 
 interface FormData {
   weight: string;
@@ -27,6 +30,11 @@ interface FormData {
   biceps: string;
   thighs: string;
   notes: string;
+}
+
+interface PendingPhoto {
+  uri: string;
+  savedPath?: string;
 }
 
 function parseOptionalNumber(value: string): number | null {
@@ -43,6 +51,7 @@ export default function AddMeasurementScreen() {
   const wUnit = weightUnit();
   const lUnit = lengthUnit();
   const [saving, setSaving] = useState(false);
+  const [pendingPhotos, setPendingPhotos] = useState<PendingPhoto[]>([]);
   const [form, setForm] = useState<FormData>({
     weight: '',
     bodyFat: '',
@@ -58,6 +67,41 @@ export default function AddMeasurementScreen() {
   const updateField = useCallback((field: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+  }, []);
+
+  const handleAddFromCamera = useCallback(async () => {
+    try {
+      const result = await takePhoto();
+      if (result.cancelled) {
+        return;
+      }
+      setPendingPhotos((prev) => [...prev, { uri: result.uri }]);
+    } catch {
+      Alert.alert(t('common.error'), t('body.photoError'));
+    }
+  }, [t]);
+
+  const handleAddFromGallery = useCallback(async () => {
+    try {
+      const result = await pickFromGallery();
+      if (result.cancelled) {
+        return;
+      }
+      setPendingPhotos((prev) => [...prev, { uri: result.uri }]);
+    } catch {
+      Alert.alert(t('common.error'), t('body.photoError'));
+    }
+  }, [t]);
+
+  const handleDeletePendingPhoto = useCallback(async (index: number) => {
+    setPendingPhotos((prev) => {
+      const removed = prev[index];
+      // Clean up saved file if it was already persisted
+      if (removed?.savedPath) {
+        deletePhotoFile(removed.savedPath);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   }, []);
 
   const validate = useCallback((): boolean => {
@@ -99,7 +143,7 @@ export default function AddMeasurementScreen() {
 
     try {
       const db = await getDatabase();
-      const repo = new BodyRepository(db);
+      const bodyRepo = new BodyRepository(db);
       const rawWeight = parseOptionalNumber(form.weight);
       const rawChest = parseOptionalNumber(form.chest);
       const rawWaist = parseOptionalNumber(form.waist);
@@ -107,7 +151,7 @@ export default function AddMeasurementScreen() {
       const rawBiceps = parseOptionalNumber(form.biceps);
       const rawThighs = parseOptionalNumber(form.thighs);
 
-      await repo.create({
+      const measurement = await bodyRepo.create({
         weight: rawWeight != null ? toMetricWeight(rawWeight) : null,
         bodyFat: parseOptionalNumber(form.bodyFat),
         chest: rawChest != null ? toMetricLength(rawChest) : null,
@@ -117,6 +161,16 @@ export default function AddMeasurementScreen() {
         thighs: rawThighs != null ? toMetricLength(rawThighs) : null,
         notes: form.notes.trim() || null,
       });
+
+      // Save photos
+      if (pendingPhotos.length > 0) {
+        const photoRepo = new BodyPhotoRepository(db);
+        for (const photo of pendingPhotos) {
+          const savedPath = await savePhoto(photo.uri);
+          await photoRepo.addPhoto(measurement.id, savedPath);
+        }
+      }
+
       router.back();
     } catch (error) {
       console.error('Failed to save measurement:', error);
@@ -124,7 +178,9 @@ export default function AddMeasurementScreen() {
     } finally {
       setSaving(false);
     }
-  }, [form, validate, saving, router, t, toMetricWeight, toMetricLength]);
+  }, [form, pendingPhotos, validate, saving, router, t, toMetricWeight, toMetricLength]);
+
+  const photoItems = pendingPhotos.map((p) => ({ uri: p.uri }));
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }}>
@@ -204,7 +260,7 @@ export default function AddMeasurementScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Weight — Primary */}
+          {/* Weight -- Primary */}
           <Input
             label={`${t('body.add.weight')} (${wUnit})`}
             placeholder={t('body.add.weightPlaceholder')}
@@ -299,6 +355,14 @@ export default function AddMeasurementScreen() {
             numberOfLines={3}
             maxLength={500}
             style={{ minHeight: 80, textAlignVertical: 'top' }}
+          />
+
+          {/* Photos Section */}
+          <PhotoSection
+            photos={photoItems}
+            onAddFromCamera={handleAddFromCamera}
+            onAddFromGallery={handleAddFromGallery}
+            onDelete={handleDeletePendingPhoto}
           />
         </ScrollView>
       </KeyboardAvoidingView>

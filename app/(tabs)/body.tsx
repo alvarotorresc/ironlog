@@ -11,7 +11,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { Plus, Scale, TrendingDown, TrendingUp, Minus, Trash2, Pencil } from 'lucide-react-native';
+import {
+  Plus,
+  Scale,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  Trash2,
+  Pencil,
+  Camera,
+} from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import type { TranslationKey } from '@/i18n';
@@ -243,6 +252,7 @@ function BodyMetricsCharts({ measurements }: { measurements: BodyMeasurement[] }
 function MeasurementCard({
   measurement,
   previousWeight,
+  photoCount,
   onEdit,
   onDelete,
   formatWeight,
@@ -252,6 +262,7 @@ function MeasurementCard({
 }: {
   measurement: BodyMeasurement;
   previousWeight: number | null;
+  photoCount: number;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   formatWeight: (kg: number) => string;
@@ -294,9 +305,17 @@ function MeasurementCard({
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
-          {formatDate(measurement.measuredAt)}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Text style={{ fontSize: 13, color: colors.text.tertiary }}>
+            {formatDate(measurement.measuredAt)}
+          </Text>
+          {photoCount > 0 && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Camera size={12} color={colors.text.tertiary} strokeWidth={1.5} />
+              <Text style={{ fontSize: 11, color: colors.text.tertiary }}>{photoCount}</Text>
+            </View>
+          )}
+        </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Pressable
             onPress={() => onEdit(measurement.id)}
@@ -392,7 +411,12 @@ export default function BodyScreen() {
   const { formatWeight, formatLength, convertWeight, weightUnit } = useSettings();
   const wUnitLabel = weightUnit();
   const [refreshing, setRefreshing] = useState(false);
-  const { measurements, isLoading, reload: reloadMeasurements } = useBodyMeasurements();
+  const {
+    measurements,
+    photoCounts,
+    isLoading,
+    reload: reloadMeasurements,
+  } = useBodyMeasurements();
 
   useFocusEffect(
     useCallback(() => {
@@ -500,6 +524,7 @@ export default function BodyScreen() {
               <MeasurementCard
                 measurement={item}
                 previousWeight={previousWeight}
+                photoCount={photoCounts.get(item.id) ?? 0}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 formatWeight={formatWeight}

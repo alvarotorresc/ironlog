@@ -265,6 +265,17 @@ export const es: Record<TranslationKey, string> = {
   'body.chartThighs': 'Muslos',
   'body.chartNoData': 'No hay suficientes datos para mostrar la gr\u00E1fica',
 
+  // Body Photos
+  'body.photos': 'Fotos',
+  'body.addPhoto': 'A\u00F1adir Foto',
+  'body.camera': 'C\u00E1mara',
+  'body.gallery': 'Galer\u00EDa',
+  'body.deletePhoto': '\u00BFEliminar foto?',
+  'body.deletePhotoMessage': 'Esta foto se eliminar\u00E1 permanentemente.',
+  'body.maxPhotos': 'M\u00E1ximo 4 fotos por entrada',
+  'body.photoPermission': 'Se necesita permiso de c\u00E1mara para tomar fotos',
+  'body.photoError': 'Error al a\u00F1adir la foto',
+
   // Backup & Restore
   'backup.title': 'Copia de Seguridad',
   'backup.exportTitle': 'Exportar Datos',

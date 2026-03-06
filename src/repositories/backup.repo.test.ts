@@ -32,6 +32,7 @@ function makeEmptyBackup(overrides: Partial<IronLogBackup> = {}): IronLogBackup 
  * 5. workouts
  * 6. workout_sets
  * 7. body_measurements
+ * 8. body_photos
  */
 function mockEmptyExport(db: SQLiteDatabase) {
   (db.getAllAsync as jest.Mock).mockResolvedValue([]);
@@ -157,6 +158,8 @@ describe('BackupRepository', () => {
         // workout_sets
         .mockResolvedValueOnce([])
         // body_measurements
+        .mockResolvedValueOnce([])
+        // body_photos
         .mockResolvedValueOnce([]);
 
       const result = await repo.exportData();
@@ -182,9 +185,10 @@ describe('BackupRepository', () => {
           { id: 10, name: 'Empty Routine', created_at: '2026-01-01T00:00:00.000Z' },
         ])
         .mockResolvedValueOnce([]) // no routine_exercises
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([])
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce([]) // workouts
+        .mockResolvedValueOnce([]) // workout_sets
+        .mockResolvedValueOnce([]) // body_measurements
+        .mockResolvedValueOnce([]); // body_photos
 
       const result = await repo.exportData();
 
@@ -227,7 +231,8 @@ describe('BackupRepository', () => {
             distance: null,
           },
         ])
-        .mockResolvedValueOnce([]); // body_measurements
+        .mockResolvedValueOnce([]) // body_measurements
+        .mockResolvedValueOnce([]); // body_photos
 
       const result = await repo.exportData();
 
@@ -255,6 +260,7 @@ describe('BackupRepository', () => {
         // body_measurements
         .mockResolvedValueOnce([
           {
+            id: 1,
             weight: 80.5,
             body_fat: 15.0,
             chest: null,
@@ -265,7 +271,9 @@ describe('BackupRepository', () => {
             notes: 'Morning',
             measured_at: '2026-02-01T08:00:00.000Z',
           },
-        ]);
+        ])
+        // body_photos
+        .mockResolvedValueOnce([]);
 
       const result = await repo.exportData();
 
@@ -318,6 +326,7 @@ describe('BackupRepository', () => {
         ])
         .mockResolvedValueOnce([
           {
+            id: 1,
             weight: 80,
             body_fat: null,
             chest: null,
@@ -328,7 +337,9 @@ describe('BackupRepository', () => {
             notes: null,
             measured_at: '2026-02-01T08:00:00.000Z',
           },
-        ]);
+        ])
+        // body_photos
+        .mockResolvedValueOnce([]);
 
       const result = await repo.exportData();
 
@@ -825,6 +836,7 @@ describe('BackupRepository', () => {
         ])
         .mockResolvedValueOnce([
           {
+            id: 1,
             weight: 80,
             body_fat: null,
             chest: null,
@@ -835,7 +847,9 @@ describe('BackupRepository', () => {
             notes: null,
             measured_at: '2026-02-01T08:00:00.000Z',
           },
-        ]);
+        ])
+        // body_photos
+        .mockResolvedValueOnce([]);
 
       const exported = await repo.exportData();
 

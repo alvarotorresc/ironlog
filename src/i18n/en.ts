@@ -257,6 +257,17 @@ export const en = {
   'body.chartThighs': 'Thighs',
   'body.chartNoData': 'Not enough data to show chart',
 
+  // Body Photos
+  'body.photos': 'Photos',
+  'body.addPhoto': 'Add Photo',
+  'body.camera': 'Camera',
+  'body.gallery': 'Gallery',
+  'body.deletePhoto': 'Delete photo?',
+  'body.deletePhotoMessage': 'This photo will be permanently removed.',
+  'body.maxPhotos': 'Maximum 4 photos per entry',
+  'body.photoPermission': 'Camera permission is needed to take photos',
+  'body.photoError': 'Failed to add photo',
+
   // Backup & Restore
   'backup.title': 'Backup & Restore',
   'backup.exportTitle': 'Export Data',
