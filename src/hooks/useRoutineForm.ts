@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import type { Exercise } from '@/types';
+import { useState, useCallback, useRef } from 'react';
+import type { Exercise, GroupType } from '@/types';
 
 export interface RoutineExerciseItem {
   exerciseId: number;
@@ -7,6 +7,8 @@ export interface RoutineExerciseItem {
   illustration: string | null;
   muscleGroup: string;
   notes: string | null;
+  groupId: number | null;
+  groupType: GroupType | null;
 }
 
 interface FormErrors {
@@ -21,6 +23,9 @@ export function useRoutineForm(
   const [name, setName] = useState(initialName);
   const [exercises, setExercises] = useState<RoutineExerciseItem[]>(initialExercises);
   const [errors, setErrors] = useState<FormErrors>({});
+  const nextGroupIdRef = useRef(
+    initialExercises.reduce((max, e) => Math.max(max, e.groupId ?? 0), 0) + 1,
+  );
 
   const addExercise = useCallback((exercise: Exercise) => {
     setExercises((prev) => [
@@ -31,6 +36,8 @@ export function useRoutineForm(
         illustration: exercise.illustration,
         muscleGroup: exercise.muscleGroup,
         notes: exercise.notes,
+        groupId: null,
+        groupType: null,
       },
     ]);
     setErrors((prev) => ({ ...prev, exercises: undefined }));
@@ -53,6 +60,31 @@ export function useRoutineForm(
 
       return newList;
     });
+  }, []);
+
+  const groupExercises = useCallback((indices: number[], groupType: GroupType) => {
+    const groupId = nextGroupIdRef.current;
+    nextGroupIdRef.current += 1;
+
+    setExercises((prev) =>
+      prev.map((item, i) => (indices.includes(i) ? { ...item, groupId, groupType } : item)),
+    );
+
+    return groupId;
+  }, []);
+
+  const ungroupExercise = useCallback((index: number) => {
+    setExercises((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, groupId: null, groupType: null } : item)),
+    );
+  }, []);
+
+  const ungroupAll = useCallback((groupId: number) => {
+    setExercises((prev) =>
+      prev.map((item) =>
+        item.groupId === groupId ? { ...item, groupId: null, groupType: null } : item,
+      ),
+    );
   }, []);
 
   const validate = useCallback((): boolean => {
@@ -78,6 +110,7 @@ export function useRoutineForm(
     setName(newName);
     setExercises(newExercises);
     setErrors({});
+    nextGroupIdRef.current = newExercises.reduce((max, e) => Math.max(max, e.groupId ?? 0), 0) + 1;
   }, []);
 
   return {
@@ -88,6 +121,9 @@ export function useRoutineForm(
     addExercise,
     removeExercise,
     moveExercise,
+    groupExercises,
+    ungroupExercise,
+    ungroupAll,
     validate,
     clearNameError,
     resetForm,

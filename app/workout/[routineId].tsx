@@ -10,8 +10,13 @@ import { useRestTimer } from '@/hooks/useRestTimer';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
 import { WorkoutSetRow } from '@/components/WorkoutSetRow';
 import { RestTimer } from '@/components/RestTimer';
+import {
+  ExerciseGroupBadge,
+  getGroupLetterFromId,
+  getGroupBorderColor,
+} from '@/components/ExerciseGroupBadge';
 import { useTranslation } from '@/i18n';
-import type { WorkoutSet } from '@/types';
+import type { WorkoutSet, GroupType } from '@/types';
 
 function formatElapsedTime(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600);
@@ -90,23 +95,39 @@ export default function WorkoutScreen() {
     return unsubscribe;
   }, [navigation, workout, restTimer, t]);
 
+  // Determine if an exercise is the last in its group (for rest timer logic)
+  const isLastInGroup = useCallback(
+    (exerciseId: number): boolean => {
+      const exerciseState = workout.exercises.find((e) => e.exercise.id === exerciseId);
+      if (!exerciseState?.groupId) return true;
+
+      const groupMembers = workout.exercises.filter((e) => e.groupId === exerciseState.groupId);
+      const lastMember = groupMembers[groupMembers.length - 1];
+      return lastMember?.exercise.id === exerciseId;
+    },
+    [workout.exercises],
+  );
+
   const handleAddSet = useCallback(
     async (exerciseId: number): Promise<WorkoutSet | null> => {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       const newSet = await workout.addSet(exerciseId);
 
       if (newSet) {
-        // Find the exercise to get its restSeconds and name
         const exerciseState = workout.exercises.find((e) => e.exercise.id === exerciseId);
         if (exerciseState && exerciseState.exercise.restSeconds > 0) {
-          setLastExerciseName(exerciseState.exercise.name);
-          restTimer.start(exerciseState.exercise.restSeconds);
+          // Only start rest timer if this is the last exercise in a group,
+          // or if the exercise is not in a group
+          if (isLastInGroup(exerciseId)) {
+            setLastExerciseName(exerciseState.exercise.name);
+            restTimer.start(exerciseState.exercise.restSeconds);
+          }
         }
       }
 
       return newSet;
     },
-    [workout, restTimer, setLastExerciseName],
+    [workout, restTimer, setLastExerciseName, isLastInGroup],
   );
 
   const handleFinish = useCallback(() => {
@@ -152,6 +173,9 @@ export default function WorkoutScreen() {
   }
 
   const isTimerVisible = restTimer.state !== 'idle';
+  const allGroupIds = workout.exercises
+    .map((e) => e.groupId)
+    .filter((id): id is number => id !== null);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
@@ -173,19 +197,36 @@ export default function WorkoutScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {workout.exercises.map((exerciseState, index) => (
-          <ExerciseSection
-            key={exerciseState.exercise.id}
-            exerciseState={exerciseState}
-            exerciseIndex={index}
-            exerciseCount={workout.exercises.length}
-            onAddSet={handleAddSet}
-            onUpdateSet={workout.updateSet}
-            onUpdateNotes={workout.updateSetNotes}
-            onDeleteSet={workout.deleteSet}
-            onReorder={workout.reorderExercise}
-          />
-        ))}
+        {workout.exercises.map((exerciseState, index) => {
+          const isFirstInGroup =
+            exerciseState.groupId !== null &&
+            (index === 0 || workout.exercises[index - 1].groupId !== exerciseState.groupId);
+          const isLastInGroupVisual =
+            exerciseState.groupId !== null &&
+            (index === workout.exercises.length - 1 ||
+              workout.exercises[index + 1].groupId !== exerciseState.groupId);
+
+          return (
+            <ExerciseSection
+              key={exerciseState.exercise.id}
+              exerciseState={exerciseState}
+              exerciseIndex={index}
+              exerciseCount={workout.exercises.length}
+              onAddSet={handleAddSet}
+              onUpdateSet={workout.updateSet}
+              onUpdateNotes={workout.updateSetNotes}
+              onDeleteSet={workout.deleteSet}
+              onReorder={workout.reorderExercise}
+              isFirstInGroup={isFirstInGroup}
+              isLastInGroup={isLastInGroupVisual}
+              groupLetter={
+                exerciseState.groupId !== null
+                  ? getGroupLetterFromId(exerciseState.groupId, allGroupIds)
+                  : null
+              }
+            />
+          );
+        })}
 
         {workout.exercises.length === 0 && (
           <View
@@ -318,6 +359,9 @@ interface ExerciseSectionProps {
   onUpdateNotes: (setId: number, notes: string | null) => void;
   onDeleteSet: (setId: number, exerciseId: number) => void;
   onReorder: (exerciseIndex: number, direction: 'up' | 'down') => void;
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
+  groupLetter: string | null;
 }
 
 function ExerciseSection({
@@ -329,10 +373,15 @@ function ExerciseSection({
   onUpdateNotes,
   onDeleteSet,
   onReorder,
+  isFirstInGroup,
+  isLastInGroup,
+  groupLetter,
 }: ExerciseSectionProps) {
   const { t } = useTranslation();
-  const { exercise, sets } = exerciseState;
+  const { exercise, sets, groupId, groupType } = exerciseState;
   const hasSets = sets.length > 0;
+  const hasGroup = groupId !== null && groupType !== null;
+  const borderColor = hasGroup ? getGroupBorderColor(groupType as GroupType) : undefined;
 
   const isFirst = exerciseIndex === 0;
   const isLast = exerciseIndex === exerciseCount - 1;
@@ -364,8 +413,23 @@ function ExerciseSection({
         borderColor: colors.border,
         borderRadius: 12,
         padding: 16,
+        borderLeftWidth: hasGroup ? 3 : 1,
+        borderLeftColor: hasGroup ? borderColor : colors.border,
+        marginTop: hasGroup && !isFirstInGroup ? -12 : 0,
+        borderTopLeftRadius: hasGroup && !isFirstInGroup ? 0 : 12,
+        borderTopRightRadius: hasGroup && !isFirstInGroup ? 0 : 12,
+        borderBottomLeftRadius: hasGroup && !isLastInGroup ? 0 : 12,
+        borderBottomRightRadius: hasGroup && !isLastInGroup ? 0 : 12,
+        borderTopWidth: hasGroup && !isFirstInGroup ? 0 : 1,
       }}
     >
+      {/* Group badge - only show for first exercise in group */}
+      {hasGroup && isFirstInGroup && groupLetter && (
+        <View style={{ marginBottom: 8 }}>
+          <ExerciseGroupBadge groupType={groupType as GroupType} letter={groupLetter} />
+        </View>
+      )}
+
       {/* Exercise header */}
       <View
         style={{
@@ -511,10 +575,6 @@ function ExerciseSection({
 }
 
 function SetColumnHeaders({ exerciseType }: { exerciseType: string }) {
-  // Column headers are short uppercase labels used as table headers.
-  // These are kept as hardcoded short abbreviations since they are
-  // universal gym terminology and no matching i18n keys exist for
-  // the abbreviated uppercase form (DURATION, DISTANCE, VALUE).
   const getHeaders = () => {
     switch (exerciseType) {
       case 'weights':

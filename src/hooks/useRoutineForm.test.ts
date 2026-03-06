@@ -25,6 +25,8 @@ function makeExerciseItem(overrides: Partial<RoutineExerciseItem> = {}): Routine
     illustration: 'bench-press',
     muscleGroup: 'chest',
     notes: null,
+    groupId: null,
+    groupType: null,
     ...overrides,
   };
 }
@@ -110,7 +112,7 @@ describe('useRoutineForm', () => {
   });
 
   describe('addExercise', () => {
-    it('should append exercise to the list', () => {
+    it('should append exercise to the list with null group info', () => {
       const { result } = renderHook(() => useRoutineForm());
 
       act(() => {
@@ -120,6 +122,8 @@ describe('useRoutineForm', () => {
       expect(result.current.exercises).toHaveLength(1);
       expect(result.current.exercises[0].exerciseId).toBe(1);
       expect(result.current.exercises[0].name).toBe('Bench Press');
+      expect(result.current.exercises[0].groupId).toBeNull();
+      expect(result.current.exercises[0].groupType).toBeNull();
     });
 
     it('should clear exercises error when adding an exercise', () => {
@@ -254,6 +258,91 @@ describe('useRoutineForm', () => {
       expect(result.current.name).toBe('New Name');
       expect(result.current.exercises).toEqual(newExercises);
       expect(result.current.errors).toEqual({});
+    });
+  });
+
+  describe('groupExercises', () => {
+    const items = [
+      makeExerciseItem({ exerciseId: 1, name: 'Bench Press' }),
+      makeExerciseItem({ exerciseId: 2, name: 'Dumbbell Fly' }),
+      makeExerciseItem({ exerciseId: 3, name: 'Squat' }),
+    ];
+
+    it('should assign shared groupId and groupType to selected indices', () => {
+      const { result } = renderHook(() => useRoutineForm('Day', items));
+
+      act(() => {
+        result.current.groupExercises([0, 1], 'superset');
+      });
+
+      expect(result.current.exercises[0].groupId).not.toBeNull();
+      expect(result.current.exercises[0].groupType).toBe('superset');
+      expect(result.current.exercises[1].groupId).toBe(result.current.exercises[0].groupId);
+      expect(result.current.exercises[1].groupType).toBe('superset');
+      expect(result.current.exercises[2].groupId).toBeNull();
+      expect(result.current.exercises[2].groupType).toBeNull();
+    });
+
+    it('should assign incremental groupIds for multiple groups', () => {
+      const fourItems = [
+        makeExerciseItem({ exerciseId: 1, name: 'Ex1' }),
+        makeExerciseItem({ exerciseId: 2, name: 'Ex2' }),
+        makeExerciseItem({ exerciseId: 3, name: 'Ex3' }),
+        makeExerciseItem({ exerciseId: 4, name: 'Ex4' }),
+      ];
+      const { result } = renderHook(() => useRoutineForm('Day', fourItems));
+
+      let groupA: number;
+      let groupB: number;
+      act(() => {
+        groupA = result.current.groupExercises([0, 1], 'superset');
+        groupB = result.current.groupExercises([2, 3], 'circuit');
+      });
+
+      expect(groupB!).toBe(groupA! + 1);
+      expect(result.current.exercises[0].groupType).toBe('superset');
+      expect(result.current.exercises[2].groupType).toBe('circuit');
+    });
+  });
+
+  describe('ungroupExercise', () => {
+    it('should clear groupId and groupType for a single exercise', () => {
+      const items = [
+        makeExerciseItem({ exerciseId: 1, name: 'Ex1', groupId: 1, groupType: 'superset' }),
+        makeExerciseItem({ exerciseId: 2, name: 'Ex2', groupId: 1, groupType: 'superset' }),
+      ];
+      const { result } = renderHook(() => useRoutineForm('Day', items));
+
+      act(() => {
+        result.current.ungroupExercise(0);
+      });
+
+      expect(result.current.exercises[0].groupId).toBeNull();
+      expect(result.current.exercises[0].groupType).toBeNull();
+      expect(result.current.exercises[1].groupId).toBe(1);
+      expect(result.current.exercises[1].groupType).toBe('superset');
+    });
+  });
+
+  describe('ungroupAll', () => {
+    it('should clear group info for all exercises with the given groupId', () => {
+      const items = [
+        makeExerciseItem({ exerciseId: 1, name: 'Ex1', groupId: 1, groupType: 'circuit' }),
+        makeExerciseItem({ exerciseId: 2, name: 'Ex2', groupId: 1, groupType: 'circuit' }),
+        makeExerciseItem({ exerciseId: 3, name: 'Ex3', groupId: 2, groupType: 'dropset' }),
+      ];
+      const { result } = renderHook(() => useRoutineForm('Day', items));
+
+      act(() => {
+        result.current.ungroupAll(1);
+      });
+
+      expect(result.current.exercises[0].groupId).toBeNull();
+      expect(result.current.exercises[0].groupType).toBeNull();
+      expect(result.current.exercises[1].groupId).toBeNull();
+      expect(result.current.exercises[1].groupType).toBeNull();
+      expect(result.current.exercises[2].groupId).toBe(2);
+      expect(result.current.exercises[2].groupType).toBe('dropset');
     });
   });
 });

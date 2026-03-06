@@ -503,6 +503,63 @@ describe('WorkoutRepository', () => {
     expect(detail!.exercises[0].sets[0].notes).toBe('PR attempt');
   });
 
+  describe('workout sets group info', () => {
+    it('should preserve group_id and group_type on workout sets', async () => {
+      const workout = await workoutRepo.start(routineId);
+
+      // Manually insert a set with group info via raw SQL
+      await db.runAsync(
+        `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, group_id, group_type)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        workout.id,
+        benchId,
+        1,
+        80,
+        10,
+        1,
+        'superset',
+      );
+      await db.runAsync(
+        `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, group_id, group_type)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        workout.id,
+        squatId,
+        1,
+        100,
+        8,
+        1,
+        'superset',
+      );
+
+      const sets = await workoutRepo.getSetsForWorkout(workout.id);
+      expect(sets).toHaveLength(2);
+      expect(sets[0].groupId).toBe(1);
+      expect(sets[0].groupType).toBe('superset');
+      expect(sets[1].groupId).toBe(1);
+      expect(sets[1].groupType).toBe('superset');
+    });
+
+    it('should return group info in workout detail', async () => {
+      const workout = await workoutRepo.start(routineId);
+
+      await db.runAsync(
+        `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, group_id, group_type)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        workout.id,
+        benchId,
+        1,
+        80,
+        10,
+        1,
+        'circuit',
+      );
+
+      const detail = await workoutRepo.getDetail(workout.id);
+      expect(detail!.exercises[0].sets[0].groupId).toBe(1);
+      expect(detail!.exercises[0].sets[0].groupType).toBe('circuit');
+    });
+  });
+
   it('should return sets ordered by exercise and sort_order', async () => {
     const workout = await workoutRepo.start(routineId);
 

@@ -19,8 +19,13 @@ import {
   type WorkoutExerciseGroup,
 } from '@/repositories/workout.repo';
 import { ExerciseIllustration } from '@/components/ExerciseIllustration';
+import {
+  ExerciseGroupBadge,
+  getGroupLetterFromId,
+  getGroupBorderColor,
+} from '@/components/ExerciseGroupBadge';
 import { useTranslation } from '@/i18n';
-import type { ExerciseType, WorkoutSet } from '@/types';
+import type { ExerciseType, WorkoutSet, GroupType } from '@/types';
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString + 'Z');
@@ -94,6 +99,17 @@ function formatSetValues(set: WorkoutSet, exerciseType: ExerciseType): string {
 }
 
 type EditedSets = Record<number, { weight?: string; reps?: string; duration?: string }>;
+
+interface ExerciseGroupInfo {
+  groupId: number | null;
+  groupType: GroupType | null;
+}
+
+function getExerciseGroupInfo(group: WorkoutExerciseGroup): ExerciseGroupInfo {
+  if (group.sets.length === 0) return { groupId: null, groupType: null };
+  const firstSet = group.sets[0];
+  return { groupId: firstSet.groupId, groupType: firstSet.groupType };
+}
 
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -357,15 +373,40 @@ export default function WorkoutDetailScreen() {
 
         {/* Exercise sections */}
         <View style={{ gap: 12 }}>
-          {workout.exercises.map((group) => (
-            <ExerciseDetailCard
-              key={group.exercise.id}
-              group={group}
-              editing={editing}
-              editedSets={editedSets}
-              onUpdateSet={updateEditedSet}
-            />
-          ))}
+          {(() => {
+            const exerciseGroupInfos = workout.exercises.map(getExerciseGroupInfo);
+            const allGroupIds = exerciseGroupInfos
+              .map((info) => info.groupId)
+              .filter((id): id is number => id !== null);
+
+            return workout.exercises.map((group, index) => {
+              const info = exerciseGroupInfos[index];
+              const isFirstInGroup =
+                info.groupId !== null &&
+                (index === 0 || exerciseGroupInfos[index - 1].groupId !== info.groupId);
+              const isLastInGroup =
+                info.groupId !== null &&
+                (index === workout.exercises.length - 1 ||
+                  exerciseGroupInfos[index + 1].groupId !== info.groupId);
+              const groupLetter =
+                info.groupId !== null ? getGroupLetterFromId(info.groupId, allGroupIds) : null;
+
+              return (
+                <ExerciseDetailCard
+                  key={group.exercise.id}
+                  group={group}
+                  editing={editing}
+                  editedSets={editedSets}
+                  onUpdateSet={updateEditedSet}
+                  groupId={info.groupId}
+                  groupType={info.groupType}
+                  isFirstInGroup={isFirstInGroup}
+                  isLastInGroup={isLastInGroup}
+                  groupLetter={groupLetter}
+                />
+              );
+            });
+          })()}
         </View>
 
         {workout.exercises.length === 0 && (
@@ -527,10 +568,27 @@ interface ExerciseDetailCardProps {
   editing: boolean;
   editedSets: EditedSets;
   onUpdateSet: (setId: number, field: 'weight' | 'reps' | 'duration', value: string) => void;
+  groupId: number | null;
+  groupType: GroupType | null;
+  isFirstInGroup: boolean;
+  isLastInGroup: boolean;
+  groupLetter: string | null;
 }
 
-function ExerciseDetailCard({ group, editing, editedSets, onUpdateSet }: ExerciseDetailCardProps) {
+function ExerciseDetailCard({
+  group,
+  editing,
+  editedSets,
+  onUpdateSet,
+  groupId,
+  groupType,
+  isFirstInGroup,
+  isLastInGroup,
+  groupLetter,
+}: ExerciseDetailCardProps) {
   const { exercise, sets } = group;
+  const hasGroup = groupId !== null && groupType !== null;
+  const borderColor = hasGroup ? getGroupBorderColor(groupType as GroupType) : undefined;
 
   return (
     <View
@@ -540,8 +598,23 @@ function ExerciseDetailCard({ group, editing, editedSets, onUpdateSet }: Exercis
         borderColor: colors.border,
         borderRadius: 12,
         padding: 16,
+        borderLeftWidth: hasGroup ? 3 : 1,
+        borderLeftColor: hasGroup ? borderColor : colors.border,
+        marginTop: hasGroup && !isFirstInGroup ? -12 : 0,
+        borderTopLeftRadius: hasGroup && !isFirstInGroup ? 0 : 12,
+        borderTopRightRadius: hasGroup && !isFirstInGroup ? 0 : 12,
+        borderBottomLeftRadius: hasGroup && !isLastInGroup ? 0 : 12,
+        borderBottomRightRadius: hasGroup && !isLastInGroup ? 0 : 12,
+        borderTopWidth: hasGroup && !isFirstInGroup ? 0 : 1,
       }}
     >
+      {/* Group badge - only show for first exercise in group */}
+      {hasGroup && isFirstInGroup && groupLetter && (
+        <View style={{ marginBottom: 8 }}>
+          <ExerciseGroupBadge groupType={groupType as GroupType} letter={groupLetter} />
+        </View>
+      )}
+
       {/* Exercise header */}
       <View
         style={{

@@ -43,6 +43,8 @@ function createExerciseState(
   return {
     exercise: ex,
     sets: sets.map((s) => createSet({ ...s, exerciseId: ex.id })),
+    groupId: null,
+    groupType: null,
   };
 }
 

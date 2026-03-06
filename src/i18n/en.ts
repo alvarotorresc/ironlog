@@ -272,6 +272,15 @@ export const en = {
   'backup.sharingUnavailable': 'Sharing is not available on this device',
   'backup.importing': 'Importing...',
   'backup.exporting': 'Exporting...',
+
+  // Exercise Groups
+  'group.superset': 'Superset',
+  'group.circuit': 'Circuit',
+  'group.dropset': 'Dropset',
+  'group.group': 'Group',
+  'group.ungroup': 'Ungroup',
+  'group.selectType': 'Select group type',
+  'group.label': '{type} {letter}',
 } as const;
 
 export type TranslationKey = keyof typeof en;
