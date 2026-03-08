@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, Animated } from 'react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
-import { getBadgeIcon, getBadgeTitleKey } from '@/constants/badges';
+import { getBadgeEmoji, getBadgeCategoryColor, getBadgeTitleKey } from '@/constants/badges';
 import type { Badge } from '@/types';
 
 interface BadgeUnlockToastProps {
@@ -15,7 +15,7 @@ const FADE_DURATION = 300;
 
 /**
  * Toast notification shown when a badge is unlocked.
- * Fades in, stays visible for 3 seconds, then fades out.
+ * @deprecated Use BadgeCelebrationModal instead.
  */
 export function BadgeUnlockToast({ badge, onDismiss }: BadgeUnlockToastProps) {
   const [opacity] = useState(() => new Animated.Value(0));
@@ -24,11 +24,9 @@ export function BadgeUnlockToast({ badge, onDismiss }: BadgeUnlockToastProps) {
   useEffect(() => {
     if (!badge) return;
 
-    // Reset to initial values for new badge
     opacity.setValue(0);
     translateY.setValue(-20);
 
-    // Fade in
     Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,
@@ -42,7 +40,6 @@ export function BadgeUnlockToast({ badge, onDismiss }: BadgeUnlockToastProps) {
       }),
     ]).start();
 
-    // Auto dismiss
     const timer = setTimeout(() => {
       Animated.parallel([
         Animated.timing(opacity, {
@@ -63,22 +60,36 @@ export function BadgeUnlockToast({ badge, onDismiss }: BadgeUnlockToastProps) {
 
   if (!badge) return null;
 
-  const Icon = getBadgeIcon(badge.badgeKey);
+  const emoji = getBadgeEmoji(badge.badgeKey);
+  const categoryColor = getBadgeCategoryColor(badge.badgeKey);
   const titleKey = getBadgeTitleKey(badge.badgeKey);
 
   return (
-    <BadgeToastContent opacity={opacity} translateY={translateY} Icon={Icon} titleKey={titleKey} />
+    <BadgeToastContent
+      opacity={opacity}
+      translateY={translateY}
+      emoji={emoji}
+      categoryColor={categoryColor.color}
+      titleKey={titleKey}
+    />
   );
 }
 
 interface BadgeToastContentProps {
   opacity: Animated.Value;
   translateY: Animated.Value;
-  Icon: ReturnType<typeof getBadgeIcon>;
+  emoji: string;
+  categoryColor: string;
   titleKey: ReturnType<typeof getBadgeTitleKey>;
 }
 
-function BadgeToastContent({ opacity, translateY, Icon, titleKey }: BadgeToastContentProps) {
+function BadgeToastContent({
+  opacity,
+  translateY,
+  emoji,
+  categoryColor,
+  titleKey,
+}: BadgeToastContentProps) {
   const { t } = useTranslation();
 
   return (
@@ -101,11 +112,11 @@ function BadgeToastContent({ opacity, translateY, Icon, titleKey }: BadgeToastCo
           alignItems: 'center',
           backgroundColor: colors.bg.secondary,
           borderWidth: 1,
-          borderColor: colors.brand.blue,
+          borderColor: categoryColor,
           borderRadius: 12,
           padding: 14,
           gap: 12,
-          shadowColor: colors.brand.blue,
+          shadowColor: categoryColor,
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.2,
           shadowRadius: 8,
@@ -117,12 +128,12 @@ function BadgeToastContent({ opacity, translateY, Icon, titleKey }: BadgeToastCo
             width: 40,
             height: 40,
             borderRadius: 10,
-            backgroundColor: colors.accent.blue10,
+            backgroundColor: categoryColor + '1A',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Icon size={22} color={colors.brand.blue} strokeWidth={1.5} />
+          <Text style={{ fontSize: 20 }}>{emoji}</Text>
         </View>
         <View style={{ flex: 1 }}>
           <Text

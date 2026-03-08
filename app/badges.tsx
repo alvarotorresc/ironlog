@@ -6,7 +6,7 @@ import { ArrowLeft, Lock } from 'lucide-react-native';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
 import { useBadges } from '@/hooks/useBadges';
-import { BADGE_DEFINITIONS, TOTAL_BADGES } from '@/constants/badges';
+import { BADGE_DEFINITIONS, TOTAL_BADGES, badgeCategoryColors } from '@/constants/badges';
 import type { Badge } from '@/types';
 
 function formatBadgeDate(dateStr: string): string {
@@ -146,7 +146,7 @@ interface BadgeCardProps {
 
 function BadgeCard({ definition, isUnlocked, badge }: BadgeCardProps) {
   const { t } = useTranslation();
-  const Icon = definition.icon;
+  const categoryColor = badgeCategoryColors[definition.category];
 
   return (
     <View
@@ -154,7 +154,7 @@ function BadgeCard({ definition, isUnlocked, badge }: BadgeCardProps) {
         width: '31%',
         backgroundColor: isUnlocked ? colors.bg.secondary : colors.bg.tertiary,
         borderWidth: 1,
-        borderColor: isUnlocked ? colors.border : colors.bg.tertiary,
+        borderColor: isUnlocked ? categoryColor.color + '40' : colors.bg.tertiary,
         borderRadius: 12,
         padding: 12,
         alignItems: 'center',
@@ -171,15 +171,15 @@ function BadgeCard({ definition, isUnlocked, badge }: BadgeCardProps) {
         style={{
           width: 48,
           height: 48,
-          borderRadius: 12,
-          backgroundColor: isUnlocked ? colors.accent.blue10 : colors.bg.elevated,
+          borderRadius: 14,
+          backgroundColor: isUnlocked ? categoryColor.bg : colors.bg.elevated,
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 8,
         }}
       >
         {isUnlocked ? (
-          <Icon size={24} color={colors.brand.blue} strokeWidth={1.5} />
+          <Text style={{ fontSize: 24 }}>{definition.emoji}</Text>
         ) : (
           <Lock size={20} color={colors.text.tertiary} strokeWidth={1.5} />
         )}
@@ -202,7 +202,7 @@ function BadgeCard({ definition, isUnlocked, badge }: BadgeCardProps) {
       <Text
         style={{
           fontSize: 10,
-          color: colors.text.tertiary,
+          color: isUnlocked ? categoryColor.color : colors.text.tertiary,
           textAlign: 'center',
           marginTop: 2,
         }}

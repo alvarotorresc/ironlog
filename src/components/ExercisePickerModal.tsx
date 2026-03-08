@@ -253,7 +253,7 @@ export function ExercisePickerModal({
           <View
             style={{
               marginHorizontal: 20,
-              marginBottom: 4,
+              marginBottom: 8,
               flexDirection: 'row',
               alignItems: 'center',
               backgroundColor: colors.bg.tertiary,
@@ -286,7 +286,7 @@ export function ExercisePickerModal({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 6 }}
+            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 10 }}
           >
             {muscleGroups.map((group) => (
               <FilterChip
@@ -302,7 +302,8 @@ export function ExercisePickerModal({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 6 }}
+            style={{ marginTop: 2 }}
+            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 10 }}
           >
             {exerciseTypes.map((type) => (
               <FilterChip
