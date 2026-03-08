@@ -364,4 +364,16 @@ export const es: Record<TranslationKey, string> = {
   // Badge: Special
   'badge.early_bird.title': 'Madrugador',
   'badge.early_bird.desc': 'Completa un entrenamiento antes de las 7 AM',
+
+  // Onboarding
+  'onboarding.welcome.title': 'Bienvenido a IronLog',
+  'onboarding.welcome.subtitle': 'Tu diario de entrenamiento personal',
+  'onboarding.features.title': 'Registra todo',
+  'onboarding.features.workouts': 'Entrenamientos, series y repeticiones',
+  'onboarding.features.progress': 'Graficas de progreso y PRs',
+  'onboarding.features.badges': 'Consigue medallas mientras entrenas',
+  'onboarding.ready.title': '\u00BFListo para entrenar?',
+  'onboarding.ready.subtitle': 'Tus datos se quedan en tu dispositivo. Sin cuenta necesaria.',
+  'onboarding.getStarted': 'Empezar',
+  'onboarding.skip': 'Saltar',
 };
