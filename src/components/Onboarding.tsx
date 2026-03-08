@@ -11,9 +11,82 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/constants/theme';
 import { useTranslation } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 
-const SLIDE_COUNT = 3;
+const SLIDE_COUNT = 9;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+interface SlideConfig {
+  emoji: string;
+  titleKey: TranslationKey;
+  bullets: Array<{ emoji: string; textKey: TranslationKey }>;
+}
+
+const FEATURE_SLIDES: SlideConfig[] = [
+  {
+    emoji: '\u{1F4CB}',
+    titleKey: 'onboarding.routines.title',
+    bullets: [
+      { emoji: '\u{2705}', textKey: 'onboarding.routines.bullet1' },
+      { emoji: '\u{1F4E6}', textKey: 'onboarding.routines.bullet2' },
+      { emoji: '\u{1F500}', textKey: 'onboarding.routines.bullet3' },
+    ],
+  },
+  {
+    emoji: '\u{1F4AA}',
+    titleKey: 'onboarding.sets.title',
+    bullets: [
+      { emoji: '\u{1F3CB}\u{FE0F}', textKey: 'onboarding.sets.bullet1' },
+      { emoji: '\u{23F1}\u{FE0F}', textKey: 'onboarding.sets.bullet2' },
+      { emoji: '\u{1F517}', textKey: 'onboarding.sets.bullet3' },
+    ],
+  },
+  {
+    emoji: '\u{1F4CA}',
+    titleKey: 'onboarding.progress.title',
+    bullets: [
+      { emoji: '\u{1F4C8}', textKey: 'onboarding.progress.bullet1' },
+      { emoji: '\u{1F9BE}', textKey: 'onboarding.progress.bullet2' },
+      { emoji: '\u{1F4C5}', textKey: 'onboarding.progress.bullet3' },
+    ],
+  },
+  {
+    emoji: '\u{1F3C5}',
+    titleKey: 'onboarding.badges.title',
+    bullets: [
+      { emoji: '\u{1F525}', textKey: 'onboarding.badges.bullet1' },
+      { emoji: '\u{1F4AA}', textKey: 'onboarding.badges.bullet2' },
+      { emoji: '\u{1F389}', textKey: 'onboarding.badges.bullet3' },
+    ],
+  },
+  {
+    emoji: '\u{1F4CF}',
+    titleKey: 'onboarding.body.title',
+    bullets: [
+      { emoji: '\u{2696}\u{FE0F}', textKey: 'onboarding.body.bullet1' },
+      { emoji: '\u{1F4F8}', textKey: 'onboarding.body.bullet2' },
+      { emoji: '\u{1F4C9}', textKey: 'onboarding.body.bullet3' },
+    ],
+  },
+  {
+    emoji: '\u{270F}\u{FE0F}',
+    titleKey: 'onboarding.exercises.title',
+    bullets: [
+      { emoji: '\u{2795}', textKey: 'onboarding.exercises.bullet1' },
+      { emoji: '\u{1F4DD}', textKey: 'onboarding.exercises.bullet2' },
+      { emoji: '\u{1F50D}', textKey: 'onboarding.exercises.bullet3' },
+    ],
+  },
+  {
+    emoji: '\u{1F512}',
+    titleKey: 'onboarding.backup.title',
+    bullets: [
+      { emoji: '\u{1F4F1}', textKey: 'onboarding.backup.bullet1' },
+      { emoji: '\u{1F4BE}', textKey: 'onboarding.backup.bullet2' },
+      { emoji: '\u{1F6AB}', textKey: 'onboarding.backup.bullet3' },
+    ],
+  },
+];
 
 interface OnboardingProps {
   onComplete: () => void;
@@ -117,34 +190,12 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           </Text>
         </View>
 
-        {/* Slide 2: Features */}
-        <View
-          style={{
-            width: SCREEN_WIDTH,
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingHorizontal: 40,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: '700',
-              color: colors.text.primary,
-              textAlign: 'center',
-              letterSpacing: -0.5,
-              marginBottom: 32,
-            }}
-          >
-            {t('onboarding.features.title')}
-          </Text>
-          <FeatureBullet emoji={'\u{1F4AA}'} text={t('onboarding.features.workouts')} />
-          <FeatureBullet emoji={'\u{1F4CA}'} text={t('onboarding.features.progress')} />
-          <FeatureBullet emoji={'\u{1F3C5}'} text={t('onboarding.features.badges')} />
-        </View>
+        {/* Feature slides (2-8) */}
+        {FEATURE_SLIDES.map((slide) => (
+          <FeatureSlide key={slide.titleKey} slide={slide} />
+        ))}
 
-        {/* Slide 3: Get Started */}
+        {/* Slide 9: Get Started */}
         <View
           style={{
             width: SCREEN_WIDTH,
@@ -154,6 +205,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             paddingHorizontal: 40,
           }}
         >
+          <Text style={{ fontSize: 56, marginBottom: 24 }}>{'\u{1F680}'}</Text>
           <Text
             style={{
               fontSize: 28,
@@ -221,7 +273,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           <View
             key={i}
             style={{
-              width: 8,
+              width: currentPage === i ? 24 : 8,
               height: 8,
               borderRadius: 4,
               backgroundColor: i === currentPage ? colors.brand.blue : colors.text.tertiary,
@@ -233,27 +285,57 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   );
 }
 
-function FeatureBullet({ emoji, text }: { emoji: string; text: string }) {
+function FeatureSlide({ slide }: { slide: SlideConfig }) {
+  const { t } = useTranslation();
+
   return (
     <View
       style={{
-        flexDirection: 'row',
+        width: SCREEN_WIDTH,
+        flex: 1,
         alignItems: 'center',
-        marginBottom: 20,
-        width: '100%',
+        justifyContent: 'center',
+        paddingHorizontal: 40,
       }}
     >
-      <Text style={{ fontSize: 28, marginRight: 16 }}>{emoji}</Text>
+      <Text style={{ fontSize: 56, marginBottom: 24 }}>{slide.emoji}</Text>
       <Text
         style={{
-          fontSize: 17,
+          fontSize: 28,
+          fontWeight: '700',
           color: colors.text.primary,
-          flex: 1,
-          lineHeight: 24,
+          textAlign: 'center',
+          letterSpacing: -0.5,
+          marginBottom: 32,
         }}
       >
-        {text}
+        {t(slide.titleKey)}
       </Text>
+      {slide.bullets.map((bullet) => (
+        <View
+          key={bullet.textKey}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 20,
+            width: '100%',
+          }}
+        >
+          <Text style={{ fontSize: 24, marginRight: 16, width: 32, textAlign: 'center' }}>
+            {bullet.emoji}
+          </Text>
+          <Text
+            style={{
+              fontSize: 17,
+              color: colors.text.primary,
+              flex: 1,
+              lineHeight: 24,
+            }}
+          >
+            {t(bullet.textKey)}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 }
