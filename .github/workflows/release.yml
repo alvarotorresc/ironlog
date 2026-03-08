@@ -1,0 +1,57 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - run: pnpm install --frozen-lockfile
+
+      # Run checks before building
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run test:ci
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # Build APK via EAS (cloud build)
+      - name: Build APK
+        run: eas build --platform android --profile preview --non-interactive --wait
+
+      # Download the APK from EAS
+      - name: Download APK
+        run: |
+          BUILD_URL=$(eas build:list --platform android --status finished --limit 1 --non-interactive --json | jq -r '.[0].artifacts.buildUrl')
+          curl -L -o ironlog.apk "$BUILD_URL"
+
+      # Extract version from tag
+      - name: Get version
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      # Create GitHub Release with the APK
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: IronLog ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          files: ironlog.apk

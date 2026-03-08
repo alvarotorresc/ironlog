@@ -150,6 +150,8 @@ export default function ExerciseDetailScreen() {
   const [period, setPeriod] = useState<TimePeriod>('3m');
   const [editingRest, setEditingRest] = useState(false);
   const [restInput, setRestInput] = useState('');
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesInput, setNotesInput] = useState('');
 
   const { stats, isLoading: statsLoading } = useExerciseStats(exerciseId);
   const {
@@ -157,6 +159,19 @@ export default function ExerciseDetailScreen() {
     volumeData,
     isLoading: progressLoading,
   } = useExerciseProgress(exerciseId, period);
+
+  const handleSaveNotes = useCallback(async () => {
+    try {
+      const trimmed = notesInput.trim();
+      const db = await getDatabase();
+      const repo = new ExerciseRepository(db);
+      await repo.update(exerciseId, { notes: trimmed || null });
+      setExercise((prev) => (prev ? { ...prev, notes: trimmed || null } : prev));
+      setEditingNotes(false);
+    } catch (error) {
+      console.error('Failed to update notes:', error);
+    }
+  }, [exerciseId, notesInput]);
 
   const handleSaveRest = useCallback(async () => {
     const parsed = parseInt(restInput, 10);
@@ -451,9 +466,107 @@ export default function ExerciseDetailScreen() {
         </View>
 
         {/* Notes section */}
-        {exercise.notes ? (
+        {editingNotes ? (
+          <Card style={{ marginBottom: 24 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <StickyNote size={16} color={colors.text.tertiary} strokeWidth={1.5} />
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: colors.text.secondary,
+                }}
+              >
+                {t('exercise.notes')}
+              </Text>
+            </View>
+            <TextInput
+              value={notesInput}
+              onChangeText={setNotesInput}
+              multiline
+              placeholder={t('exercise.notesPlaceholder')}
+              placeholderTextColor={colors.text.tertiary}
+              maxLength={500}
+              style={{
+                fontSize: 14,
+                color: colors.text.primary,
+                backgroundColor: colors.bg.tertiary,
+                borderWidth: 1,
+                borderColor: colors.border,
+                borderRadius: 8,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                minHeight: 80,
+                textAlignVertical: 'top',
+                lineHeight: 20,
+              }}
+              autoFocus
+              accessibilityLabel={t('exercise.notes')}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                gap: 8,
+                marginTop: 10,
+              }}
+            >
+              <Pressable
+                onPress={() => setEditingNotes(false)}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.cancel')}
+              >
+                {({ pressed }) => (
+                  <View
+                    style={{
+                      paddingHorizontal: 14,
+                      paddingVertical: 8,
+                      borderRadius: 8,
+                      backgroundColor: colors.bg.elevated,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      opacity: pressed ? 0.7 : 1,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text.secondary }}>
+                      {t('common.cancel')}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+              <Pressable
+                onPress={handleSaveNotes}
+                accessibilityRole="button"
+                accessibilityLabel={t('common.save')}
+              >
+                {({ pressed }) => (
+                  <View
+                    style={{
+                      paddingHorizontal: 14,
+                      paddingVertical: 8,
+                      borderRadius: 8,
+                      backgroundColor: colors.brand.blue,
+                      opacity: pressed ? 0.7 : 1,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#FFFFFF' }}>
+                      {t('common.save')}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
+          </Card>
+        ) : exercise.notes ? (
           <Pressable
-            onPress={() => router.push(`/exercise/edit/${exerciseId}`)}
+            onPress={() => {
+              if (exercise.isPredefined) {
+                setNotesInput(exercise.notes ?? '');
+                setEditingNotes(true);
+              } else {
+                router.push(`/exercise/edit/${exerciseId}`);
+              }
+            }}
             accessibilityRole="button"
             accessibilityLabel={t('exercise.notes')}
           >
@@ -490,9 +603,16 @@ export default function ExerciseDetailScreen() {
               </Card>
             )}
           </Pressable>
-        ) : !exercise.isPredefined ? (
+        ) : (
           <Pressable
-            onPress={() => router.push(`/exercise/edit/${exerciseId}`)}
+            onPress={() => {
+              if (exercise.isPredefined) {
+                setNotesInput('');
+                setEditingNotes(true);
+              } else {
+                router.push(`/exercise/edit/${exerciseId}`);
+              }
+            }}
             accessibilityRole="button"
             accessibilityLabel={t('exercise.addNotes')}
           >
@@ -520,7 +640,7 @@ export default function ExerciseDetailScreen() {
               </View>
             )}
           </Pressable>
-        ) : null}
+        )}
 
         {/* Stats section */}
         {statsLoading ? (

@@ -1,9 +1,10 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import {
   useExerciseProgress,
   useExerciseStats,
   useDashboardStats,
   useMuscleDistribution,
+  useMuscleFatigue,
 } from './useStats';
 import type {
   ExerciseStats,
@@ -11,6 +12,7 @@ import type {
   MaxWeightDataPoint,
   VolumeDataPoint,
   MuscleGroupVolume,
+  MuscleFatigueData,
   TimePeriod,
 } from '@/types';
 
@@ -20,6 +22,7 @@ const mockGetVolumeOverTime = jest.fn();
 const mockGetExerciseStats = jest.fn();
 const mockGetDashboardStats = jest.fn();
 const mockGetMuscleGroupDistribution = jest.fn();
+const mockGetMuscleFatigueData = jest.fn();
 
 jest.mock('@/db/connection', () => ({
   getDatabase: jest.fn().mockResolvedValue({}),
@@ -32,6 +35,7 @@ jest.mock('@/repositories/stats.repo', () => ({
     getExerciseStats: mockGetExerciseStats,
     getDashboardStats: mockGetDashboardStats,
     getMuscleGroupDistribution: mockGetMuscleGroupDistribution,
+    getMuscleFatigueData: mockGetMuscleFatigueData,
   })),
 }));
 
@@ -244,5 +248,154 @@ describe('useMuscleDistribution', () => {
     });
 
     expect(mockGetMuscleGroupDistribution).toHaveBeenCalledWith('all');
+  });
+
+  it('should handle errors gracefully', async () => {
+    mockGetMuscleGroupDistribution.mockRejectedValue(new Error('DB error'));
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const { result } = renderHook(() => useMuscleDistribution('1m'));
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.distribution).toEqual([]);
+
+    consoleSpy.mockRestore();
+  });
+});
+
+describe('useDashboardStats - error and reload', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should handle errors gracefully', async () => {
+    mockGetDashboardStats.mockRejectedValue(new Error('DB error'));
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const { result } = renderHook(() => useDashboardStats());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.stats).toBeNull();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should reload when reload() is called', async () => {
+    const stats: DashboardStats = {
+      totalWorkouts: 42,
+      workoutsThisWeek: 3,
+      workoutsThisMonth: 15,
+      currentStreak: 5,
+      volumeThisWeek: 12000,
+      volumeThisMonth: 56000,
+      recentPRs: [],
+    };
+
+    mockGetDashboardStats.mockResolvedValue(stats);
+
+    const { result } = renderHook(() => useDashboardStats());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    const updatedStats: DashboardStats = {
+      ...stats,
+      totalWorkouts: 43,
+      workoutsThisWeek: 4,
+    };
+
+    mockGetDashboardStats.mockResolvedValue(updatedStats);
+
+    await act(async () => {
+      await result.current.reload();
+    });
+
+    expect(result.current.stats).toEqual(updatedStats);
+    expect(mockGetDashboardStats).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('useMuscleFatigue', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should start in loading state with empty fatigueData', () => {
+    mockGetMuscleFatigueData.mockResolvedValue([]);
+
+    const { result } = renderHook(() => useMuscleFatigue());
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.fatigueData).toEqual([]);
+  });
+
+  it('should load fatigue data', async () => {
+    const fatigueData: MuscleFatigueData[] = [
+      { muscleGroup: 'chest', level: 'recovered', daysSince: 5 },
+      { muscleGroup: 'legs', level: 'weakened', daysSince: 1 },
+    ];
+
+    mockGetMuscleFatigueData.mockResolvedValue(fatigueData);
+
+    const { result } = renderHook(() => useMuscleFatigue());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.fatigueData).toEqual(fatigueData);
+  });
+
+  it('should handle errors gracefully', async () => {
+    mockGetMuscleFatigueData.mockRejectedValue(new Error('DB error'));
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const { result } = renderHook(() => useMuscleFatigue());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.fatigueData).toEqual([]);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should reload when reload() is called', async () => {
+    const initialData: MuscleFatigueData[] = [
+      { muscleGroup: 'chest', level: 'recovered', daysSince: 5 },
+    ];
+
+    mockGetMuscleFatigueData.mockResolvedValue(initialData);
+
+    const { result } = renderHook(() => useMuscleFatigue());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    const updatedData: MuscleFatigueData[] = [
+      { muscleGroup: 'chest', level: 'weakened', daysSince: 1 },
+      { muscleGroup: 'back', level: 'recovering', daysSince: 3 },
+    ];
+
+    mockGetMuscleFatigueData.mockResolvedValue(updatedData);
+
+    await act(async () => {
+      await result.current.reload();
+    });
+
+    expect(result.current.fatigueData).toEqual(updatedData);
+    expect(mockGetMuscleFatigueData).toHaveBeenCalledTimes(2);
   });
 });

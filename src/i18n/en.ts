@@ -310,7 +310,9 @@ export const en = {
   'badges.title': 'Badges',
   'badges.unlocked': '{count}/{total} unlocked',
   'badges.locked': '???',
-  'badges.newBadge': 'Badge unlocked!',
+  'badges.newBadge': 'Badge Unlocked!',
+  'badges.congratulations': 'Congratulations!',
+  'badges.continue': 'Continue',
   'badges.unlockedOn': 'Unlocked {date}',
 
   // Badge: Workout milestones
@@ -354,6 +356,18 @@ export const en = {
   // Badge: Special
   'badge.early_bird.title': 'Early Bird',
   'badge.early_bird.desc': 'Complete a workout before 7 AM',
+
+  // Onboarding
+  'onboarding.welcome.title': 'Welcome to IronLog',
+  'onboarding.welcome.subtitle': 'Your personal workout journal',
+  'onboarding.features.title': 'Track Everything',
+  'onboarding.features.workouts': 'Workouts, sets & reps',
+  'onboarding.features.progress': 'Progress charts & PRs',
+  'onboarding.features.badges': 'Earn badges as you train',
+  'onboarding.ready.title': 'Ready to train?',
+  'onboarding.ready.subtitle': 'Your data stays on your device. No account needed.',
+  'onboarding.getStarted': 'Get Started',
+  'onboarding.skip': 'Skip',
 } as const;
 
 export type TranslationKey = keyof typeof en;

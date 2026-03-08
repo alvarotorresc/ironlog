@@ -16,7 +16,7 @@ import {
   getGroupLetterFromId,
   getGroupBorderColor,
 } from '@/components/ExerciseGroupBadge';
-import { BadgeUnlockToast } from '@/components/BadgeUnlockToast';
+import { BadgeCelebrationModal } from '@/components/BadgeCelebrationModal';
 import { useTranslation } from '@/i18n';
 import type { Badge, WorkoutSet, GroupType } from '@/types';
 
@@ -47,25 +47,28 @@ export default function WorkoutScreen() {
   const restTimer = useRestTimer();
   const navigation = useNavigation();
   const { checkBadges } = useBadgeCheck();
-  const [toastBadge, setToastBadge] = useLocalState<Badge | null>(null);
+  const [celebrationBadge, setCelebrationBadge] = useLocalState<Badge | null>(null);
   const [pendingBadges, setPendingBadges] = useLocalState<Badge[]>([]);
 
   const runBadgeCheck = useCallback(async () => {
     const newBadges = await checkBadges();
     if (newBadges.length > 0) {
+      setCelebrationBadge(newBadges[0]);
       setPendingBadges(newBadges.slice(1));
-      setToastBadge(newBadges[0]);
+      return true;
     }
-  }, [checkBadges, setPendingBadges, setToastBadge]);
+    return false;
+  }, [checkBadges, setCelebrationBadge, setPendingBadges]);
 
-  const handleToastDismiss = useCallback(() => {
+  const handleCelebrationDismiss = useCallback(() => {
     if (pendingBadges.length > 0) {
-      setToastBadge(pendingBadges[0]);
+      setCelebrationBadge(pendingBadges[0]);
       setPendingBadges(pendingBadges.slice(1));
     } else {
-      setToastBadge(null);
+      setCelebrationBadge(null);
+      router.back();
     }
-  }, [pendingBadges, setPendingBadges, setToastBadge]);
+  }, [pendingBadges, setCelebrationBadge, setPendingBadges, router]);
 
   useEffect(() => {
     if (workout.isFinished) return;
@@ -98,8 +101,11 @@ export default function WorkoutScreen() {
             onPress: async () => {
               restTimer.reset();
               await workout.finishWorkout();
-              await runBadgeCheck();
-              navigation.dispatch(e.data.action);
+              const hasNewBadges = await runBadgeCheck();
+              if (!hasNewBadges) {
+                navigation.dispatch(e.data.action);
+              }
+              // If badges found, modal shows and handles navigation on dismiss
             },
           },
           {
@@ -179,8 +185,11 @@ export default function WorkoutScreen() {
         onPress: async () => {
           restTimer.reset();
           await workout.finishWorkout();
-          await runBadgeCheck();
-          router.back();
+          const hasNewBadges = await runBadgeCheck();
+          if (!hasNewBadges) {
+            router.back();
+          }
+          // If badges found, modal shows and handles navigation on dismiss
         },
       },
     ]);
@@ -203,8 +212,8 @@ export default function WorkoutScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg.primary }} edges={['top']}>
-      {/* Badge Unlock Toast */}
-      <BadgeUnlockToast badge={toastBadge} onDismiss={handleToastDismiss} />
+      {/* Badge Celebration Modal */}
+      <BadgeCelebrationModal badge={celebrationBadge} onDismiss={handleCelebrationDismiss} />
 
       {/* Header */}
       <WorkoutHeader
