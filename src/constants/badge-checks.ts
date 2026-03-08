@@ -73,12 +73,6 @@ export const BADGE_CHECKS: BadgeCheck[] = [
 
   // Volume
   {
-    key: 'volume_1000',
-    titleKey: 'badge.volume_1000.title',
-    descriptionKey: 'badge.volume_1000.desc',
-    check: (stats) => stats.totalVolume >= 1000,
-  },
-  {
     key: 'volume_10000',
     titleKey: 'badge.volume_10000.title',
     descriptionKey: 'badge.volume_10000.desc',
@@ -89,6 +83,12 @@ export const BADGE_CHECKS: BadgeCheck[] = [
     titleKey: 'badge.volume_100000.title',
     descriptionKey: 'badge.volume_100000.desc',
     check: (stats) => stats.totalVolume >= 100000,
+  },
+  {
+    key: 'volume_1000000',
+    titleKey: 'badge.volume_1000000.title',
+    descriptionKey: 'badge.volume_1000000.desc',
+    check: (stats) => stats.totalVolume >= 1000000,
   },
 
   // Exercise variety

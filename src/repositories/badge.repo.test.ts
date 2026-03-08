@@ -186,7 +186,7 @@ describe('BadgeRepository', () => {
     const stats: BadgeCheckStats = {
       ...baseStats(),
       totalWorkouts: 10,
-      totalVolume: 1500,
+      totalVolume: 15000,
       totalMeasurements: 1,
     };
 
@@ -195,7 +195,7 @@ describe('BadgeRepository', () => {
     const keys = newlyUnlocked.map((b) => b.badgeKey);
     expect(keys).toContain('first_workout');
     expect(keys).toContain('workout_10');
-    expect(keys).toContain('volume_1000');
+    expect(keys).toContain('volume_10000');
     expect(keys).toContain('first_measurement');
   });
 

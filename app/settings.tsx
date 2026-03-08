@@ -11,11 +11,12 @@ import {
   ChevronRight,
   Check,
 } from 'lucide-react-native';
+import Constants from 'expo-constants';
 import { colors } from '@/constants/theme';
 import { useTranslation, type Locale } from '@/i18n';
 import { useSettings } from '@/contexts/SettingsContext';
 
-const APP_VERSION = '0.2.0';
+const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -108,7 +109,7 @@ export default function SettingsScreen() {
             onPress={() => setLocale('en' as Locale)}
           />
           <UnitOption
-            label="Espa\u00F1ol"
+            label="Español"
             selected={locale === 'es'}
             onPress={() => setLocale('es' as Locale)}
             isLast
