@@ -58,9 +58,9 @@ function FilterChip({
       {({ pressed }) => (
         <View
           style={{
-            height: 32,
+            height: 36,
             paddingHorizontal: 14,
-            borderRadius: 16,
+            borderRadius: 18,
             backgroundColor: active ? colors.brand.blue : colors.bg.tertiary,
             borderWidth: 1,
             borderColor: active ? colors.brand.blue : colors.border,
@@ -286,7 +286,7 @@ export function ExercisePickerModal({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 10 }}
+            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 6 }}
           >
             {muscleGroups.map((group) => (
               <FilterChip
@@ -302,8 +302,7 @@ export function ExercisePickerModal({
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            style={{ marginTop: 2 }}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 10 }}
+            contentContainerStyle={{ paddingHorizontal: 20, gap: 8, paddingVertical: 6 }}
           >
             {exerciseTypes.map((type) => (
               <FilterChip
