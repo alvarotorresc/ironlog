@@ -310,7 +310,9 @@ export const en = {
   'badges.title': 'Badges',
   'badges.unlocked': '{count}/{total} unlocked',
   'badges.locked': '???',
-  'badges.newBadge': 'Badge unlocked!',
+  'badges.newBadge': 'Badge Unlocked!',
+  'badges.congratulations': 'Congratulations!',
+  'badges.continue': 'Continue',
   'badges.unlockedOn': 'Unlocked {date}',
 
   // Badge: Workout milestones

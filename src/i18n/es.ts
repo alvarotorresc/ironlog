@@ -319,6 +319,8 @@ export const es: Record<TranslationKey, string> = {
   'badges.unlocked': '{count}/{total} desbloqueados',
   'badges.locked': '???',
   'badges.newBadge': '¡Logro desbloqueado!',
+  'badges.congratulations': '¡Felicidades!',
+  'badges.continue': 'Continuar',
   'badges.unlockedOn': 'Desbloqueado {date}',
 
   // Badge: Workout milestones
