@@ -34,9 +34,9 @@ const BADGE_VISUALS: Record<string, BadgeVisual> = {
   streak_7: { emoji: '\u{2604}\u{FE0F}', category: 'streak' },
   streak_30: { emoji: '\u{1F30B}', category: 'streak' },
   // Volume
-  volume_1000: { emoji: '\u{1F3CB}\u{FE0F}', category: 'volume' },
-  volume_10000: { emoji: '\u{1F48E}', category: 'volume' },
-  volume_100000: { emoji: '\u{1F3C6}', category: 'volume' },
+  volume_10000: { emoji: '\u{1F3CB}\u{FE0F}', category: 'volume' },
+  volume_100000: { emoji: '\u{1F48E}', category: 'volume' },
+  volume_1000000: { emoji: '\u{1F3C6}', category: 'volume' },
   // Variety
   exercises_10: { emoji: '\u{1F3AF}', category: 'variety' },
   exercises_25: { emoji: '\u{1F9ED}', category: 'variety' },
