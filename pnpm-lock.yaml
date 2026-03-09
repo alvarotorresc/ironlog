@@ -76,9 +76,6 @@ importers:
       react-native-svg:
         specifier: 15.15.3
         version: 15.15.3(react-native@0.83.2(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
-      zod:
-        specifier: ^4.3.6
-        version: 4.3.6
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.2
@@ -104,6 +101,9 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.56.1
         version: 8.56.1(eslint@8.57.1)(typescript@5.9.3)
+      babel-plugin-transform-remove-console:
+        specifier: ^6.9.4
+        version: 6.9.4
       better-sqlite3:
         specifier: ^12.6.2
         version: 12.6.2
@@ -3109,6 +3109,12 @@ packages:
     resolution:
       {
         integrity: sha512-g4aaCrDDOsWjbm0PUUeVnkcVd6AKJsVc/MbnPhEotEpkeJQP6b8nzewohQi7+QS8UyPehOhGWn0nOwjvWpmMvQ==,
+      }
+
+  babel-plugin-transform-remove-console@6.9.4:
+    resolution:
+      {
+        integrity: sha512-88blrUrMX3SPiGkT1GnvVY8E/7A+k6oj3MNvUtTIxJflFzXTw1bHkuJ/y039ouhFMp2prRn5cQGzokViYi1dsg==,
       }
 
   babel-preset-current-node-syntax@1.2.0:
@@ -11735,6 +11741,8 @@ snapshots:
       '@babel/plugin-syntax-flow': 7.28.6(@babel/core@7.29.0)
     transitivePeerDependencies:
       - '@babel/core'
+
+  babel-plugin-transform-remove-console@6.9.4: {}
 
   babel-preset-current-node-syntax@1.2.0(@babel/core@7.29.0):
     dependencies:
