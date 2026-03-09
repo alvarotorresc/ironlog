@@ -10,16 +10,21 @@ const exerciseExportSchema = z.object({
   restSeconds: z.number().int().min(0),
   notes: z.string().max(500).nullable().optional(),
   createdAt: z.string().min(1),
+  isPredefined: z.boolean().optional(),
 });
 
 const routineExportSchema = z.object({
   id: z.number().int().positive(),
   name: z.string().min(1).max(200),
   createdAt: z.string().min(1),
+  isTemplate: z.boolean().optional(),
+  description: z.string().max(500).nullable().optional(),
   exercises: z.array(
     z.object({
       exerciseId: z.number().int().positive(),
       sortOrder: z.number().int().min(0),
+      groupId: z.number().int().nullable().optional(),
+      groupType: z.string().nullable().optional(),
     }),
   ),
 });
@@ -32,6 +37,8 @@ const workoutSetSchema = z.object({
   duration: z.number().nullable(),
   distance: z.number().nullable(),
   notes: z.string().max(500).nullable().optional(),
+  groupId: z.number().int().nullable().optional(),
+  groupType: z.string().nullable().optional(),
 });
 
 const workoutExportSchema = z.object({

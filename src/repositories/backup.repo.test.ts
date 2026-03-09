@@ -33,6 +33,8 @@ function makeEmptyBackup(overrides: Partial<IronLogBackup> = {}): IronLogBackup 
  * 6. workout_sets
  * 7. body_measurements
  * 8. body_photos
+ * 9. user_settings
+ * 10. badges
  */
 function mockEmptyExport(db: SQLiteDatabase) {
   (db.getAllAsync as jest.Mock).mockResolvedValue([]);
@@ -56,16 +58,18 @@ describe('BackupRepository', () => {
   // exportData
   // ---------------------------------------------------------------------------
   describe('exportData', () => {
-    it('should return empty arrays and version 1 when DB is empty', async () => {
+    it('should return empty arrays and version 2 when DB is empty', async () => {
       mockEmptyExport(db);
 
       const result = await repo.exportData();
 
-      expect(result.version).toBe(1);
+      expect(result.version).toBe(2);
       expect(result.exercises).toEqual([]);
       expect(result.routines).toEqual([]);
       expect(result.workouts).toEqual([]);
       expect(result.bodyMeasurements).toEqual([]);
+      expect(result.settings).toEqual([]);
+      expect(result.badges).toEqual([]);
     });
 
     it('should return a valid ISO exportedAt timestamp when DB is empty', async () => {
@@ -88,7 +92,9 @@ describe('BackupRepository', () => {
             muscle_group: 'chest',
             illustration: 'bench.svg',
             rest_seconds: 90,
+            notes: null,
             created_at: '2026-01-01T00:00:00.000Z',
+            is_predefined: 1,
           },
         ])
         // exercise_muscle_groups
@@ -109,7 +115,9 @@ describe('BackupRepository', () => {
           muscleGroups: ['chest', 'shoulders'],
           illustration: 'bench.svg',
           restSeconds: 90,
+          notes: null,
           createdAt: '2026-01-01T00:00:00.000Z',
+          isPredefined: true,
         },
       ]);
     });
@@ -124,7 +132,9 @@ describe('BackupRepository', () => {
             muscle_group: 'back',
             illustration: null,
             rest_seconds: 60,
+            notes: null,
             created_at: '2026-01-01T00:00:00.000Z',
+            is_predefined: 0,
           },
         ])
         // empty pivot table
@@ -144,14 +154,26 @@ describe('BackupRepository', () => {
         .mockResolvedValueOnce([])
         // routines
         .mockResolvedValueOnce([
-          { id: 10, name: 'Push Day', created_at: '2026-01-01T00:00:00.000Z' },
-          { id: 20, name: 'Pull Day', created_at: '2026-01-02T00:00:00.000Z' },
+          {
+            id: 10,
+            name: 'Push Day',
+            created_at: '2026-01-01T00:00:00.000Z',
+            is_template: 0,
+            description: null,
+          },
+          {
+            id: 20,
+            name: 'Pull Day',
+            created_at: '2026-01-02T00:00:00.000Z',
+            is_template: 1,
+            description: 'Pull muscles',
+          },
         ])
         // routine_exercises
         .mockResolvedValueOnce([
-          { routine_id: 10, exercise_id: 1, sort_order: 0 },
-          { routine_id: 10, exercise_id: 2, sort_order: 1 },
-          { routine_id: 20, exercise_id: 3, sort_order: 0 },
+          { routine_id: 10, exercise_id: 1, sort_order: 0, group_id: null, group_type: null },
+          { routine_id: 10, exercise_id: 2, sort_order: 1, group_id: 1, group_type: 'superset' },
+          { routine_id: 20, exercise_id: 3, sort_order: 0, group_id: null, group_type: null },
         ])
         // workouts
         .mockResolvedValueOnce([])
@@ -160,6 +182,10 @@ describe('BackupRepository', () => {
         // body_measurements
         .mockResolvedValueOnce([])
         // body_photos
+        .mockResolvedValueOnce([])
+        // user_settings
+        .mockResolvedValueOnce([])
+        // badges
         .mockResolvedValueOnce([]);
 
       const result = await repo.exportData();
@@ -169,12 +195,21 @@ describe('BackupRepository', () => {
         id: 10,
         name: 'Push Day',
         createdAt: '2026-01-01T00:00:00.000Z',
+        isTemplate: false,
+        description: null,
         exercises: [
-          { exerciseId: 1, sortOrder: 0 },
-          { exerciseId: 2, sortOrder: 1 },
+          { exerciseId: 1, sortOrder: 0, groupId: null, groupType: null },
+          { exerciseId: 2, sortOrder: 1, groupId: 1, groupType: 'superset' },
         ],
       });
-      expect(result.routines[1].exercises).toEqual([{ exerciseId: 3, sortOrder: 0 }]);
+      expect(result.routines[1]).toEqual({
+        id: 20,
+        name: 'Pull Day',
+        createdAt: '2026-01-02T00:00:00.000Z',
+        isTemplate: true,
+        description: 'Pull muscles',
+        exercises: [{ exerciseId: 3, sortOrder: 0, groupId: null, groupType: null }],
+      });
     });
 
     it('should return empty exercises array for routine with no routine_exercises', async () => {
@@ -182,13 +217,21 @@ describe('BackupRepository', () => {
         .mockResolvedValueOnce([]) // exercises
         .mockResolvedValueOnce([]) // exercise_muscle_groups
         .mockResolvedValueOnce([
-          { id: 10, name: 'Empty Routine', created_at: '2026-01-01T00:00:00.000Z' },
+          {
+            id: 10,
+            name: 'Empty Routine',
+            created_at: '2026-01-01T00:00:00.000Z',
+            is_template: 0,
+            description: null,
+          },
         ])
         .mockResolvedValueOnce([]) // no routine_exercises
         .mockResolvedValueOnce([]) // workouts
         .mockResolvedValueOnce([]) // workout_sets
         .mockResolvedValueOnce([]) // body_measurements
-        .mockResolvedValueOnce([]); // body_photos
+        .mockResolvedValueOnce([]) // body_photos
+        .mockResolvedValueOnce([]) // user_settings
+        .mockResolvedValueOnce([]); // badges
 
       const result = await repo.exportData();
 
@@ -220,6 +263,9 @@ describe('BackupRepository', () => {
             reps: 10,
             duration: null,
             distance: null,
+            notes: null,
+            group_id: null,
+            group_type: null,
           },
           {
             workout_id: 100,
@@ -229,10 +275,15 @@ describe('BackupRepository', () => {
             reps: 8,
             duration: null,
             distance: null,
+            notes: null,
+            group_id: 1,
+            group_type: 'superset',
           },
         ])
         .mockResolvedValueOnce([]) // body_measurements
-        .mockResolvedValueOnce([]); // body_photos
+        .mockResolvedValueOnce([]) // body_photos
+        .mockResolvedValueOnce([]) // user_settings
+        .mockResolvedValueOnce([]); // badges
 
       const result = await repo.exportData();
 
@@ -243,8 +294,28 @@ describe('BackupRepository', () => {
         startedAt: '2026-01-10T08:00:00.000Z',
         finishedAt: '2026-01-10T09:00:00.000Z',
         sets: [
-          { exerciseId: 1, sortOrder: 0, weight: 60, reps: 10, duration: null, distance: null },
-          { exerciseId: 1, sortOrder: 1, weight: 65, reps: 8, duration: null, distance: null },
+          {
+            exerciseId: 1,
+            sortOrder: 0,
+            weight: 60,
+            reps: 10,
+            duration: null,
+            distance: null,
+            notes: null,
+            groupId: null,
+            groupType: null,
+          },
+          {
+            exerciseId: 1,
+            sortOrder: 1,
+            weight: 65,
+            reps: 8,
+            duration: null,
+            distance: null,
+            notes: null,
+            groupId: 1,
+            groupType: 'superset',
+          },
         ],
       });
     });
@@ -273,6 +344,10 @@ describe('BackupRepository', () => {
           },
         ])
         // body_photos
+        .mockResolvedValueOnce([])
+        // user_settings
+        .mockResolvedValueOnce([])
+        // badges
         .mockResolvedValueOnce([]);
 
       const result = await repo.exportData();
@@ -302,14 +377,24 @@ describe('BackupRepository', () => {
             muscle_group: 'legs',
             illustration: null,
             rest_seconds: 120,
+            notes: null,
             created_at: '2026-01-01T00:00:00.000Z',
+            is_predefined: 0,
           },
         ])
         .mockResolvedValueOnce([{ exercise_id: 1, muscle_group: 'legs', is_primary: 1 }])
         .mockResolvedValueOnce([
-          { id: 10, name: 'Leg Day', created_at: '2026-01-01T00:00:00.000Z' },
+          {
+            id: 10,
+            name: 'Leg Day',
+            created_at: '2026-01-01T00:00:00.000Z',
+            is_template: 0,
+            description: null,
+          },
         ])
-        .mockResolvedValueOnce([{ routine_id: 10, exercise_id: 1, sort_order: 0 }])
+        .mockResolvedValueOnce([
+          { routine_id: 10, exercise_id: 1, sort_order: 0, group_id: null, group_type: null },
+        ])
         .mockResolvedValueOnce([
           { id: 100, routine_id: 10, started_at: '2026-01-10T08:00:00.000Z', finished_at: null },
         ])
@@ -322,6 +407,9 @@ describe('BackupRepository', () => {
             reps: 5,
             duration: null,
             distance: null,
+            notes: null,
+            group_id: null,
+            group_type: null,
           },
         ])
         .mockResolvedValueOnce([
@@ -339,16 +427,27 @@ describe('BackupRepository', () => {
           },
         ])
         // body_photos
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce([])
+        // user_settings
+        .mockResolvedValueOnce([{ key: 'theme', value: 'dark' }])
+        // badges
+        .mockResolvedValueOnce([
+          { badge_key: 'first_workout', unlocked_at: '2026-01-10T09:00:00.000Z' },
+        ]);
 
       const result = await repo.exportData();
 
       expect(result.exercises).toHaveLength(1);
       expect(result.exercises[0].muscleGroups).toEqual(['legs']);
+      expect(result.exercises[0].isPredefined).toBe(false);
       expect(result.routines).toHaveLength(1);
       expect(result.workouts).toHaveLength(1);
       expect(result.bodyMeasurements).toHaveLength(1);
-      expect(result.version).toBe(1);
+      expect(result.settings).toEqual([{ key: 'theme', value: 'dark' }]);
+      expect(result.badges).toEqual([
+        { badgeKey: 'first_workout', unlockedAt: '2026-01-10T09:00:00.000Z' },
+      ]);
+      expect(result.version).toBe(2);
       expect(result.exportedAt).toBeDefined();
     });
 
@@ -804,7 +903,9 @@ describe('BackupRepository', () => {
             muscle_group: 'legs',
             illustration: null,
             rest_seconds: 120,
+            notes: null,
             created_at: '2026-01-01T00:00:00.000Z',
+            is_predefined: 0,
           },
         ])
         .mockResolvedValueOnce([
@@ -812,9 +913,17 @@ describe('BackupRepository', () => {
           { exercise_id: 1, muscle_group: 'core', is_primary: 0 },
         ])
         .mockResolvedValueOnce([
-          { id: 10, name: 'Leg Day', created_at: '2026-01-01T00:00:00.000Z' },
+          {
+            id: 10,
+            name: 'Leg Day',
+            created_at: '2026-01-01T00:00:00.000Z',
+            is_template: 0,
+            description: null,
+          },
         ])
-        .mockResolvedValueOnce([{ routine_id: 10, exercise_id: 1, sort_order: 0 }])
+        .mockResolvedValueOnce([
+          { routine_id: 10, exercise_id: 1, sort_order: 0, group_id: null, group_type: null },
+        ])
         .mockResolvedValueOnce([
           {
             id: 100,
@@ -832,6 +941,9 @@ describe('BackupRepository', () => {
             reps: 5,
             duration: null,
             distance: null,
+            notes: null,
+            group_id: null,
+            group_type: null,
           },
         ])
         .mockResolvedValueOnce([
@@ -849,12 +961,21 @@ describe('BackupRepository', () => {
           },
         ])
         // body_photos
-        .mockResolvedValueOnce([]);
+        .mockResolvedValueOnce([])
+        // user_settings
+        .mockResolvedValueOnce([{ key: 'unit', value: 'kg' }])
+        // badges
+        .mockResolvedValueOnce([
+          { badge_key: 'first_workout', unlocked_at: '2026-01-10T09:00:00.000Z' },
+        ]);
 
       const exported = await repo.exportData();
 
       // Verify muscleGroups are in the export
       expect(exported.exercises[0].muscleGroups).toEqual(['legs', 'core']);
+      expect(exported.version).toBe(2);
+      expect(exported.settings).toHaveLength(1);
+      expect(exported.badges).toHaveLength(1);
 
       // Reset mocks for import phase
       (db.runAsync as jest.Mock).mockClear();

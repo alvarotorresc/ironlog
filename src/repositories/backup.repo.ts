@@ -5,6 +5,8 @@ import type {
   RoutineExport,
   WorkoutExport,
   BodyMeasurementExport,
+  SettingExport,
+  BadgeExport,
 } from '../types';
 
 interface ExerciseRow {
@@ -16,18 +18,23 @@ interface ExerciseRow {
   rest_seconds: number;
   notes: string | null;
   created_at: string;
+  is_predefined: number;
 }
 
 interface RoutineRow {
   id: number;
   name: string;
   created_at: string;
+  is_template: number;
+  description: string | null;
 }
 
 interface RoutineExerciseRow {
   routine_id: number;
   exercise_id: number;
   sort_order: number;
+  group_id: number | null;
+  group_type: string | null;
 }
 
 interface WorkoutRow {
@@ -46,12 +53,24 @@ interface WorkoutSetRow {
   duration: number | null;
   distance: number | null;
   notes: string | null;
+  group_id: number | null;
+  group_type: string | null;
 }
 
 interface MuscleGroupRow {
   exercise_id: number;
   muscle_group: string;
   is_primary: number;
+}
+
+interface SettingRow {
+  key: string;
+  value: string;
+}
+
+interface BadgeRow {
+  badge_key: string;
+  unlocked_at: string;
 }
 
 interface BodyMeasurementRow {
@@ -72,7 +91,7 @@ export class BackupRepository {
   async exportData(): Promise<IronLogBackup> {
     // Exercises
     const exerciseRows = await this.db.getAllAsync<ExerciseRow>(
-      'SELECT id, name, type, muscle_group, illustration, rest_seconds, notes, created_at FROM exercises ORDER BY id ASC',
+      'SELECT id, name, type, muscle_group, illustration, rest_seconds, notes, created_at, is_predefined FROM exercises ORDER BY id ASC',
     );
     // Muscle groups from pivot table
     const muscleGroupRows = await this.db.getAllAsync<MuscleGroupRow>(
@@ -95,20 +114,34 @@ export class BackupRepository {
       restSeconds: row.rest_seconds,
       notes: row.notes,
       createdAt: row.created_at,
+      isPredefined: row.is_predefined === 1,
     }));
 
     // Routines with their exercises
     const routineRows = await this.db.getAllAsync<RoutineRow>(
-      'SELECT id, name, created_at FROM routines ORDER BY id ASC',
+      'SELECT id, name, created_at, is_template, description FROM routines ORDER BY id ASC',
     );
     const routineExerciseRows = await this.db.getAllAsync<RoutineExerciseRow>(
-      'SELECT routine_id, exercise_id, sort_order FROM routine_exercises ORDER BY routine_id ASC, sort_order ASC',
+      'SELECT routine_id, exercise_id, sort_order, group_id, group_type FROM routine_exercises ORDER BY routine_id ASC, sort_order ASC',
     );
 
-    const reByRoutine = new Map<number, Array<{ exerciseId: number; sortOrder: number }>>();
+    const reByRoutine = new Map<
+      number,
+      Array<{
+        exerciseId: number;
+        sortOrder: number;
+        groupId: number | null;
+        groupType: string | null;
+      }>
+    >();
     for (const row of routineExerciseRows) {
       const list = reByRoutine.get(row.routine_id) ?? [];
-      list.push({ exerciseId: row.exercise_id, sortOrder: row.sort_order });
+      list.push({
+        exerciseId: row.exercise_id,
+        sortOrder: row.sort_order,
+        groupId: row.group_id,
+        groupType: row.group_type,
+      });
       reByRoutine.set(row.routine_id, list);
     }
 
@@ -116,6 +149,8 @@ export class BackupRepository {
       id: row.id,
       name: row.name,
       createdAt: row.created_at,
+      isTemplate: row.is_template === 1,
+      description: row.description,
       exercises: reByRoutine.get(row.id) ?? [],
     }));
 
@@ -124,7 +159,7 @@ export class BackupRepository {
       'SELECT id, routine_id, started_at, finished_at FROM workouts ORDER BY id ASC',
     );
     const workoutSetRows = await this.db.getAllAsync<WorkoutSetRow>(
-      'SELECT workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes FROM workout_sets ORDER BY workout_id ASC, sort_order ASC',
+      'SELECT workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes, group_id, group_type FROM workout_sets ORDER BY workout_id ASC, sort_order ASC',
     );
 
     const setsByWorkout = new Map<number, WorkoutExport['sets']>();
@@ -138,6 +173,8 @@ export class BackupRepository {
         duration: row.duration,
         distance: row.distance,
         notes: row.notes,
+        groupId: row.group_id,
+        groupType: row.group_type,
       });
       setsByWorkout.set(row.workout_id, list);
     }
@@ -180,13 +217,33 @@ export class BackupRepository {
       };
     });
 
+    // User settings
+    const settingRows = await this.db.getAllAsync<SettingRow>(
+      'SELECT key, value FROM user_settings',
+    );
+    const settings: SettingExport[] = settingRows.map((row) => ({
+      key: row.key,
+      value: row.value,
+    }));
+
+    // Badges
+    const badgeRows = await this.db.getAllAsync<BadgeRow>(
+      'SELECT badge_key, unlocked_at FROM badges',
+    );
+    const badges: BadgeExport[] = badgeRows.map((row) => ({
+      badgeKey: row.badge_key,
+      unlockedAt: row.unlocked_at,
+    }));
+
     return {
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
       exercises,
       routines,
       workouts,
       bodyMeasurements,
+      settings,
+      badges,
     };
   }
 
