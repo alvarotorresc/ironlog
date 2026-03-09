@@ -161,6 +161,7 @@ export function WorkoutSetRow({
               minHeight: 36,
               maxHeight: 80,
             }}
+            maxLength={500}
             accessibilityLabel={`${t('workout.notes')} - set ${setNumber}`}
           />
         </View>

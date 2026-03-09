@@ -279,6 +279,7 @@ export function ExercisePickerModal({
               }}
               autoCapitalize="none"
               autoCorrect={false}
+              maxLength={100}
             />
           </View>
 

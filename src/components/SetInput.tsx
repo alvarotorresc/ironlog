@@ -199,6 +199,7 @@ function NumericField({
         selectTextOnFocus
         cursorColor={colors.brand.blue}
         selectionColor={colors.brand.blue}
+        maxLength={10}
         accessibilityLabel={`${suffix} input`}
       />
       <Text
