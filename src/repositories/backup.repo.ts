@@ -257,8 +257,8 @@ export class BackupRepository {
       //    After each upsert, resolve the real local ID.
       for (const ex of backup.exercises) {
         await this.db.runAsync(
-          `INSERT OR IGNORE INTO exercises (name, type, muscle_group, illustration, rest_seconds, notes, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT OR IGNORE INTO exercises (name, type, muscle_group, illustration, rest_seconds, notes, created_at, is_predefined)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           ex.name,
           ex.type,
           ex.muscleGroup,
@@ -266,6 +266,7 @@ export class BackupRepository {
           ex.restSeconds,
           ex.notes ?? null,
           ex.createdAt,
+          ex.isPredefined ? 1 : 0,
         );
 
         const row = await this.db.getFirstAsync<{ id: number }>(
@@ -296,11 +297,13 @@ export class BackupRepository {
       // 2. Insert routines with INSERT OR REPLACE (preserves original ID).
       for (const routine of backup.routines) {
         await this.db.runAsync(
-          `INSERT OR REPLACE INTO routines (id, name, created_at)
-           VALUES (?, ?, ?)`,
+          `INSERT OR REPLACE INTO routines (id, name, created_at, is_template, description)
+           VALUES (?, ?, ?, ?, ?)`,
           routine.id,
           routine.name,
           routine.createdAt,
+          routine.isTemplate ? 1 : 0,
+          routine.description ?? null,
         );
 
         // Remove existing routine_exercises for this routine before reinserting.
@@ -316,11 +319,13 @@ export class BackupRepository {
           }
 
           await this.db.runAsync(
-            `INSERT INTO routine_exercises (routine_id, exercise_id, sort_order)
-             VALUES (?, ?, ?)`,
+            `INSERT INTO routine_exercises (routine_id, exercise_id, sort_order, group_id, group_type)
+             VALUES (?, ?, ?, ?, ?)`,
             routine.id,
             localExerciseId,
             re.sortOrder,
+            re.groupId ?? null,
+            re.groupType ?? null,
           );
         }
       }
@@ -349,8 +354,8 @@ export class BackupRepository {
           }
 
           await this.db.runAsync(
-            `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO workout_sets (workout_id, exercise_id, sort_order, weight, reps, duration, distance, notes, group_id, group_type)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             workout.id,
             localExerciseId,
             set.sortOrder,
@@ -359,6 +364,8 @@ export class BackupRepository {
             set.duration ?? null,
             set.distance ?? null,
             set.notes ?? null,
+            set.groupId ?? null,
+            set.groupType ?? null,
           );
         }
       }
@@ -381,6 +388,48 @@ export class BackupRepository {
           bm.notes ?? null,
           bm.measuredAt,
         );
+
+        // If backup includes photo paths, preserve references in body_photos
+        if (bm.photoPaths && bm.photoPaths.length > 0) {
+          const bmRow = await this.db.getFirstAsync<{ id: number }>(
+            'SELECT id FROM body_measurements WHERE measured_at = ?',
+            bm.measuredAt,
+          );
+          if (bmRow) {
+            for (const photoPath of bm.photoPaths) {
+              await this.db.runAsync(
+                `INSERT OR IGNORE INTO body_photos (measurement_id, photo_path)
+                 VALUES (?, ?)`,
+                bmRow.id,
+                photoPath,
+              );
+            }
+          }
+        }
+      }
+
+      // 5. Import user settings (INSERT OR REPLACE to update existing keys).
+      if (backup.settings) {
+        for (const setting of backup.settings) {
+          await this.db.runAsync(
+            `INSERT OR REPLACE INTO user_settings (key, value)
+             VALUES (?, ?)`,
+            setting.key,
+            setting.value,
+          );
+        }
+      }
+
+      // 6. Import badges (INSERT OR IGNORE to preserve already-unlocked badges).
+      if (backup.badges) {
+        for (const badge of backup.badges) {
+          await this.db.runAsync(
+            `INSERT OR IGNORE INTO badges (badge_key, unlocked_at)
+             VALUES (?, ?)`,
+            badge.badgeKey,
+            badge.unlockedAt,
+          );
+        }
       }
     });
   }
