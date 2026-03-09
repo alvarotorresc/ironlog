@@ -28,9 +28,9 @@ function makeValidBackup() {
     workouts: [
       {
         id: 1,
-        routineId: 1,
+        routineId: 1 as number | null,
         startedAt: '2026-01-10T08:00:00.000Z',
-        finishedAt: '2026-01-10T09:00:00.000Z',
+        finishedAt: '2026-01-10T09:00:00.000Z' as string | null,
         sets: [
           {
             exerciseId: 1,
