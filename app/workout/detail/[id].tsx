@@ -785,6 +785,7 @@ function EditableSetRow({
             value={editedValues?.weight ?? ''}
             onChangeText={(v) => onUpdate('weight', v)}
             keyboardType="decimal-pad"
+            maxLength={10}
             style={{
               width: 60,
               height: 34,
@@ -811,6 +812,7 @@ function EditableSetRow({
             value={editedValues?.reps ?? ''}
             onChangeText={(v) => onUpdate('reps', v)}
             keyboardType="number-pad"
+            maxLength={10}
             style={{
               width: 50,
               height: 34,
@@ -836,6 +838,7 @@ function EditableSetRow({
             value={editedValues?.duration ?? ''}
             onChangeText={(v) => onUpdate('duration', v)}
             keyboardType="number-pad"
+            maxLength={10}
             style={{
               width: 60,
               height: 34,

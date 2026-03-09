@@ -268,6 +268,7 @@ export default function AddMeasurementScreen() {
             value={form.weight}
             onChangeText={(v) => updateField('weight', v)}
             error={errors.weight}
+            maxLength={10}
           />
 
           <Input
@@ -277,6 +278,7 @@ export default function AddMeasurementScreen() {
             value={form.bodyFat}
             onChangeText={(v) => updateField('bodyFat', v)}
             error={errors.bodyFat}
+            maxLength={10}
           />
 
           {/* Measurements Section */}
@@ -300,6 +302,7 @@ export default function AddMeasurementScreen() {
                 value={form.chest}
                 onChangeText={(v) => updateField('chest', v)}
                 error={errors.chest}
+                maxLength={10}
               />
             </View>
             <View style={{ flex: 1 }}>
@@ -310,6 +313,7 @@ export default function AddMeasurementScreen() {
                 value={form.waist}
                 onChangeText={(v) => updateField('waist', v)}
                 error={errors.waist}
+                maxLength={10}
               />
             </View>
           </View>
@@ -323,6 +327,7 @@ export default function AddMeasurementScreen() {
                 value={form.hips}
                 onChangeText={(v) => updateField('hips', v)}
                 error={errors.hips}
+                maxLength={10}
               />
             </View>
             <View style={{ flex: 1 }}>
@@ -333,6 +338,7 @@ export default function AddMeasurementScreen() {
                 value={form.biceps}
                 onChangeText={(v) => updateField('biceps', v)}
                 error={errors.biceps}
+                maxLength={10}
               />
             </View>
           </View>
@@ -344,6 +350,7 @@ export default function AddMeasurementScreen() {
             value={form.thighs}
             onChangeText={(v) => updateField('thighs', v)}
             error={errors.thighs}
+            maxLength={10}
           />
 
           <Input

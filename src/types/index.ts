@@ -154,13 +154,21 @@ export interface ExerciseExport {
   restSeconds: number;
   notes?: string | null;
   createdAt: string;
+  isPredefined?: boolean;
 }
 
 export interface RoutineExport {
   id: number;
   name: string;
   createdAt: string;
-  exercises: Array<{ exerciseId: number; sortOrder: number }>;
+  isTemplate?: boolean;
+  description?: string | null;
+  exercises: Array<{
+    exerciseId: number;
+    sortOrder: number;
+    groupId?: number | null;
+    groupType?: string | null;
+  }>;
 }
 
 export interface WorkoutExport {
@@ -176,6 +184,8 @@ export interface WorkoutExport {
     duration: number | null;
     distance: number | null;
     notes?: string | null;
+    groupId?: number | null;
+    groupType?: string | null;
   }>;
 }
 
@@ -192,6 +202,16 @@ export interface BodyMeasurementExport {
   photoPaths?: string[];
 }
 
+export interface SettingExport {
+  key: string;
+  value: string;
+}
+
+export interface BadgeExport {
+  badgeKey: string;
+  unlockedAt: string;
+}
+
 export interface IronLogBackup {
   version: 1 | 2;
   exportedAt: string;
@@ -199,6 +219,8 @@ export interface IronLogBackup {
   routines: RoutineExport[];
   workouts: WorkoutExport[];
   bodyMeasurements: BodyMeasurementExport[];
+  settings?: SettingExport[];
+  badges?: BadgeExport[];
 }
 
 // Body photos

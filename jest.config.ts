@@ -10,6 +10,7 @@ const config: Config = {
         '<rootDir>/src/repositories/**/*.test.ts',
         '<rootDir>/src/db/**/*.test.ts',
         '<rootDir>/src/i18n/**/*.test.ts',
+        '<rootDir>/src/schemas/**/*.test.ts',
         '<rootDir>/src/utils/**/*.test.ts',
       ],
       transform: {

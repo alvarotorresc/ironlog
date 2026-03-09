@@ -393,6 +393,7 @@ export default function ExerciseDetailScreen() {
                   }}
                   autoFocus
                   selectTextOnFocus
+                  maxLength={5}
                   accessibilityLabel={t('exercise.restTimeEdit')}
                 />
                 <Text style={{ fontSize: 13, color: colors.text.tertiary }}>s</Text>
