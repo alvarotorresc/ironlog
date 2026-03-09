@@ -10,6 +10,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { getDatabase } from '@/db/connection';
 import { BackupRepository } from '@/repositories/backup.repo';
 import { useTranslation } from '@/i18n';
+import { backupSchema } from '@/schemas/backup.schema';
 import type { IronLogBackup } from '@/types';
 
 export interface ImportResult {
@@ -66,25 +67,19 @@ export function useBackup() {
         encoding: EncodingType.UTF8,
       });
 
-      let backup: IronLogBackup;
+      let parsed: unknown;
       try {
-        backup = JSON.parse(json) as IronLogBackup;
+        parsed = JSON.parse(json);
       } catch {
         return { success: false, error: 'Invalid backup file' };
       }
 
-      if (backup.version !== 1) {
-        return { success: false, error: 'Unsupported backup version' };
-      }
-
-      if (
-        !Array.isArray(backup.exercises) ||
-        !Array.isArray(backup.routines) ||
-        !Array.isArray(backup.workouts) ||
-        !Array.isArray(backup.bodyMeasurements)
-      ) {
+      const result = backupSchema.safeParse(parsed);
+      if (!result.success) {
         return { success: false, error: t('backup.importInvalidFormat') };
       }
+
+      const backup = result.data as IronLogBackup;
 
       const db = await getDatabase();
       const repo = new BackupRepository(db);
