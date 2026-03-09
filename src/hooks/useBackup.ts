@@ -74,12 +74,12 @@ export function useBackup() {
         return { success: false, error: 'Invalid backup file' };
       }
 
-      const result = backupSchema.safeParse(parsed);
-      if (!result.success) {
+      const validation = backupSchema.safeParse(parsed);
+      if (!validation.success) {
         return { success: false, error: t('backup.importInvalidFormat') };
       }
 
-      const backup = result.data as IronLogBackup;
+      const backup = validation.data as IronLogBackup;
 
       const db = await getDatabase();
       const repo = new BackupRepository(db);
